@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import '../estilos/AuthPages.css'
-import api from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import { usuariosMock } from '../data/MockData'
 
 const Logar = () => {
   const [email, setEmail] = useState('')
@@ -12,23 +12,23 @@ const Logar = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setErro('')
     setLoading(true)
-    try {
-      const response = await api.post('/auth/login', { email, senha })
-      login(response.data)
-      navigate('/home')
-    } catch (error) {
-      setErro(
-        error.response?.status === 401
-          ? 'Email ou senha incorretos.'
-          : 'Erro ao conectar. Tente novamente mais tarde.'
-      )
-    } finally {
+
+    const usuarioEncontrado = usuariosMock.find(
+      (u) => u.email === email && u.senha === senha
+    )
+
+    if (!usuarioEncontrado) {
+      setErro('Email ou senha incorretos.')
       setLoading(false)
+      return
     }
+
+    login(usuarioEncontrado)
+    navigate('/home')
   }
 
   return (
@@ -64,7 +64,7 @@ const Logar = () => {
               />
             </div>
             <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+              Entrar
             </button>
           </form>
           <div className="auth-links">

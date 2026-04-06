@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import Navbar from '../componentes/Navbar'
 import '../estilos/SettingsPage.css'
-import api from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 
 const Configuracoes = () => {
@@ -13,37 +12,19 @@ const Configuracoes = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const [loading, setLoading] = useState(false)
-  const [erro, setErro] = useState('')
 
-  const handleToggle = async (key) => {
-    const updated = { ...settings, [key]: !settings[key] }
-    setSettings(updated)
-    try {
-      await api.patch(`/usuarios/${user.id}`, { [key]: updated[key] })
-    } catch {
-      setSettings(settings)
-      setErro('Erro ao salvar preferência. Tente novamente.')
-    }
+  const handleToggle = (key) => {
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (confirmText !== 'EXCLUIR') return
     setLoading(true)
-    setErro('')
-    try {
-      await api.delete(`/usuarios/${user.id}`)
-      logout()
-    } catch {
-      setErro('Não foi possível excluir a conta. Tente novamente.')
-      setShowDeleteModal(false)
-    } finally {
-      setLoading(false)
-    }
+    logout()
   }
 
   const openDeleteModal = () => {
     setConfirmText('')
-    setErro('')
     setShowDeleteModal(true)
   }
 
@@ -56,12 +37,6 @@ const Configuracoes = () => {
       </section>
 
       <main className="settings-content">
-        {erro && (
-          <p style={{ color: '#e74c3c', background: 'rgba(255,255,255,0.9)', padding: '0.8rem 1.5rem', borderRadius: '10px', marginBottom: '1rem', maxWidth: '700px' }}>
-            {erro}
-          </p>
-        )}
-
         <div className="settings-card">
           {/* Notificações */}
           <div className="settings-section">
@@ -120,7 +95,6 @@ const Configuracoes = () => {
           </div>
         </div>
 
-        {/* Modal de confirmação com digitação de "EXCLUIR" */}
         {showDeleteModal && (
           <div className="modal-overlay">
             <div className="delete-modal">

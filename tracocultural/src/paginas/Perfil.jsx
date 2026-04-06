@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import api from '../services/api'
 import Navbar from '../componentes/Navbar'
 import '../estilos/ProfilePage.css'
 import { useAuth } from '../contexts/AuthContext'
@@ -25,7 +24,6 @@ const Perfil = () => {
   const { user, login } = useAuth()
   const [editProfile, setEditProfile] = useState({})
   const [isEditing, setIsEditing] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
 
@@ -34,35 +32,17 @@ const Perfil = () => {
     : null
 
   useEffect(() => {
-    if (user) {
-      setEditProfile({ estado: 'SP', icone: 'person-standing', corFundo: '#8E5E56', ...user })
-    }
+    if (user) setEditProfile({ estado: 'SP', icone: 'person-standing', corFundo: '#8E5E56', ...user })
   }, [user])
 
-  const handleSave = async () => {
+  const handleSave = () => {
     setErro('')
     setSucesso('')
-
     if (!editProfile.nome?.trim()) return setErro('Nome não pode ser vazio.')
     if (!editProfile.email?.trim()) return setErro('Email não pode ser vazio.')
-
-    setLoading(true)
-    try {
-      const response = await api.put(`/usuarios/${profile.id}`, editProfile)
-      login(response.data)
-      setSucesso('Perfil atualizado com sucesso!')
-      setIsEditing(false)
-    } catch {
-      setErro('Erro ao salvar alterações. Tente novamente.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleOpenEdit = () => {
-    setErro('')
-    setSucesso('')
-    setIsEditing(true)
+    login(editProfile)
+    setSucesso('Perfil atualizado com sucesso!')
+    setIsEditing(false)
   }
 
   if (!profile) return <div>Carregando...</div>
@@ -92,7 +72,7 @@ const Perfil = () => {
               <p className="profile-email">{profile.email}</p>
               <p className="profile-location">📍 {profile.estado}</p>
             </div>
-            <button className="btn-edit-profile" onClick={handleOpenEdit}>
+            <button className="btn-edit-profile" onClick={() => { setErro(''); setSucesso(''); setIsEditing(true) }}>
               <i className="bi bi-pencil"></i> Editar
             </button>
           </div>
@@ -102,39 +82,23 @@ const Perfil = () => {
           <div className="modal-overlay">
             <div className="edit-modal">
               <h3>Editar Perfil</h3>
-
               {erro && <p style={{ color: '#e74c3c', marginBottom: '1rem' }}>{erro}</p>}
 
               <label>Nome:</label>
-              <input
-                type="text"
-                value={editProfile.nome || ''}
-                onChange={(e) => setEditProfile({ ...editProfile, nome: e.target.value })}
-              />
+              <input type="text" value={editProfile.nome || ''} onChange={(e) => setEditProfile({ ...editProfile, nome: e.target.value })} />
 
               <label>Email:</label>
-              <input
-                type="email"
-                value={editProfile.email || ''}
-                onChange={(e) => setEditProfile({ ...editProfile, email: e.target.value })}
-              />
+              <input type="email" value={editProfile.email || ''} onChange={(e) => setEditProfile({ ...editProfile, email: e.target.value })} />
 
               <label>Estado:</label>
-              <select
-                value={editProfile.estado || 'SP'}
-                onChange={(e) => setEditProfile({ ...editProfile, estado: e.target.value })}
-              >
+              <select value={editProfile.estado || 'SP'} onChange={(e) => setEditProfile({ ...editProfile, estado: e.target.value })}>
                 {estados.map((e) => <option key={e}>{e}</option>)}
               </select>
 
               <label>Ícone:</label>
               <div className="icon-grid">
                 {icones.map((i) => (
-                  <div
-                    key={i}
-                    className={`icon-option ${editProfile.icone === i ? 'selected' : ''}`}
-                    onClick={() => setEditProfile({ ...editProfile, icone: i })}
-                  >
+                  <div key={i} className={`icon-option ${editProfile.icone === i ? 'selected' : ''}`} onClick={() => setEditProfile({ ...editProfile, icone: i })}>
                     <i className={`bi bi-${i}`}></i>
                   </div>
                 ))}
@@ -143,22 +107,13 @@ const Perfil = () => {
               <label>Cor:</label>
               <div className="color-grid">
                 {cores.map((c) => (
-                  <div
-                    key={c}
-                    className={`color-option ${editProfile.corFundo === c ? 'selected' : ''}`}
-                    style={{ backgroundColor: c }}
-                    onClick={() => setEditProfile({ ...editProfile, corFundo: c })}
-                  />
+                  <div key={c} className={`color-option ${editProfile.corFundo === c ? 'selected' : ''}`} style={{ backgroundColor: c }} onClick={() => setEditProfile({ ...editProfile, corFundo: c })} />
                 ))}
               </div>
 
               <div className="modal-actions">
-                <button onClick={handleSave} disabled={loading}>
-                  {loading ? 'Salvando...' : 'Salvar'}
-                </button>
-                <button onClick={() => setIsEditing(false)} disabled={loading}>
-                  Cancelar
-                </button>
+                <button onClick={handleSave}>Salvar</button>
+                <button onClick={() => setIsEditing(false)}>Cancelar</button>
               </div>
             </div>
           </div>

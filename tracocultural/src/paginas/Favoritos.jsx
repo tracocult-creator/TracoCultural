@@ -1,33 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
+import EventCard from '../componentes/EventCard'
 import '../estilos/FavoritesPage.css'
-import '../estilos/Modal.css'
-import api from '../services/api'
-import { useAuth } from '../contexts/AuthContext'
+import { eventosMock } from '../data/MockData'
 
 const Favoritos = () => {
-  const { user } = useAuth()
   const navigate = useNavigate()
-  const [favoritos, setFavoritos] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [erro, setErro] = useState('')
+  const [favoritos, setFavoritos] = useState(eventosMock.slice(0, 3))
 
-  useEffect(() => {
-    if (!user?.id) return
-    api.get(`/usuarios/${user.id}/favoritos`)
-      .then((res) => setFavoritos(res.data))
-      .catch(() => setErro('Não foi possível carregar os favoritos.'))
-      .finally(() => setLoading(false))
-  }, [user])
-
-  const removerFavorito = async (id) => {
-    try {
-      await api.delete(`/favoritos/${id}`)
-      setFavoritos((prev) => prev.filter((e) => e.id !== id))
-    } catch {
-      setErro('Erro ao remover favorito. Tente novamente.')
-    }
+  const removerFavorito = (id) => {
+    setFavoritos((prev) => prev.filter((e) => e.id !== id))
   }
 
   return (
@@ -39,10 +22,7 @@ const Favoritos = () => {
       </section>
 
       <main className="favorites-content">
-        {loading && <p>Carregando...</p>}
-        {erro && <p style={{ color: '#e74c3c' }}>{erro}</p>}
-
-        {!loading && favoritos.length === 0 && !erro ? (
+        {favoritos.length === 0 ? (
           <div className="empty-favorites">
             <p>Você ainda não tem eventos favoritos.</p>
             <button className="btn-explore" onClick={() => navigate('/home')}>Explorar Eventos</button>
