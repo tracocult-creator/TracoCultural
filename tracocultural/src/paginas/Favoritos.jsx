@@ -1,63 +1,55 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
 import '../estilos/FavoritesPage.css'
 import '../estilos/Modal.css'
+import api from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 const Favoritos = () => {
-  const [favoritos, setFavoritos] = useState([
-    {
-      id: 1,
-      image: 'src/assets/EVENTOCABELOS.jpg',
-      titulo: '💇♀️ Beleza em Foco 2025',
-      tipo: 'Beleza',
-      data: '12 a 14 de março de 2025',
-      local: 'São Paulo – SP'
-    },
-    {
-      id: 2,
-      image: 'src/assets/EVENTOCINEMA.jpg',
-      titulo: '🎬 CinemaLivre',
-      tipo: 'Cinema',
-      data: '3 e 4 de maio de 2025',
-      local: 'Belo Horizonte – MG'
-    },
-    {
-      id: 3,
-      image: 'src/assets/EVENTOFESTA.jpg',
-      titulo: '🎉 Fresio Festival',
-      tipo: 'Festival',
-      data: '7 e 8 de setembro de 2025',
-      local: 'Recife – PE'
-    }
-  ])
+  const { user } = useAuth()
   const navigate = useNavigate()
+  const [favoritos, setFavoritos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState('')
 
-  const removerFavorito = (id) => {
-    setFavoritos(favoritos.filter(evento => evento.id !== id))
+  useEffect(() => {
+    if (!user?.id) return
+    api.get(`/usuarios/${user.id}/favoritos`)
+      .then((res) => setFavoritos(res.data))
+      .catch(() => setErro('Não foi possível carregar os favoritos.'))
+      .finally(() => setLoading(false))
+  }, [user])
+
+  const removerFavorito = async (id) => {
+    try {
+      await api.delete(`/favoritos/${id}`)
+      setFavoritos((prev) => prev.filter((e) => e.id !== id))
+    } catch {
+      setErro('Erro ao remover favorito. Tente novamente.')
+    }
   }
-
-
 
   return (
     <div className="favorites-page">
       <Navbar />
 
-      {/* Título */}
       <section className="title-section">
         <h2 className="main-title">Meus Eventos Favoritos</h2>
       </section>
 
-      {/* Lista de Favoritos */}
       <main className="favorites-content">
-        {favoritos.length === 0 ? (
+        {loading && <p>Carregando...</p>}
+        {erro && <p style={{ color: '#e74c3c' }}>{erro}</p>}
+
+        {!loading && favoritos.length === 0 && !erro ? (
           <div className="empty-favorites">
             <p>Você ainda não tem eventos favoritos.</p>
             <button className="btn-explore" onClick={() => navigate('/home')}>Explorar Eventos</button>
           </div>
         ) : (
           <div className="favorites-grid">
-            {favoritos.map(evento => (
+            {favoritos.map((evento) => (
               <div key={evento.id} className="favorite-card">
                 <img src={evento.image} alt={evento.titulo} className="favorite-image" />
                 <div className="favorite-content">
