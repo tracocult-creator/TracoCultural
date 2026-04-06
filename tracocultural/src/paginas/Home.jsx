@@ -34,7 +34,7 @@ const estadosBR = [
   { sigla: 'TO', nome: 'Tocantins' }
 ]
 
-const Home = ({ user, onLogout }) => {
+const Home = () => {
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [showEventModal, setShowEventModal] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -136,7 +136,7 @@ const Home = ({ user, onLogout }) => {
 
   return (
     <div className="home-page">
-      <Navbar onLogout={onLogout} />
+      <Navbar />
 
       <section className="search-section">
         <div className="search-container">

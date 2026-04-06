@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import api from '../servicos/services/api';
-import Navbar from '../componentes/Navbar';
-import '../estilos/ProfilePage.css';
+import React, { useState, useEffect } from 'react'
+import api from '../services/api'
+import Navbar from '../componentes/Navbar'
+import '../estilos/ProfilePage.css'
+import { useAuth } from '../contexts/AuthContext'
 
-const Perfil = ({ user, onLogout }) => {
+const Perfil = () => {
+  const { user } = useAuth()
   const [profile, setProfile] = useState(null);
   const [editProfile, setEditProfile] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -64,7 +66,7 @@ const Perfil = ({ user, onLogout }) => {
 
   return (
     <div className="profile-page">
-      <Navbar onLogout={onLogout} />
+      <Navbar />
 
       <section className="title-section">
         <h2 className="main-title">Meu Perfil</h2>

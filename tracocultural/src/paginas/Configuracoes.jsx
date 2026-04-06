@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import Navbar from '../componentes/Navbar'
 import '../estilos/SettingsPage.css'
-import api from '../servicos/services/api'
+import api from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
-const Configuracoes = ({ user, onLogout }) => {
+const Configuracoes = () => {
+  const { user, logout } = useAuth()
   const [settings, setSettings] = useState({
     emailMarketing: false,
     localizacao: true
@@ -35,7 +37,7 @@ const Configuracoes = ({ user, onLogout }) => {
 
       // Remove dados locais e desloga
       localStorage.removeItem('user')
-      onLogout()
+      logout()
     } catch (err) {
       console.error('Erro ao excluir conta:', err)
       alert('Não foi possível excluir a conta. Tente novamente mais tarde.')
@@ -47,7 +49,7 @@ const Configuracoes = ({ user, onLogout }) => {
 
   return (
     <div className="settings-page">
-      <Navbar onLogout={onLogout} />
+      <Navbar />
 
       <section className="title-section">
         <h2 className="main-title">Configurações</h2>
@@ -121,7 +123,7 @@ const Configuracoes = ({ user, onLogout }) => {
             <div className="danger-buttons">
               <button 
                 className="btn-danger"
-                onClick={onLogout}
+                onClick={logout}
               >
                 <i className="bi bi-box-arrow-right"></i> Sair temporariamente
               </button>

@@ -4,7 +4,7 @@ import Navbar from '../componentes/Navbar'
 import '../estilos/FavoritesPage.css'
 import '../estilos/Modal.css'
 
-const Favoritos = ({ user, onLogout }) => {
+const Favoritos = () => {
   const [favoritos, setFavoritos] = useState([
     {
       id: 1,
@@ -41,7 +41,7 @@ const Favoritos = ({ user, onLogout }) => {
 
   return (
     <div className="favorites-page">
-      <Navbar onLogout={onLogout} />
+      <Navbar />
 
       {/* Título */}
       <section className="title-section">
