@@ -58,7 +58,7 @@ const Cadastrar = () => {
             <div className="form-group">
               <label>Senha</label>
               <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" className={erros.senha ? 'error' : ''} />
-              {erros.senha && <span className="field-error">{erros.senha}</span>}
+              {erros.senha && <span className="field-error">{erros.senha}</span>}''''
             </div>
             <button type="submit" className="btn-submit">Cadastrar</button>
           </form>
