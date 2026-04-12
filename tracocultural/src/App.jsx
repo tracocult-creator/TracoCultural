@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 
- 
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import WelcomePage from './componentes/WelcomePage'
 import Home from './paginas/Home'
 import Logar from './paginas/Logar'
@@ -11,33 +11,36 @@ import Favoritos from './paginas/Favoritos'
 import Perfil from './paginas/Perfil'
 import Configuracoes from './paginas/Configuracoes'
 
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth()
+  return user ? children : <Navigate to="/logar" replace />
+}
+
+const NotFound = () => (
+  <div style={{ textAlign: 'center', padding: '4rem' }}>
+    <h2>404 — Página não encontrada</h2>
+    <a href="/">Voltar ao início</a>
+  </div>
+)
+
 function App() {
-  const [user, setUser] = useState(null)
-
-  const handleLogin = (userData) => {
-    setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
-  }
-
-  const handleLogout = () => {
-    setUser(null)
-    localStorage.removeItem('user')
-  }
-
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          <Route path="/logar" element={<Logar onLogin={handleLogin} />} />
-          <Route path="/cadastrar" element={<Cadastrar onLogin={handleLogin} />} />
-          <Route path="/home" element={<Home user={user} onLogout={handleLogout} />} />
-          <Route path="/favoritos" element={<Favoritos user={user} onLogout={handleLogout} />} />
-          <Route path="/perfil" element={<Perfil user={user} onLogout={handleLogout} />} />
-          <Route path="/configuracoes" element={<Configuracoes user={user} onLogout={handleLogout} />} />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<WelcomePage />} />
+            <Route path="/logar" element={<Logar />} />
+            <Route path="/cadastrar" element={<Cadastrar />} />
+            <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/favoritos" element={<ProtectedRoute><Favoritos /></ProtectedRoute>} />
+            <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+            <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   )
 }
 

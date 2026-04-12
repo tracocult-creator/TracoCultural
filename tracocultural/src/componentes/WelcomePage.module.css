@@ -1,0 +1,85 @@
+.welcomePage {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8E5E56 0%, #3C2321 100%);
+  position: relative;
+}
+
+.welcomeContent {
+  text-align: center;
+  color: white;
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  z-index: 1;
+}
+
+.welcomeTitle {
+  font-size: 5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.welcomeSubtitle {
+  font-size: 1.3rem;
+  margin-bottom: 3rem;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.welcomeButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.btnPrimary,
+.btnSecondary {
+  display: inline-block;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  min-width: 120px;
+  text-decoration: none;
+  text-align: center;
+  background-color: white;
+  color: #8E5E56;
+}
+
+.btnPrimary:hover,
+.btnSecondary:hover {
+  background-color: #f0f0f0;
+  color: #8E5E56;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .welcomeTitle {
+    font-size: 2.5rem;
+  }
+
+  .welcomeSubtitle {
+    font-size: 1.1rem;
+  }
+
+  .welcomeButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btnPrimary,
+  .btnSecondary {
+    width: 200px;
+  }
+}
