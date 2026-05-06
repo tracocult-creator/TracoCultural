@@ -10,6 +10,7 @@ import Cadastrar from './paginas/Cadastrar'
 import Favoritos from './paginas/Favoritos'
 import Perfil from './paginas/Perfil'
 import Configuracoes from './paginas/Configuracoes'
+import CriarEvento from './paginas/CriarEvento'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -35,6 +36,7 @@ function App() {
           <Route path="/favoritos" element={<Favoritos user={user} onLogout={handleLogout} />} />
           <Route path="/perfil" element={<Perfil user={user} onLogout={handleLogout} />} />
           <Route path="/configuracoes" element={<Configuracoes user={user} onLogout={handleLogout} />} />
+          <Route path="/CriarEvento" element={<CriarEvento onLogout={handleLogout} />} />
         </Routes>
       </div>
     </Router>
