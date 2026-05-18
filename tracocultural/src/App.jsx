@@ -13,7 +13,10 @@ import Configuracoes from './paginas/Configuracoes'
 import CriarEvento from './paginas/CriarEvento'
 
 function App() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('user')
+    return saved ? JSON.parse(saved) : null
+  })
 
   const handleLogin = (userData) => {
     setUser(userData)
@@ -36,7 +39,7 @@ function App() {
           <Route path="/favoritos" element={<Favoritos user={user} onLogout={handleLogout} />} />
           <Route path="/perfil" element={<Perfil user={user} onLogout={handleLogout} />} />
           <Route path="/configuracoes" element={<Configuracoes user={user} onLogout={handleLogout} />} />
-          <Route path="/CriarEvento" element={<CriarEvento onLogout={handleLogout} />} />
+          <Route path="/CriarEvento" element={<CriarEvento user={user} onLogout={handleLogout} />} />
         </Routes>
       </div>
     </Router>

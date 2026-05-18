@@ -8,6 +8,7 @@ const Perfil = ({ user, onLogout }) => {
   const [editProfile, setEditProfile] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [userEvents, setUserEvents] = useState([]);
 
   const icones = ['airplane-fill', 'backpack2-fill', 'bag-heart-fill', 'balloon-fill', 'bank2',
     'basket3-fill', 'bicycle', 'binoculars-fill', 'book-half', 'brightness-alt-high-fill',
@@ -36,6 +37,14 @@ const Perfil = ({ user, onLogout }) => {
         icone: user.icone || 'person-standing',
         corFundo: user.corFundo || '#8E5E56',
       });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.id) {
+      api.get(`/eventos/usuario/${user.id}`)
+        .then((res) => setUserEvents(res.data))
+        .catch(() => {});
     }
   }, [user]);
 
@@ -86,6 +95,32 @@ const Perfil = ({ user, onLogout }) => {
             </button>
           </div>
         </div>
+
+        <section className="user-events-section">
+          <h3 className="user-events-title">Meus Eventos</h3>
+          {userEvents.length > 0 ? (
+            <div className="user-events-grid">
+              {userEvents.map((evento) => (
+                <div className="event-card" key={evento.id}>
+                  {evento.cardImage ? (
+                    <img src={`data:image/jpeg;base64,${evento.cardImage}`} alt={evento.nome} className="event-image" />
+                  ) : (
+                    <div className="event-image" style={{ background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <i className="bi bi-image" style={{ fontSize: '2rem' }}></i>
+                    </div>
+                  )}
+                  <div className="event-content">
+                    <h3 className="event-title">{evento.nome}</h3>
+                    <p className="event-date">📅 {new Date(evento.dataInicio).toLocaleDateString('pt-BR')}</p>
+                    <p className="event-location">📍 {evento.cidade}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="no-events">Você ainda não criou nenhum evento.</p>
+          )}
+        </section>
 
         {isEditing && (
           <div className="modal-overlay">

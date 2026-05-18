@@ -22,7 +22,7 @@ const categorias = [
   { id: 15, nome: 'Viagem' },
 ]
 
-const CriarEvento = ({ onLogout }) => {
+const CriarEvento = ({ user, onLogout }) => {
   const navigate = useNavigate()
   const [previewImage, setPreviewImage] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -51,6 +51,14 @@ const CriarEvento = ({ onLogout }) => {
     setPreviewImage(URL.createObjectURL(file))
   }
 
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result.split(',')[1])
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErro('')
@@ -62,19 +70,18 @@ const CriarEvento = ({ onLogout }) => {
 
     setLoading(true)
     try {
-      const data = new FormData()
-      data.append('nome', form.nome)
-      data.append('descricao', form.descricao)
-      data.append('dataInicio', form.dataInicio)
-      data.append('dataFim', form.dataFim)
-      data.append('cidade', form.cidade)
-      data.append('idCategoriaFk', form.idCategoriaFk)
-      if (form.cardImage) data.append('cardImage', form.cardImage)
+      const payload = {
+        nome: form.nome,
+        descricao: form.descricao,
+        dataInicio: new Date(form.dataInicio).toISOString(),
+        dataFim: form.dataFim ? new Date(form.dataFim).toISOString() : null,
+        cidade: form.cidade,
+        idCategoriaFk: Number(form.idCategoriaFk),
+        cardImage: form.cardImage ? await toBase64(form.cardImage) : null,
+        idUsuarioFk: user?.id,
+      }
 
-      await api.post('/eventos', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-
+      await api.post('/eventos', payload)
       navigate('/home')
     } catch (err) {
       setErro('Erro ao criar evento. Tente novamente.')

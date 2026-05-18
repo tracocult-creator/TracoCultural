@@ -269,3 +269,29 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* Seção Meus Eventos no Perfil */
+.user-events-section {
+  margin-top: 2.5rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.user-events-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.user-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.no-events {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+}

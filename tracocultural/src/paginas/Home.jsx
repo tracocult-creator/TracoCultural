@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
+import api from '../servicos/services/api'
 import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
 
@@ -44,7 +45,18 @@ const Home = ({ user, onLogout }) => {
   const [category, setCategory] = useState('Todas')
   const [dateFilter, setDateFilter] = useState('')
 
+  const [eventosBackend, setEventosBackend] = useState([])
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editForm, setEditForm] = useState(null)
+  const [editLoading, setEditLoading] = useState(false)
+
   const navigate = useNavigate()
+
+  useEffect(() => {
+    api.get('/eventos')
+      .then((res) => setEventosBackend(res.data))
+      .catch(() => {})
+  }, [])
 
   const eventDetails = {
     'Beleza em Foco 2025': {
@@ -131,6 +143,70 @@ const Home = ({ user, onLogout }) => {
 
   const handleVerMais = (eventTitle) => {
     setSelectedEvent(eventDetails[eventTitle])
+    setShowEventModal(true)
+  }
+
+  const isOwner = (evento) => user && evento.idUsuarioFk && user.id === evento.idUsuarioFk
+
+  const handleDeletar = async (eventoId) => {
+    if (!window.confirm('Tem certeza que deseja deletar este evento?')) return
+    try {
+      await api.delete(`/eventos/${eventoId}?idUsuario=${user.id}`)
+      setEventosBackend((prev) => prev.filter((e) => e.id !== eventoId))
+      setShowEventModal(false)
+    } catch {
+      alert('Erro ao deletar evento.')
+    }
+  }
+
+  const handleAbrirEditar = (evento) => {
+    setEditForm({
+      id: evento.id,
+      nome: evento.nome || '',
+      descricao: evento.descricao || '',
+      dataInicio: evento.dataInicio ? evento.dataInicio.slice(0, 16) : '',
+      dataFim: evento.dataFim ? evento.dataFim.slice(0, 16) : '',
+      cidade: evento.cidade || '',
+      idCategoriaFk: evento.idCategoriaFk || '',
+      linkexterno: evento.linkexterno || '',
+    })
+    setShowEditModal(true)
+  }
+
+  const handleSalvarEdicao = async () => {
+    setEditLoading(true)
+    try {
+      const payload = {
+        ...editForm,
+        dataInicio: new Date(editForm.dataInicio).toISOString(),
+        dataFim: editForm.dataFim ? new Date(editForm.dataFim).toISOString() : null,
+        idCategoriaFk: Number(editForm.idCategoriaFk),
+      }
+      const { data } = await api.put(`/eventos/${editForm.id}?idUsuario=${user.id}`, payload)
+      setEventosBackend((prev) => prev.map((e) => (e.id === editForm.id ? { ...e, ...data } : e)))
+      setShowEditModal(false)
+      setShowEventModal(false)
+    } catch {
+      alert('Erro ao editar evento.')
+    } finally {
+      setEditLoading(false)
+    }
+  }
+
+  const handleVerMaisBackend = (evento) => {
+    setSelectedEvent({
+      image: evento.cardImage ? `data:image/jpeg;base64,${evento.cardImage}` : null,
+      title: evento.nome,
+      date: new Date(evento.dataInicio).toLocaleDateString('pt-BR') + (evento.dataFim ? ` → ${new Date(evento.dataFim).toLocaleDateString('pt-BR')}` : ''),
+      location: evento.cidade,
+      description: evento.descricao || 'Sem descrição disponível.',
+      linkexterno: evento.linkexterno,
+      autor: evento.nomeUsuario || evento.autor || null,
+      autorIcone: evento.iconeUsuario || null,
+      autorCor: evento.corFundoUsuario || '#8E5E56',
+      autorEstado: evento.estadoUsuario || null,
+      eventoOriginal: evento,
+    })
     setShowEventModal(true)
   }
 
@@ -361,6 +437,30 @@ const Home = ({ user, onLogout }) => {
             </div>
           </div>
         </div>
+        {eventosBackend.map((evento) => (
+          <div className="event-card" key={evento.id}>
+            {evento.cardImage ? (
+              <img
+                src={`data:image/jpeg;base64,${evento.cardImage}`}
+                alt={evento.nome}
+                className="event-image"
+              />
+            ) : (
+              <div className="event-image" style={{ background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="bi bi-image" style={{ fontSize: '2rem' }}></i>
+              </div>
+            )}
+            <div className="event-content">
+              <h3 className="event-title">{evento.nome}</h3>
+              <p className="event-date">📅 {new Date(evento.dataInicio).toLocaleDateString('pt-BR')}</p>
+              <p className="event-location">📍 {evento.cidade}</p>
+              <div className="event-actions">
+                <button className="btn-ver-mais" onClick={() => handleVerMaisBackend(evento)}>Ver mais</button>
+                <button className="btn-favoritar"><i className="bi bi-heart"></i></button>
+              </div>
+            </div>
+          </div>
+        ))}
       </main>
 
       {showFilterModal && (
@@ -403,6 +503,44 @@ const Home = ({ user, onLogout }) => {
         </div>
       )}
 
+      {/* Modal de Edição */}
+      {showEditModal && editForm && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="edit-evento-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
+            <h3>Editar Evento</h3>
+
+            <label>Nome *</label>
+            <input className="form-input" value={editForm.nome} onChange={(e) => setEditForm({ ...editForm, nome: e.target.value })} maxLength={100} />
+
+            <label>Descrição</label>
+            <textarea className="form-textarea" rows={4} value={editForm.descricao} onChange={(e) => setEditForm({ ...editForm, descricao: e.target.value })} maxLength={255} />
+
+            <div className="edit-row">
+              <div>
+                <label>Data de Início *</label>
+                <input className="form-input" type="datetime-local" value={editForm.dataInicio} onChange={(e) => setEditForm({ ...editForm, dataInicio: e.target.value })} />
+              </div>
+              <div>
+                <label>Data de Término</label>
+                <input className="form-input" type="datetime-local" value={editForm.dataFim} onChange={(e) => setEditForm({ ...editForm, dataFim: e.target.value })} />
+              </div>
+            </div>
+
+            <label>Cidade *</label>
+            <input className="form-input" value={editForm.cidade} onChange={(e) => setEditForm({ ...editForm, cidade: e.target.value })} maxLength={45} />
+
+            <label>Link Externo</label>
+            <input className="form-input" type="url" value={editForm.linkexterno} onChange={(e) => setEditForm({ ...editForm, linkexterno: e.target.value })} placeholder="https://..." />
+
+            <div className="modal-actions">
+              <button onClick={handleSalvarEdicao} disabled={editLoading}>{editLoading ? 'Salvando...' : 'Salvar'}</button>
+              <button onClick={() => setShowEditModal(false)} disabled={editLoading}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Detalhes do Evento */}
       {showEventModal && selectedEvent && (
         <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
@@ -410,16 +548,49 @@ const Home = ({ user, onLogout }) => {
             <button className="modal-close" onClick={() => setShowEventModal(false)}>×</button>
 
             <div className="event-modal-header">
-              <img src={selectedEvent.image} alt={selectedEvent.title} className="event-modal-image" />
+              {selectedEvent.image ? (
+                <img src={selectedEvent.image} alt={selectedEvent.title} className="event-modal-image" />
+              ) : (
+                <div className="event-modal-image" style={{ background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '15px' }}>
+                  <i className="bi bi-image" style={{ fontSize: '3rem', color: '#aaa' }}></i>
+                </div>
+              )}
 
               <div className="event-modal-info-section">
                 <h2 className="event-modal-title">{selectedEvent.title}</h2>
                 <p className="event-modal-info">📅 {selectedEvent.date} | 📍 {selectedEvent.location}</p>
 
+                {selectedEvent.autor && (
+                  <div className="event-modal-autor">
+                    <div className="autor-avatar" style={{ backgroundColor: selectedEvent.autorCor }}>
+                      <i className={`bi bi-${selectedEvent.autorIcone || 'person-fill'}`}></i>
+                    </div>
+                    <div>
+                      <span className="autor-label">Criado por</span>
+                      <span className="autor-nome">{selectedEvent.autor}</span>
+                      {selectedEvent.autorEstado && <span className="autor-estado">📍 {selectedEvent.autorEstado}</span>}
+                    </div>
+                  </div>
+                )}
+
                 <div className="event-modal-actions">
-                  <button className="btn-ingressos">INGRESSOS</button>
+                  {selectedEvent.linkexterno ? (
+                    <a href={selectedEvent.linkexterno} target="_blank" rel="noreferrer" className="btn-ingressos">INGRESSOS</a>
+                  ) : (
+                    <button className="btn-ingressos">INGRESSOS</button>
+                  )}
                   <button className="btn-icon"><i className="bi bi-share"></i></button>
                   <button className="btn-icon"><i className="bi bi-heart"></i></button>
+                  {selectedEvent.eventoOriginal && isOwner(selectedEvent.eventoOriginal) && (
+                    <>
+                      <button className="btn-icon btn-editar" onClick={() => handleAbrirEditar(selectedEvent.eventoOriginal)}>
+                        <i className="bi bi-pencil"></i>
+                      </button>
+                      <button className="btn-icon btn-deletar" onClick={() => handleDeletar(selectedEvent.eventoOriginal.id)}>
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

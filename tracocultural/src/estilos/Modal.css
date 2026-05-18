@@ -256,3 +256,107 @@
   background: rgba(142, 94, 86, 0.2);
   transform: scale(1.1);
 }
+
+/* Autor do evento no modal */
+.event-modal-autor {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: #f8f4f3;
+  border-radius: 12px;
+  border-left: 3px solid #8E5E56;
+}
+
+.autor-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.autor-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.autor-nome {
+  display: block;
+  font-weight: 600;
+  color: #3C2321;
+  font-size: 0.95rem;
+}
+
+.autor-estado {
+  display: block;
+  font-size: 0.8rem;
+  color: #8E5E56;
+}
+
+/* Botões editar/deletar do dono */
+.btn-editar {
+  color: #3498db !important;
+  background: rgba(52, 152, 219, 0.1) !important;
+}
+
+.btn-editar:hover {
+  background: rgba(52, 152, 219, 0.2) !important;
+}
+
+.btn-deletar {
+  color: #e74c3c !important;
+  background: rgba(231, 76, 60, 0.1) !important;
+}
+
+.btn-deletar:hover {
+  background: rgba(231, 76, 60, 0.2) !important;
+}
+
+/* Modal de edição de evento */
+.edit-evento-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.edit-evento-modal h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #8E5E56;
+  margin-bottom: 0.5rem;
+}
+
+.edit-evento-modal label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.edit-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.edit-row > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
