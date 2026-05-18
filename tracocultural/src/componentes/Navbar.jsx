@@ -1,12 +1,14 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
-const Navbar = ({ onLogout }) => {
+const Navbar = () => {
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
   const handleLogout = () => {
     if (window.confirm('Tem certeza que deseja sair?')) {
-      onLogout()
+      logout()
       navigate('/')
     }
   }
@@ -27,10 +29,6 @@ const Navbar = ({ onLogout }) => {
     navigate('/configuracoes')
   }
 
-  const handleCriarEvento = () => {
-    navigate('/CriarEvento')
-  }
-
   return (
     <header className="navbar">
       <div className="navbar-brand">
@@ -41,7 +39,6 @@ const Navbar = ({ onLogout }) => {
         <button className="nav-button" onClick={handleFavoritos}><i className="bi bi-heart"></i> Favoritos</button>
         <button className="nav-button" onClick={handlePerfil}><i className="bi bi-person"></i> Meu Perfil</button>
         <button className="nav-button" onClick={handleConfiguracoes}><i className="bi bi-gear"></i> Configurações</button>
-        <button className="nav-button" onClick={handleCriarEvento}><i className="bi bi-plus"></i> Criar Evento</button>
         <button className="nav-button" onClick={handleLogout}><i className="bi bi-box-arrow-right"></i> Sair</button>
       </nav>
     </header>

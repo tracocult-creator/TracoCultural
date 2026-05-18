@@ -1,54 +1,26 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
+import EventCard from '../componentes/EventCard'
 import '../estilos/FavoritesPage.css'
-import '../estilos/Modal.css'
+import { eventosMock } from '../data/MockData'
 
-const Favoritos = ({ user, onLogout }) => {
-  const [favoritos, setFavoritos] = useState([
-    {
-      id: 1,
-      image: 'src/assets/EVENTOCABELOS.jpg',
-      titulo: '💇♀️ Beleza em Foco 2025',
-      tipo: 'Beleza',
-      data: '12 a 14 de março de 2025',
-      local: 'São Paulo – SP'
-    },
-    {
-      id: 2,
-      image: 'src/assets/EVENTOCINEMA.jpg',
-      titulo: '🎬 CinemaLivre',
-      tipo: 'Cinema',
-      data: '3 e 4 de maio de 2025',
-      local: 'Belo Horizonte – MG'
-    },
-    {
-      id: 3,
-      image: 'src/assets/EVENTOFESTA.jpg',
-      titulo: '🎉 Fresio Festival',
-      tipo: 'Festival',
-      data: '7 e 8 de setembro de 2025',
-      local: 'Recife – PE'
-    }
-  ])
+const Favoritos = () => {
   const navigate = useNavigate()
+  const [favoritos, setFavoritos] = useState(eventosMock.slice(0, 3))
 
   const removerFavorito = (id) => {
-    setFavoritos(favoritos.filter(evento => evento.id !== id))
+    setFavoritos((prev) => prev.filter((e) => e.id !== id))
   }
-
-
 
   return (
     <div className="favorites-page">
-      <Navbar onLogout={onLogout} />
+      <Navbar />
 
-      {/* Título */}
       <section className="title-section">
         <h2 className="main-title">Meus Eventos Favoritos</h2>
       </section>
 
-      {/* Lista de Favoritos */}
       <main className="favorites-content">
         {favoritos.length === 0 ? (
           <div className="empty-favorites">
@@ -57,7 +29,7 @@ const Favoritos = ({ user, onLogout }) => {
           </div>
         ) : (
           <div className="favorites-grid">
-            {favoritos.map(evento => (
+            {favoritos.map((evento) => (
               <div key={evento.id} className="favorite-card">
                 <img src={evento.image} alt={evento.titulo} className="favorite-image" />
                 <div className="favorite-content">

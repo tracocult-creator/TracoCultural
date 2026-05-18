@@ -1,22 +1,21 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import '../estilos/WelcomePage.css'
+import { Link, Navigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import styles from './WelcomePage.module.css'
 
 const WelcomePage = () => {
+  const { user } = useAuth()
+
+  if (user) return <Navigate to="/home" replace />
+
   return (
-    <div className="welcome-page">
-      <div className="welcome-content">
-        
-        <h1 className="welcome-title">Para onde nós vamos hoje?</h1>
-        <p className="welcome-subtitle">— Traço Cultural —</p>
-        
-        <div className="welcome-buttons">
-          <Link to="/logar" className="btn-primary">
-            Entrar
-          </Link>
-          <Link to="/cadastrar" className="btn-secondary">
-            Cadastrar
-          </Link>
+    <div className={styles.welcomePage}>
+      <div className={styles.welcomeContent}>
+        <h1 className={styles.welcomeTitle}>Para onde nós vamos hoje?</h1>
+        <p className={styles.welcomeSubtitle}>— Traço Cultural —</p>
+        <div className={styles.welcomeButtons}>
+          <Link to="/logar" className={styles.btnPrimary}>Entrar</Link>
+          <Link to="/cadastrar" className={styles.btnSecondary}>Cadastrar</Link>
         </div>
       </div>
     </div>

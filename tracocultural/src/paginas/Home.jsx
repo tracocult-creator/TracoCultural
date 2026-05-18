@@ -1,62 +1,25 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
-import api from '../servicos/services/api'
 import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
 
 const estadosBR = [
-  { sigla: 'AC', nome: 'Acre' },
-  { sigla: 'AL', nome: 'Alagoas' },
-  { sigla: 'AP', nome: 'Amapá' },
-  { sigla: 'AM', nome: 'Amazonas' },
-  { sigla: 'BA', nome: 'Bahia' },
-  { sigla: 'CE', nome: 'Ceará' },
-  { sigla: 'DF', nome: 'Distrito Federal' },
-  { sigla: 'ES', nome: 'Espírito Santo' },
-  { sigla: 'GO', nome: 'Goiás' },
-  { sigla: 'MA', nome: 'Maranhão' },
-  { sigla: 'MT', nome: 'Mato Grosso' },
-  { sigla: 'MS', nome: 'Mato Grosso do Sul' },
-  { sigla: 'MG', nome: 'Minas Gerais' },
-  { sigla: 'PA', nome: 'Pará' },
-  { sigla: 'PB', nome: 'Paraíba' },
-  { sigla: 'PR', nome: 'Paraná' },
-  { sigla: 'PE', nome: 'Pernambuco' },
-  { sigla: 'PI', nome: 'Piauí' },
-  { sigla: 'RJ', nome: 'Rio de Janeiro' },
-  { sigla: 'RN', nome: 'Rio Grande do Norte' },
-  { sigla: 'RS', nome: 'Rio Grande do Sul' },
-  { sigla: 'RO', nome: 'Rondônia' },
-  { sigla: 'RR', nome: 'Roraima' },
-  { sigla: 'SC', nome: 'Santa Catarina' },
-  { sigla: 'SP', nome: 'São Paulo' },
-  { sigla: 'SE', nome: 'Sergipe' },
-  { sigla: 'TO', nome: 'Tocantins' }
+  'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS',
+  'MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
 ]
 
-const Home = ({ user, onLogout }) => {
+const categorias = ['Todas', 'Beleza', 'Automotivo', 'Cinema', 'Sustentabilidade', 'Negócios', 'Festival', 'Infantil', 'Literatura', 'Natal', 'Teatro']
+
+const Home = () => {
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [showEventModal, setShowEventModal] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
-
-  // estado para selects / filtros
-  const [uf, setUf] = useState('') // '' = todos os estados
+  const [uf, setUf] = useState('')
   const [category, setCategory] = useState('Todas')
   const [dateFilter, setDateFilter] = useState('')
 
-  const [eventosBackend, setEventosBackend] = useState([])
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editForm, setEditForm] = useState(null)
-  const [editLoading, setEditLoading] = useState(false)
-
   const navigate = useNavigate()
-
-  useEffect(() => {
-    api.get('/eventos')
-      .then((res) => setEventosBackend(res.data))
-      .catch(() => {})
-  }, [])
 
   const eventDetails = {
     'Beleza em Foco 2025': {
@@ -141,8 +104,8 @@ const Home = ({ user, onLogout }) => {
     }
   }
 
-  const handleVerMais = (eventTitle) => {
-    setSelectedEvent(eventDetails[eventTitle])
+  const handleVerMais = (evento) => {
+    setSelectedEvent(evento)
     setShowEventModal(true)
   }
 
@@ -212,7 +175,7 @@ const Home = ({ user, onLogout }) => {
 
   return (
     <div className="home-page">
-      <Navbar onLogout={onLogout} />
+      <Navbar />
 
       <section className="search-section">
         <div className="search-container">
@@ -220,9 +183,9 @@ const Home = ({ user, onLogout }) => {
             type="text"
             className="search-input"
             placeholder="Pesquisar eventos..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
           />
-
-          {/* Select controlado para localização */}
           <select
             className="location-select"
             value={uf}
@@ -230,19 +193,9 @@ const Home = ({ user, onLogout }) => {
             aria-label="Selecionar estado"
           >
             <option value="">Todos os estados</option>
-            {estadosBR.map((s) => (
-              <option key={s.sigla} value={s.sigla}>
-                {s.sigla}
-              </option>
-            ))}
+            {estadosBR.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
-
-          <button
-            className="filter-button"
-            onClick={() => setShowFilterModal(true)}
-          >
-            Filtros
-          </button>
+          <button className="filter-button" onClick={() => setShowFilterModal(true)}>Filtros</button>
         </div>
       </section>
 
@@ -437,67 +390,22 @@ const Home = ({ user, onLogout }) => {
             </div>
           </div>
         </div>
-        {eventosBackend.map((evento) => (
-          <div className="event-card" key={evento.id}>
-            {evento.cardImage ? (
-              <img
-                src={`data:image/jpeg;base64,${evento.cardImage}`}
-                alt={evento.nome}
-                className="event-image"
-              />
-            ) : (
-              <div className="event-image" style={{ background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className="bi bi-image" style={{ fontSize: '2rem' }}></i>
-              </div>
-            )}
-            <div className="event-content">
-              <h3 className="event-title">{evento.nome}</h3>
-              <p className="event-date">📅 {new Date(evento.dataInicio).toLocaleDateString('pt-BR')}</p>
-              <p className="event-location">📍 {evento.cidade}</p>
-              <div className="event-actions">
-                <button className="btn-ver-mais" onClick={() => handleVerMaisBackend(evento)}>Ver mais</button>
-                <button className="btn-favoritar"><i className="bi bi-heart"></i></button>
-              </div>
-            </div>
-          </div>
-        ))}
       </main>
 
+      {/* Modal de Filtros */}
       {showFilterModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowFilterModal(false)}
-        >
+        <div className="modal-overlay" onClick={() => setShowFilterModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Filtros</h3>
-
             <div className="filter-group">
               <label>Categoria:</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                aria-label="Selecionar categoria"
-              >
-                <option value="Todas">Todas</option>
-                <option value="Música">Música</option>
-                <option value="Arte">Arte</option>
-                <option value="Teatro">Teatro</option>
-                <option value="Dança">Dança</option>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Selecionar categoria">
+                {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-
-            <div className="filter-group">
-              <label>Data:</label>
-              <input
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-              />
-            </div>
-
             <div className="modal-actions">
               <button onClick={() => setShowFilterModal(false)}>Aplicar</button>
-              <button onClick={() => setShowFilterModal(false)}>Cancelar</button>
+              <button onClick={() => { setCategory('Todas'); setUf(''); setShowFilterModal(false) }}>Limpar</button>
             </div>
           </div>
         </div>
@@ -546,32 +454,12 @@ const Home = ({ user, onLogout }) => {
         <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
           <div className="event-modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowEventModal(false)}>×</button>
-
             <div className="event-modal-header">
-              {selectedEvent.image ? (
-                <img src={selectedEvent.image} alt={selectedEvent.title} className="event-modal-image" />
-              ) : (
-                <div className="event-modal-image" style={{ background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '15px' }}>
-                  <i className="bi bi-image" style={{ fontSize: '3rem', color: '#aaa' }}></i>
-                </div>
-              )}
+              <img src={selectedEvent.image} alt={selectedEvent.title} className="event-modal-image" />
 
               <div className="event-modal-info-section">
                 <h2 className="event-modal-title">{selectedEvent.title}</h2>
                 <p className="event-modal-info">📅 {selectedEvent.date} | 📍 {selectedEvent.location}</p>
-
-                {selectedEvent.autor && (
-                  <div className="event-modal-autor">
-                    <div className="autor-avatar" style={{ backgroundColor: selectedEvent.autorCor }}>
-                      <i className={`bi bi-${selectedEvent.autorIcone || 'person-fill'}`}></i>
-                    </div>
-                    <div>
-                      <span className="autor-label">Criado por</span>
-                      <span className="autor-nome">{selectedEvent.autor}</span>
-                      {selectedEvent.autorEstado && <span className="autor-estado">📍 {selectedEvent.autorEstado}</span>}
-                    </div>
-                  </div>
-                )}
 
                 <div className="event-modal-actions">
                   {selectedEvent.linkexterno ? (
@@ -594,26 +482,16 @@ const Home = ({ user, onLogout }) => {
                 </div>
               </div>
             </div>
-
             <div className="event-modal-body">
               <div className="event-modal-description">
-                {selectedEvent.description.split('\n\n').map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
+                {selectedEvent.descricao.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
               </div>
-
               <div className="comments-section">
                 <h3 className="comments-title">Avaliações e Comentários</h3>
-
                 <div className="comment-form">
-                  <textarea
-                    className="comment-input"
-                    placeholder="Deixe seu comentário sobre o evento..."
-                    rows="3"
-                  ></textarea>
+                  <textarea className="comment-input" placeholder="Deixe seu comentário sobre o evento..." rows="3"></textarea>
                   <button className="comment-submit">Enviar</button>
                 </div>
-
                 <div className="comments-list">
                   <div className="comment-item">
                     <div className="comment-author">Maria Silva</div>
