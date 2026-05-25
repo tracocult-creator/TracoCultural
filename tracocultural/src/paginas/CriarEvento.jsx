@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
-import api from '../servicos/services/api'
+import api from '../servicos/api'
+import { useAuth } from '../contexts/AuthContext'
 import '../estilos/CriarEvento.css'
 
 const categorias = [
@@ -22,7 +23,8 @@ const categorias = [
   { id: 15, nome: 'Viagem' },
 ]
 
-const CriarEvento = ({ user, onLogout }) => {
+const CriarEvento = () => {
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [previewImage, setPreviewImage] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -92,7 +94,7 @@ const CriarEvento = ({ user, onLogout }) => {
 
   return (
     <div className="criar-evento-page">
-      <Navbar onLogout={onLogout} />
+      <Navbar />
 
       <div className="criar-evento-layout">
         {/* Painel esquerdo — preview */}

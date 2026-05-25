@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import '../estilos/AuthPages.css'
 import { useAuth } from '../contexts/AuthContext'
-import { usuariosMock } from '../data/MockData'
+import { loginUsuario } from '../servicos/api'
 
 const Logar = () => {
   const [email, setEmail] = useState('')
@@ -12,23 +12,20 @@ const Logar = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setErro('')
     setLoading(true)
 
-    const usuarioEncontrado = usuariosMock.find(
-      (u) => u.email === email && u.senha === senha
-    )
-
-    if (!usuarioEncontrado) {
-      setErro('Email ou senha incorretos.')
+    try {
+      const { data } = await loginUsuario(email, senha)
+      login(data)
+      navigate('/home')
+    } catch (err) {
+      setErro(err.response?.data?.message || 'Email ou senha incorretos.')
+    } finally {
       setLoading(false)
-      return
     }
-
-    login(usuarioEncontrado)
-    navigate('/home')
   }
 
   return (

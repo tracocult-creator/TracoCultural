@@ -1,16 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
-import EventCard from '../componentes/EventCard'
 import '../estilos/FavoritesPage.css'
-import { eventosMock } from '../data/MockData'
+import { useAuth } from '../contexts/AuthContext'
+import { getFavoritos, removerFavorito as removerFavoritoApi } from '../servicos/api'
 
 const Favoritos = () => {
   const navigate = useNavigate()
-  const [favoritos, setFavoritos] = useState(eventosMock.slice(0, 3))
+  const { user } = useAuth()
+  const [favoritos, setFavoritos] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const removerFavorito = (id) => {
-    setFavoritos((prev) => prev.filter((e) => e.id !== id))
+  useEffect(() => {
+    if (!user) return
+    getFavoritos()
+      .then(({ data }) => setFavoritos(data))
+      .catch(() => setFavoritos([]))
+      .finally(() => setLoading(false))
+  }, [user])
+
+  const removerFavorito = async (id) => {
+    try {
+      await removerFavoritoApi(id)
+      setFavoritos((prev) => prev.filter((e) => e.id !== id))
+    } catch {}
   }
 
   return (
@@ -22,7 +35,9 @@ const Favoritos = () => {
       </section>
 
       <main className="favorites-content">
-        {favoritos.length === 0 ? (
+        {loading ? (
+          <div className="empty-favorites"><p>Carregando...</p></div>
+        ) : favoritos.length === 0 ? (
           <div className="empty-favorites">
             <p>Você ainda não tem eventos favoritos.</p>
             <button className="btn-explore" onClick={() => navigate('/home')}>Explorar Eventos</button>

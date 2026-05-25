@@ -1,64 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import api from '../servicos/services/api';
-import Navbar from '../componentes/Navbar';
-import '../estilos/ProfilePage.css';
+import React, { useState, useEffect } from 'react'
+import api from '../servicos/api'
+import { useAuth } from '../contexts/AuthContext'
+import Navbar from '../componentes/Navbar'
+import '../estilos/ProfilePage.css'
 
-const Perfil = ({ user, onLogout }) => {
-  const [profile, setProfile] = useState(null);
-  const [editProfile, setEditProfile] = useState({});
-  const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
+const icones = [
+  'airplane-fill', 'backpack2-fill', 'bag-heart-fill', 'balloon-fill', 'bank2',
+  'basket3-fill', 'bicycle', 'binoculars-fill', 'book-half', 'brightness-alt-high-fill',
+  'bug-fill', 'brush-fill', 'bus-front', 'cake-fill', 'camera-fill', 'car-front-fill',
+  'cassette-fill', 'cloud-rain-fill', 'cup-hot-fill', 'cup-straw', 'earbuds',
+  'egg-fried', 'emoji-wink-fill', 'emoji-tear-fill', 'emoji-sunglasses-fill',
+  'eyeglasses', 'flower3', 'fork-knife', 'gear-wide-connected', 'hearts',
+  'moon-stars-fill', 'person-arms-up', 'person-standing', 'person-standing-dress',
+  'person-wheelchair', 'piggy-bank-fill', 'rocket-takeoff-fill',
+]
 
-  const icones = ['airplane-fill', 'backpack2-fill', 'bag-heart-fill', 'balloon-fill', 'bank2',
-    'basket3-fill', 'bicycle', 'binoculars-fill', 'book-half', 'brightness-alt-high-fill',
-    'bug-fill', 'brush-fill', 'bus-front', 'cake-fill', 'camera-fill', 'car-front-fill',
-    'cassette-fill', 'cloud-rain-fill', 'cup-hot-fill', 'cup-straw', 'earbuds',
-    'egg-fried', 'emoji-wink-fill', 'emoji-tear-fill', 'emoji-sunglasses-fill',
-    'eyeglasses', 'flower3', 'fork-knife', 'gear-wide-connected', 'hearts',
-    'moon-stars-fill', 'person-arms-up', 'person-standing', 'person-standing-dress',
-    'person-wheelchair', 'piggy-bank-fill', 'rocket-takeoff-fill'];
-  const cores = ['#8E5E56', '#2ecc71', '#3498db', '#9b59b6', '#f39c12', 
-    '#5bb144ff', '#cc2e68ff', '#cc2222ff', '#d0ca22ff', '#2d2a26ff', '#391f1bff',
-     '#cc6217ff', '#34db90ff', '#76148cff', '#eea6c0ff'];
-  const estados = ['SP', 'RJ', 'MG', 'RS', 'BA', 'PR', 'SC', 'PE', 'DF'];
+const cores = [
+  '#8E5E56', '#2ecc71', '#3498db', '#9b59b6', '#f39c12',
+  '#5bb144ff', '#cc2e68ff', '#cc2222ff', '#d0ca22ff', '#2d2a26ff',
+  '#391f1bff', '#cc6217ff', '#34db90ff', '#76148cff', '#eea6c0ff',
+]
+
+const estados = ['SP', 'RJ', 'MG', 'RS', 'BA', 'PR', 'SC', 'PE', 'DF']
+
+const Perfil = () => {
+  const { user, login } = useAuth()
+  const [profile, setProfile] = useState(null)
+  const [editProfile, setEditProfile] = useState({})
+  const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [userEvents, setUserEvents] = useState([])
+  const [erro, setErro] = useState('')
+  const [sucesso, setSucesso] = useState('')
 
   useEffect(() => {
-    if (user) {
-      setProfile({
-        ...user,
-        estado: user.estado || 'SP',
-        icone: user.icone || 'person-standing',
-        corFundo: user.corFundo || '#8E5E56',
-      });
-      setEditProfile({
-        ...user,
-        estado: user.estado || 'SP',
-        icone: user.icone || 'person-standing',
-        corFundo: user.corFundo || '#8E5E56',
-      });
+    if (!user) return
+    const base = {
+      ...user,
+      estado: user.estado || 'SP',
+      icone: user.icone || 'person-standing',
+      corFundo: user.corFundo || '#8E5E56',
     }
-  }, [user]);
+    setProfile(base)
+    setEditProfile(base)
+
+    api.get(`/eventos?idUsuario=${user.id}`)
+      .then(({ data }) => setUserEvents(data))
+      .catch(() => setUserEvents([]))
+  }, [user])
 
   const handleSave = async () => {
-    if (!profile?.id) {
-      alert('Usuário inválido.');
-      return;
-    }
-
-    setLoading(true);
-
+    if (!profile?.id) return
+    setErro('')
+    setSucesso('')
+    setLoading(true)
     try {
-      const response = await api.put(`/usuarios/${profile.id}`, editProfile);
-      setProfile(response.data);
-      setIsEditing(false);
-      alert('Perfil atualizado com sucesso!');
-    } catch (err) {
-      console.error('Erro ao salvar perfil:', err);
-      alert('Erro ao salvar alterações.');
+      const { data } = await api.put(`/usuarios/${profile.id}`, editProfile)
+      setProfile(data)
+      login(data)
+      setSucesso('Perfil atualizado com sucesso!')
+      setIsEditing(false)
+    } catch {
+      setErro('Erro ao salvar alterações.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (!profile) return <div>Carregando...</div>
 
@@ -153,8 +160,8 @@ const Perfil = ({ user, onLogout }) => {
               </div>
 
               <div className="modal-actions">
-                <button onClick={handleSave}>Salvar</button>
-                <button onClick={() => setIsEditing(false)}>Cancelar</button>
+                <button onClick={handleSave} disabled={loading}>{loading ? 'Salvando...' : 'Salvar'}</button>
+                <button onClick={() => setIsEditing(false)} disabled={loading}>Cancelar</button>
               </div>
             </div>
           </div>

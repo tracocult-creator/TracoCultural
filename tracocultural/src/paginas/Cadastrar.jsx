@@ -1,14 +1,17 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import '../estilos/AuthPages.css'
+import { useAuth } from '../contexts/AuthContext'
+import { cadastrarUsuario } from '../servicos/api'
 
 const Cadastrar = () => {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erros, setErros] = useState({})
-  const [sucesso, setSucesso] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const validar = () => {
     const novosErros = {}
@@ -18,7 +21,7 @@ const Cadastrar = () => {
     return novosErros
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const novosErros = validar()
     if (Object.keys(novosErros).length > 0) {
@@ -26,8 +29,20 @@ const Cadastrar = () => {
       return
     }
     setErros({})
-    setSucesso('Conta criada com sucesso! Redirecionando...')
-    setTimeout(() => navigate('/home'), 1500)
+    setLoading(true)
+    try {
+      const { data } = await cadastrarUsuario({ nome, email, senha })
+      login(data)
+      navigate('/home')
+    } catch (err) {
+      const status = err.response?.status
+      const msg = status === 409
+        ? 'Este email já está cadastrado.'
+        : err.response?.data?.message || 'Erro ao criar conta. Tente novamente.'
+      setErros({ geral: msg })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -40,11 +55,6 @@ const Cadastrar = () => {
           </div>
           <form onSubmit={handleSubmit} className="auth-form">
             {erros.geral && <div className="error-message">{erros.geral}</div>}
-            {sucesso && (
-              <div className="error-message" style={{ backgroundColor: '#eaffea', color: '#2e7d32', borderColor: '#c8e6c9' }}>
-                {sucesso}
-              </div>
-            )}
             <div className="form-group">
               <label>Nome</label>
               <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Digite seu nome" className={erros.nome ? 'error' : ''} />
@@ -58,9 +68,11 @@ const Cadastrar = () => {
             <div className="form-group">
               <label>Senha</label>
               <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" className={erros.senha ? 'error' : ''} />
-              {erros.senha && <span className="field-error">{erros.senha}</span>}''''
+              {erros.senha && <span className="field-error">{erros.senha}</span>}
             </div>
-            <button type="submit" className="btn-submit">Cadastrar</button>
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? 'Cadastrando...' : 'Cadastrar'}
+            </button>
           </form>
           <div className="auth-links">
             <p>Já tem uma conta? <Link to="/logar" className="auth-link">Entrar</Link></p>

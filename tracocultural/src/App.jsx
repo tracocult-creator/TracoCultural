@@ -10,34 +10,38 @@ import Cadastrar from './paginas/Cadastrar'
 import Favoritos from './paginas/Favoritos'
 import Perfil from './paginas/Perfil'
 import Configuracoes from './paginas/Configuracoes'
+import CriarEvento from './paginas/CriarEvento'
+
+const PrivateRoute = ({ children }) => {
+  const { user } = useAuth()
+  return user ? children : <Navigate to="/logar" replace />
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<WelcomePage />} />
+      <Route path="/logar" element={<Logar />} />
+      <Route path="/cadastrar" element={<Cadastrar />} />
+      <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+      <Route path="/favoritos" element={<PrivateRoute><Favoritos /></PrivateRoute>} />
+      <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
+      <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />
+      <Route path="/criar-evento" element={<PrivateRoute><CriarEvento /></PrivateRoute>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
 
 function App() {
-  const [user, setUser] = useState(null)
-
-  const handleLogin = (userData) => {
-    setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
-  }
-
-  const handleLogout = () => {
-    setUser(null)
-    localStorage.removeItem('user')
-  }
-
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          <Route path="/logar" element={<Logar onLogin={handleLogin} />} />
-          <Route path="/cadastrar" element={<Cadastrar onLogin={handleLogin} />} />
-          <Route path="/home" element={<Home user={user} onLogout={handleLogout} />} />
-          <Route path="/favoritos" element={<Favoritos user={user} onLogout={handleLogout} />} />
-          <Route path="/perfil" element={<Perfil user={user} onLogout={handleLogout} />} />
-          <Route path="/configuracoes" element={<Configuracoes user={user} onLogout={handleLogout} />} />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <AppRoutes />
+        </div>
+      </Router>
+    </AuthProvider>
   )
 }
 
