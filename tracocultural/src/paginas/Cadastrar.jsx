@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { cadastrarUsuario } from '../servicos/api'
 import logo from '../assets/TRAÇO.png'
 
+
 const Cadastrar = () => {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -39,9 +40,9 @@ const Cadastrar = () => {
         : err.response?.data?.message || 'Erro ao criar conta. Tente novamente.'
       setErros({ geral: msg })
     } finally {
-      setLoading(false)
+     setLoading(false)
     }
-  }
+ }
 
   return (
     <div className="auth-page">
