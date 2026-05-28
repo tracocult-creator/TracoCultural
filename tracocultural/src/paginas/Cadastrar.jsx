@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import '../estilos/AuthPages.css'
 import { useAuth } from '../contexts/AuthContext'
 import { cadastrarUsuario } from '../servicos/api'
+import logo from '../assets/TRAÇO.png'
 
 const Cadastrar = () => {
   const [nome, setNome] = useState('')
@@ -24,10 +25,7 @@ const Cadastrar = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const novosErros = validar()
-    if (Object.keys(novosErros).length > 0) {
-      setErros(novosErros)
-      return
-    }
+    if (Object.keys(novosErros).length > 0) { setErros(novosErros); return }
     setErros({})
     setLoading(true)
     try {
@@ -49,29 +47,39 @@ const Cadastrar = () => {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-card">
+          <img src={logo} alt="Traço Cultural" className="auth-logo" />
           <div className="auth-header">
-            <h2>Cadastrar</h2>
-            <p>Crie sua conta TracoCultural</p>
+            <h2>Criar conta</h2>
+            <p>Junte-se ao Traço Cultural</p>
           </div>
           <form onSubmit={handleSubmit} className="auth-form">
             {erros.geral && <div className="error-message">{erros.geral}</div>}
             <div className="form-group">
               <label>Nome</label>
-              <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Digite seu nome" className={erros.nome ? 'error' : ''} />
+              <div className="input-wrapper">
+                <i className="bi bi-person input-icon"></i>
+                <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome completo" className={erros.nome ? 'error' : ''} />
+              </div>
               {erros.nome && <span className="field-error">{erros.nome}</span>}
             </div>
             <div className="form-group">
               <label>Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Digite seu email" className={erros.email ? 'error' : ''} />
+              <div className="input-wrapper">
+                <i className="bi bi-envelope input-icon"></i>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className={erros.email ? 'error' : ''} />
+              </div>
               {erros.email && <span className="field-error">{erros.email}</span>}
             </div>
             <div className="form-group">
               <label>Senha</label>
-              <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" className={erros.senha ? 'error' : ''} />
+              <div className="input-wrapper">
+                <i className="bi bi-lock input-icon"></i>
+                <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" className={erros.senha ? 'error' : ''} />
+              </div>
               {erros.senha && <span className="field-error">{erros.senha}</span>}
             </div>
             <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? 'Cadastrando...' : 'Cadastrar'}
+              {loading ? 'Cadastrando...' : 'Criar conta'}
             </button>
           </form>
           <div className="auth-links">

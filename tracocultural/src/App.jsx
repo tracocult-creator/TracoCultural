@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -36,11 +36,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="App">
           <AppRoutes />
         </div>
-      </Router>
+      </BrowserRouter>
     </AuthProvider>
   )
 }

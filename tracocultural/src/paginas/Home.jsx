@@ -165,18 +165,22 @@ const Home = () => {
         ) : (
           eventos.map((evento) => (
             <div key={evento.id} className="event-card">
-              {evento.cardImage && (
-                <img
-                  src={`data:image/jpeg;base64,${evento.cardImage}`}
-                  alt={evento.nome}
-                  className="event-image"
-                />
-              )}
+              <div className="event-image-wrapper">
+                {evento.cardImage && (
+                  <img
+                    src={`data:image/jpeg;base64,${evento.cardImage}`}
+                    alt={evento.nome}
+                    className="event-image"
+                  />
+                )}
+                {evento.categoria && (
+                  <span className="event-category-badge">{evento.categoria}</span>
+                )}
+              </div>
               <div className="event-content">
                 <h3 className="event-title">{evento.nome}</h3>
-                <p className="event-type">{evento.categoria}</p>
-                <p className="event-date">{formatarData(evento.dataInicio, evento.dataFim)}</p>
-                <p className="event-location">📍 {evento.cidade}</p>
+                <p className="event-date"><i className="bi bi-calendar3"></i> {formatarData(evento.dataInicio, evento.dataFim)}</p>
+                <p className="event-location"><i className="bi bi-geo-alt"></i> {evento.cidade}</p>
                 <div className="event-actions">
                   <button className="btn-ver-mais" onClick={() => handleVerMais(evento)}>Ver mais</button>
                   <button

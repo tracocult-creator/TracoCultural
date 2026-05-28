@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import '../estilos/AuthPages.css'
 import { useAuth } from '../contexts/AuthContext'
 import { loginUsuario } from '../servicos/api'
+import logo from '../assets/TRAÇO.png'
 
 const Logar = () => {
   const [email, setEmail] = useState('')
@@ -16,7 +17,6 @@ const Logar = () => {
     e.preventDefault()
     setErro('')
     setLoading(true)
-
     try {
       const { data } = await loginUsuario(email, senha)
       login(data)
@@ -32,36 +32,43 @@ const Logar = () => {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-card">
+          <img src={logo} alt="Traço Cultural" className="auth-logo" />
           <div className="auth-header">
-            <h2>Entrar</h2>
-            <p>Acesse sua conta TracoCultural</p>
+            <h2>Bem-vindo de volta</h2>
+            <p>Acesse sua conta Traço Cultural</p>
           </div>
           <form onSubmit={handleSubmit} className="auth-form">
             {erro && <div className="error-message">{erro}</div>}
             <div className="form-group">
               <label>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Digite seu email"
-                required
-                disabled={loading}
-              />
+              <div className="input-wrapper">
+                <i className="bi bi-envelope input-icon"></i>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  required
+                  disabled={loading}
+                />
+              </div>
             </div>
             <div className="form-group">
               <label>Senha</label>
-              <input
-                type="password"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                placeholder="Digite sua senha"
-                required
-                disabled={loading}
-              />
+              <div className="input-wrapper">
+                <i className="bi bi-lock input-icon"></i>
+                <input
+                  type="password"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  disabled={loading}
+                />
+              </div>
             </div>
             <button type="submit" className="btn-submit" disabled={loading}>
-              Entrar
+              {loading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
           <div className="auth-links">

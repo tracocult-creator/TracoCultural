@@ -1,68 +1,83 @@
+/* ═══════════════════════════════════════════
+   TRAÇO CULTURAL — DESIGN SYSTEM
+   ═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  /* Paleta */
+  --color-primary:       #8E5E56;
+  --color-primary-dark:  #3C2321;
+  --color-primary-light: #A67B72;
+  --color-accent:        #D4A373;
+  --color-accent-dark:   #B8864E;
+  --color-white:         #ffffff;
+  --color-text:          #2d1f1d;
+  --color-text-muted:    #7a6360;
+
+  /* Gradientes */
+  --bg-gradient: linear-gradient(135deg, #3C2321 0%, #8E5E56 50%, #A67B72 100%);
+  --bg-pattern:
+    radial-gradient(ellipse at 20% 20%, rgba(212,163,115,.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(60,35,33,.35)    0%, transparent 55%),
+    var(--bg-gradient);
+
+  /* Glass */
+  --glass-bg:     rgba(255,255,255,.10);
+  --glass-bg-md:  rgba(255,255,255,.16);
+  --glass-border: rgba(255,255,255,.22);
+  --glass-blur:   blur(16px);
+
+  /* Sombras */
+  --shadow-xs: 0 2px  8px rgba(0,0,0,.12);
+  --shadow-sm: 0 4px 16px rgba(0,0,0,.18);
+  --shadow-md: 0 8px 32px rgba(0,0,0,.28);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,.38);
+  --shadow-accent:  0 8px 24px rgba(212,163,115,.45);
+  --shadow-primary: 0 8px 24px rgba(142, 94, 86,.40);
+
+  /* Raios */
+  --r-sm:   10px;
+  --r-md:   18px;
+  --r-lg:   28px;
+  --r-xl:   2rem;
+  --r-pill: 50px;
+
+  /* Transição padrão */
+  --t: all .3s ease;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  height: 100%;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-primary-dark);
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+#root { height: 100%; }
+.App  { width: 100%; min-height: 100vh; }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+a    { text-decoration: none; color: inherit; }
+img  { display: block; max-width: 100%; }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-family: 'Poppins', sans-serif;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: var(--t);
+  border: none;
+  outline: none;
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+button:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(142,94,86,.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(142,94,86,.7); }
