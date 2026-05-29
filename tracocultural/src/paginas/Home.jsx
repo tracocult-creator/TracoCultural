@@ -10,7 +10,11 @@ const estadosBR = [
   'MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
 ]
 
-const categorias = ['Todas', 'Beleza', 'Automotivo', 'Cinema', 'Sustentabilidade', 'Negócios', 'Festival', 'Infantil', 'Literatura', 'Natal', 'Teatro']
+const categorias = [
+  'Todas', 'Social', 'Música', 'Cultura & Arte', 'Profissional',
+  'Educação', 'Tecnologia', 'Bem-Estar', 'Esporte', 'Gastronomia',
+  'Comércio', 'Kids', 'Religioso', 'Comunidade', 'Geek', 'Viagem',
+]
 
 const formatarData = (inicio, fim) => {
   const d = new Date(inicio).toLocaleDateString('pt-BR')
@@ -33,18 +37,15 @@ const Home = () => {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editForm, setEditForm] = useState(null)
   const [editLoading, setEditLoading] = useState(false)
-
   const [favoritando, setFavoritando] = useState(null)
 
   const buscarEventos = useCallback(() => {
     setLoading(true)
     const params = {}
     if (uf) params.cidade = uf
-    if (category !== 'Todas') params.categoria = category
-    if (dateFilter) params.data = dateFilter
-    if (busca) params.busca = busca
 
-    api.get('/api/v1/eventos', { params })
+    // ← URLs corrigidas: sem /api/v1/ (já está no baseURL do api.js)
+    api.get('/eventos', { params })
       .then(({ data }) => setEventos(data))
       .catch(() => setEventos([]))
       .finally(() => setLoading(false))
@@ -54,7 +55,8 @@ const Home = () => {
     buscarEventos()
   }, [buscarEventos])
 
-  const isOwner = (evento) => user && evento.idUsuarioFk && user.id === evento.idUsuarioFk
+  const isOwner = (evento) =>
+    user && evento.usuario && user.id === evento.usuario.id  // ← era evento.idUsuarioFk
 
   const handleVerMais = (evento) => {
     setSelectedEvent({
@@ -63,11 +65,7 @@ const Home = () => {
       date: formatarData(evento.dataInicio, evento.dataFim),
       location: evento.cidade,
       descricao: evento.descricao || 'Sem descrição disponível.',
-      linkexterno: evento.linkexterno,
-      autor: evento.nomeUsuario || null,
-      autorIcone: evento.iconeUsuario || null,
-      autorCor: evento.corFundoUsuario || '#8E5E56',
-      autorEstado: evento.estadoUsuario || null,
+      linkexterno: evento.linkExterno,  // ← era evento.linkexterno (L maiúsculo no backend)
       eventoOriginal: evento,
     })
     setShowEventModal(true)
@@ -77,7 +75,7 @@ const Home = () => {
     if (!user) return
     setFavoritando(eventoId)
     try {
-      await api.post('/api/v1/favoritos', { eventoId })
+      await api.post('/favoritos', { idEventoFk: eventoId })  // ← era eventoId, backend espera idEventoFk
     } catch {}
     finally { setFavoritando(null) }
   }
@@ -85,7 +83,7 @@ const Home = () => {
   const handleDeletar = async (eventoId) => {
     if (!window.confirm('Tem certeza que deseja deletar este evento?')) return
     try {
-      await api.delete(`/api/v1/eventos/${eventoId}?idUsuario=${user.id}`)
+      await api.delete(`/eventos/${eventoId}`)  // ← removido /api/v1/ e ?idUsuario
       setEventos((prev) => prev.filter((e) => e.id !== eventoId))
       setShowEventModal(false)
     } catch {
@@ -101,8 +99,7 @@ const Home = () => {
       dataInicio: evento.dataInicio ? evento.dataInicio.slice(0, 16) : '',
       dataFim: evento.dataFim ? evento.dataFim.slice(0, 16) : '',
       cidade: evento.cidade || '',
-      idCategoriaFk: evento.idCategoriaFk || '',
-      linkexterno: evento.linkexterno || '',
+      linkExterno: evento.linkExterno || '',  // ← L maiúsculo
     })
     setShowEditModal(true)
   }
@@ -114,9 +111,8 @@ const Home = () => {
         ...editForm,
         dataInicio: new Date(editForm.dataInicio).toISOString(),
         dataFim: editForm.dataFim ? new Date(editForm.dataFim).toISOString() : null,
-        idCategoriaFk: Number(editForm.idCategoriaFk),
       }
-      const { data } = await api.put(`/api/v1/eventos/${editForm.id}?idUsuario=${user.id}`, payload)
+      const { data } = await api.put(`/eventos/${editForm.id}`, payload)  // ← removido /api/v1/
       setEventos((prev) => prev.map((e) => (e.id === editForm.id ? { ...e, ...data } : e)))
       setShowEditModal(false)
       setShowEventModal(false)
@@ -174,7 +170,7 @@ const Home = () => {
                   />
                 )}
                 {evento.categoria && (
-                  <span className="event-category-badge">{evento.categoria}</span>
+                  <span className="event-category-badge">{evento.categoria.nome}</span>
                 )}
               </div>
               <div className="event-content">
@@ -248,7 +244,7 @@ const Home = () => {
             <input className="form-input" value={editForm.cidade} onChange={(e) => setEditForm({ ...editForm, cidade: e.target.value })} maxLength={45} />
 
             <label>Link Externo</label>
-            <input className="form-input" type="url" value={editForm.linkexterno} onChange={(e) => setEditForm({ ...editForm, linkexterno: e.target.value })} placeholder="https://..." />
+            <input className="form-input" type="url" value={editForm.linkExterno} onChange={(e) => setEditForm({ ...editForm, linkExterno: e.target.value })} placeholder="https://..." />
 
             <div className="modal-actions">
               <button onClick={handleSalvarEdicao} disabled={editLoading}>{editLoading ? 'Salvando...' : 'Salvar'}</button>

@@ -23,7 +23,7 @@ api.interceptors.response.use(
 )
 
 export const loginUsuario = (email, senha) =>
-  api.post('/usuarios/auth/login', { email, senha })
+  api.post('/auth/login', { email, senha })  // ← era /usuarios/auth/login
 
 export const cadastrarUsuario = (dados) =>
   api.post('/usuarios/auth/register', dados)
@@ -35,6 +35,12 @@ export const removerFavorito = (eventoId) =>
   api.delete(`/favoritos/${eventoId}`)
 
 export const adicionarFavorito = (eventoId) =>
-  api.post('/favoritos', { eventoId })
+  api.post('/favoritos', { idEventoFk: eventoId })  // ← backend espera idEventoFk
+
+export const getEventos = (params) =>
+  api.get('/eventos', { params })  // ← adicionado para uso no Home.jsx
+
+export const getEventoPorId = (id) =>
+  api.get(`/eventos/${id}`)
 
 export default api
