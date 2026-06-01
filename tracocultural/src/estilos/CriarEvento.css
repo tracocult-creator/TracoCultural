@@ -1,285 +1,321 @@
+/* ============================================================
+   PÁGINA
+   ============================================================ */
+
 .criar-evento-page {
   min-height: 100vh;
-  width: 100vw;
-  background: linear-gradient(135deg, #8E5E56 0%, #3C2321 100%);
-  color: white;
-  font-family: 'Poppins', sans-serif;
+  background: #1a0f0d;
+  color: #f0e6e0;
 }
 
 .criar-evento-layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 2rem;
-  padding: 2rem 3rem;
-  max-width: 1300px;
-  margin: 0 auto;
-  align-items: start;
+  grid-template-columns: 340px 1fr;
+  min-height: calc(100vh - 64px);
 }
 
-/* ── Painel esquerdo (preview) ── */
+/* ============================================================
+   PREVIEW
+   ============================================================ */
+
 .criar-evento-preview {
   position: sticky;
-  top: 2rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
+  top: 64px;
+  height: calc(100vh - 64px);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 2rem;
+
+  background: #120a08;
+  border-right: 1px solid rgba(255,255,255,.06);
+}
+
+.preview-card {
+  width: 100%;
+  max-width: 300px;
+
+  background: #2a1a16;
+  border-radius: 16px;
   overflow: hidden;
-  backdrop-filter: blur(12px);
+
+  box-shadow: 0 15px 40px rgba(0,0,0,.35);
 }
 
 .preview-banner {
-  width: 100%;
-  height: 220px;
-  background: rgba(0, 0, 0, 0.3);
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  background-color: #3d2218;
+
   display: flex;
-  align-items: center;
   justify-content: center;
-}
-
-.preview-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.preview-placeholder {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.9rem;
+
+  position: relative;
 }
 
-.preview-placeholder i {
-  font-size: 3rem;
+.preview-body {
+  padding: 1rem;
 }
 
-.preview-info {
-  padding: 1.5rem;
+.preview-label {
+  margin-top: 1rem;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  opacity: .5;
 }
 
-.preview-info h2 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.3rem;
-  font-weight: 700;
-  word-break: break-word;
-}
+/* ============================================================
+   FORMULÁRIO
+   ============================================================ */
 
-.preview-meta {
-  margin: 0.3rem 0;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.preview-categoria {
-  display: inline-block;
-  margin-top: 0.75rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 0.3rem 1rem;
-  font-size: 0.85rem;
-}
-
-/* ── Formulário direito ── */
 .criar-evento-form-wrapper {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 2.5rem;
-  backdrop-filter: blur(12px);
+  width: 100%;
+  max-width: 900px;
+
+  margin: 0 auto;
+  padding: 3rem;
+
+  overflow-y: auto;
 }
 
-.criar-evento-titulo {
-  margin: 0 0 2rem 0;
+.criar-evento-header {
+  margin-bottom: 2rem;
+}
+
+.criar-evento-header h1 {
+  margin: 0;
   font-size: 2rem;
-  font-weight: 700;
+}
+
+.criar-evento-header p {
+  opacity: .7;
+  margin-top: .5rem;
 }
 
 .criar-evento-form {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  flex: 1;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: .75rem;
 }
 
 .form-label {
-  font-size: 0.95rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.form-hint {
-  margin: 0;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.opcional {
-  font-weight: 400;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
 }
 
 .form-input,
-.form-select,
 .form-textarea {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 12px;
-  padding: 0.85rem 1rem;
-  color: white;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.95rem;
-  transition: border-color 0.2s;
-  outline: none;
-}
+  width: 100%;
+  box-sizing: border-box;
 
-.form-input::placeholder,
-.form-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  padding: 1rem;
+
+  background: #241512;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+
+  color: #fff;
 }
 
 .form-input:focus,
-.form-select:focus,
 .form-textarea:focus {
-  border-color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.form-select option {
-  background: #3C2321;
-  color: white;
+  outline: none;
+  border-color: #f0c080;
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 130px;
+  min-height: 140px;
 }
 
-/* ── Upload ── */
+/* ============================================================
+   UPLOAD
+   ============================================================ */
+
 .upload-area {
-  border: 2px dashed rgba(255, 255, 255, 0.35);
-  border-radius: 14px;
-  height: 160px;
+  width: 100%;
+  box-sizing: border-box;
+
+  min-height: 240px;
+
+  border: 2px dashed rgba(240,192,128,.25);
+  border-radius: 16px;
+
+  overflow: hidden;
+  cursor: pointer;
+
+  background: #241512;
+}
+
+.upload-placeholder {
+  height: 240px;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  cursor: pointer;
-  gap: 0.5rem;
-  transition: border-color 0.2s, background 0.2s;
-  overflow: hidden;
-}
+  align-items: center;
 
-.upload-area:hover {
-  border-color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.upload-area p {
-  margin: 0;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.upload-area span {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.upload-icon {
-  font-size: 2.5rem;
-  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  padding: 1rem;
 }
 
 .upload-preview {
   width: 100%;
-  height: 100%;
+  height: 240px;
   object-fit: cover;
 }
 
-/* ── Erro ── */
-.form-erro {
-  background: rgba(220, 53, 69, 0.25);
-  border: 1px solid rgba(220, 53, 69, 0.5);
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
-  font-size: 0.9rem;
-  margin: 0;
+.upload-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  border: none;
+  background: rgba(0,0,0,.7);
+
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
 }
 
-/* ── Ações ── */
+/* ============================================================
+   CATEGORIAS
+   ============================================================ */
+
+.categoria-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.categoria-chip {
+  border: none;
+  border-radius: 999px;
+
+  padding: .7rem 1rem;
+
+  background: #241512;
+  color: #f0e6e0;
+
+  cursor: pointer;
+}
+
+.categoria-chip--ativo {
+  background: #f0c080;
+  color: #1a0f0d;
+  font-weight: 700;
+}
+
+/* ============================================================
+   DATAS
+   ============================================================ */
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-col {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+/* ============================================================
+   BOTÕES
+   ============================================================ */
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 0.5rem;
+}
+
+.btn-cancelar,
+.btn-publicar {
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
 }
 
 .btn-cancelar {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.7);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 0.85rem 2rem;
-  border-radius: 25px;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.95rem;
-  transition: all 0.2s;
-}
-
-.btn-cancelar:hover {
-  border-color: white;
+  background: #2b1916;
   color: white;
 }
 
 .btn-publicar {
-  background: white;
-  color: #8E5E56;
-  border: none;
-  padding: 0.85rem 2.5rem;
-  border-radius: 25px;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.95rem;
+  background: #f0c080;
+  color: #1a0f0d;
   font-weight: 700;
-  transition: all 0.2s;
 }
 
-.btn-publicar:hover:not(:disabled) {
-  background: #f0f0f0;
-  transform: translateY(-2px);
+/* ============================================================
+   ERRO
+   ============================================================ */
+
+.criar-evento-erro {
+  margin-bottom: 2rem;
+
+  padding: 1rem;
+
+  border-radius: 12px;
+
+  background: rgba(255,0,0,.1);
+  border: 1px solid rgba(255,0,0,.2);
 }
 
-.btn-publicar:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+/* ============================================================
+   RESPONSIVO
+   ============================================================ */
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .criar-evento-layout {
     grid-template-columns: 1fr;
-    padding: 1rem;
   }
 
   .criar-evento-preview {
-    position: static;
+    position: relative;
+    top: 0;
+    height: auto;
+
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,.06);
   }
 
+  .criar-evento-form-wrapper {
+    max-width: 100%;
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-cancelar,
+  .btn-publicar {
+    width: 100%;
   }
 }
