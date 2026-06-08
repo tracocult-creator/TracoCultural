@@ -76,6 +76,7 @@ const CriarEvento = () => {
       if (imagem) {
         cardImageBase64 = await new Promise((resolve) => {
           const reader = new FileReader()
+          // Jackson maps a raw Base64 JSON string to byte[]; keep the data URL prefix out.
           reader.onload = () => resolve(reader.result.split(',')[1])
           reader.readAsDataURL(imagem)
         })
