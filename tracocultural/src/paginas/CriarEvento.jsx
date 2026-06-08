@@ -89,7 +89,7 @@ const CriarEvento = () => {
         dataFim: form.dataFim ? new Date(form.dataFim).toISOString() : null,
         cidade: form.cidade,
         linkExterno: form.linkExterno || null,
-        usuario: { id: user.id },
+        idUsuarioFk: user.id,
         categoria: { id: Number(form.categoriaId) },
         cardImage: cardImageBase64,
       }
