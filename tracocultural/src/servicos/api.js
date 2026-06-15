@@ -26,7 +26,7 @@ export const loginUsuario = (email, senha) =>
   api.post('/auth/login', { email, senha })  // ← era /usuarios/auth/login
 
 export const cadastrarUsuario = (dados) =>
-  api.post('/usuarios/auth/register', dados)
+  api.post('/auth/register', dados)
 
 export const getFavoritos = () =>
   api.get('/favoritos')

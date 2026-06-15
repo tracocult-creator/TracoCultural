@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import logo from '../assets/TRAÇO.png'
 
 const Navbar = () => {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ const Navbar = () => {
   return (
     <header className="navbar">
       <div className="navbar-brand" onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}>
-        <img src="src/assets/TRAÇO.png" alt="TracoCultural" className="navbar-logo" />
+        <img src={logo} alt="TracoCultural" className="navbar-logo" />
       </div>
       <nav className="navbar-nav">
         <button className="nav-button" onClick={() => navigate('/home')}>

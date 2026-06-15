@@ -30,10 +30,13 @@ const Cadastrar = () => {
     setErros({})
     setLoading(true)
     try {
+      console.log('Register payload:', { nome, email, senha })
       const { data } = await cadastrarUsuario({ nome, email, senha })
+      console.log('Register success:', data)
       login(data)
       navigate('/home')
     } catch (err) {
+      console.error('Register error:', err.response?.status, err.response?.data, err.request, err.message)
       const status = err.response?.status
       const msg = status === 409
         ? 'Este email já está cadastrado.'

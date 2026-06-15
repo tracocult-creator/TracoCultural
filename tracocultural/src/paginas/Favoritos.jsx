@@ -31,7 +31,11 @@ const Favoritos = () => {
       <Navbar />
 
       <section className="title-section">
-        <h2 className="main-title">Meus Eventos Favoritos</h2>
+        <div>
+          <span className="page-eyebrow">Sua curadoria</span>
+          <h2 className="main-title">Meus Eventos Favoritos</h2>
+          <p className="page-subtitle">Acesse rapidamente os eventos que você quer acompanhar.</p>
+        </div>
       </section>
 
       <main className="favorites-content">
@@ -40,18 +44,35 @@ const Favoritos = () => {
         ) : favoritos.length === 0 ? (
           <div className="empty-favorites">
             <p>Você ainda não tem eventos favoritos.</p>
-            <button className="btn-explore" onClick={() => navigate('/home')}>Explorar Eventos</button>
+            <button className="btn-explore" onClick={() => navigate('/home')}>
+              <i className="bi bi-compass"></i> Explorar Eventos
+            </button>
           </div>
         ) : (
           <div className="favorites-grid">
-            {favoritos.map((evento) => (
+            {favoritos.map((evento) => {
+              const titulo = evento.nome || evento.titulo || 'Evento sem nome'
+              const imagem = evento.cardImage ? `data:image/jpeg;base64,${evento.cardImage}` : evento.image
+              const categoria = evento.categoria?.nome || evento.tipo
+              const data = evento.dataInicio ? new Date(evento.dataInicio).toLocaleDateString('pt-BR') : evento.data
+              const local = evento.cidade || evento.local || 'Local a confirmar'
+
+              return (
               <div key={evento.id} className="favorite-card">
-                <img src={evento.image} alt={evento.titulo} className="favorite-image" />
+                <div className="favorite-image-wrap">
+                  {imagem ? (
+                    <img src={imagem} alt={titulo} className="favorite-image" />
+                  ) : (
+                    <div className="favorite-image favorite-image--empty">
+                      <i className="bi bi-calendar-heart"></i>
+                    </div>
+                  )}
+                  {categoria && <span className="favorite-badge">{categoria}</span>}
+                </div>
                 <div className="favorite-content">
-                  <h3 className="favorite-title">{evento.titulo}</h3>
-                  <p className="favorite-type">{evento.tipo}</p>
-                  <p className="favorite-date">{evento.data}</p>
-                  <p className="favorite-location">📍 {evento.local}</p>
+                  <h3 className="favorite-title">{titulo}</h3>
+                  {data && <p className="favorite-date"><i className="bi bi-calendar3"></i> {data}</p>}
+                  <p className="favorite-location"><i className="bi bi-geo-alt"></i> {local}</p>
                   <div className="favorite-actions">
                     <button className="btn-ver-mais">Ver mais</button>
                     <button className="btn-remover" onClick={() => removerFavorito(evento.id)}>
@@ -60,7 +81,8 @@ const Favoritos = () => {
                   </div>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </main>

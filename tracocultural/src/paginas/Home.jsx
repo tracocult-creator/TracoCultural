@@ -129,13 +129,16 @@ const Home = () => {
 
       <section className="search-section">
         <div className="search-container">
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Pesquisar eventos..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
+          <div className="search-input-wrapper">
+            <i className="bi bi-search search-icon"></i>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Pesquisar eventos, artistas ou lugares"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
+          </div>
           <select
             className="location-select"
             value={uf}
@@ -145,12 +148,22 @@ const Home = () => {
             <option value="">Todos os estados</option>
             {estadosBR.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
-          <button className="filter-button" onClick={() => setShowFilterModal(true)}>Filtros</button>
+          <button className="filter-button" onClick={() => setShowFilterModal(true)}>
+            <i className="bi bi-sliders"></i> Filtros
+          </button>
         </div>
       </section>
 
       <section className="title-section">
-        <h2 className="main-title">O que vamos fazer?</h2>
+        <div>
+          <span className="page-eyebrow">Agenda cultural</span>
+          <h2 className="main-title">O que vamos fazer?</h2>
+          <p className="page-subtitle">Descubra eventos, salve favoritos e acompanhe experiências perto de você.</p>
+        </div>
+        <div className="home-summary">
+          <span>{eventos.length}</span>
+          <small>eventos encontrados</small>
+        </div>
       </section>
 
       <main className="events-grid">
@@ -162,12 +175,16 @@ const Home = () => {
           eventos.map((evento) => (
             <div key={evento.id} className="event-card">
               <div className="event-image-wrapper">
-                {evento.cardImage && (
+                {evento.cardImage ? (
                   <img
                     src={`data:image/jpeg;base64,${evento.cardImage}`}
                     alt={evento.nome}
                     className="event-image"
                   />
+                ) : (
+                  <div className="event-image event-image--empty">
+                    <i className="bi bi-calendar-event"></i>
+                  </div>
                 )}
                 {evento.categoria && (
                   <span className="event-category-badge">{evento.categoria.nome}</span>

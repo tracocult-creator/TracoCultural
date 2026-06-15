@@ -74,12 +74,16 @@ const Perfil = () => {
       <Navbar />
 
       <section className="title-section">
-        <h2 className="main-title">Meu Perfil</h2>
+        <div>
+          <span className="page-eyebrow">Sua conta</span>
+          <h2 className="main-title">Meu Perfil</h2>
+          <p className="page-subtitle">Gerencie sua identidade no Traço Cultural e acompanhe os eventos publicados.</p>
+        </div>
       </section>
 
       <main className="profile-content">
         {sucesso && (
-          <p style={{ color: '#2e7d32', background: 'rgba(255,255,255,0.9)', padding: '0.8rem 1.5rem', borderRadius: '10px', marginBottom: '1rem', maxWidth: '450px', margin: '0 auto 1rem' }}>
+          <p className="profile-alert profile-alert--success">
             {sucesso}
           </p>
         )}
@@ -98,6 +102,16 @@ const Perfil = () => {
               <i className="bi bi-pencil"></i> Editar
             </button>
           </div>
+          <div className="profile-stats">
+            <div>
+              <strong>{userEvents.length}</strong>
+              <span>eventos criados</span>
+            </div>
+            <div>
+              <strong>{profile.estado}</strong>
+              <span>estado</span>
+            </div>
+          </div>
         </div>
 
         <section className="user-events-section">
@@ -109,8 +123,8 @@ const Perfil = () => {
                   {evento.cardImage ? (
                     <img src={`data:image/jpeg;base64,${evento.cardImage}`} alt={evento.nome} className="event-image" />
                   ) : (
-                    <div className="event-image" style={{ background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <i className="bi bi-image" style={{ fontSize: '2rem' }}></i>
+                    <div className="event-image event-image--empty">
+                      <i className="bi bi-image"></i>
                     </div>
                   )}
                   <div className="event-content">
@@ -130,7 +144,7 @@ const Perfil = () => {
           <div className="modal-overlay">
             <div className="edit-modal">
               <h3>Editar Perfil</h3>
-              {erro && <p style={{ color: '#e74c3c', marginBottom: '1rem' }}>{erro}</p>}
+              {erro && <p className="profile-alert profile-alert--error">{erro}</p>}
 
               <label>Nome:</label>
               <input type="text" value={editProfile.nome || ''} onChange={(e) => setEditProfile({ ...editProfile, nome: e.target.value })} />

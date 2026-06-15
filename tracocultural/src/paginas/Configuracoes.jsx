@@ -33,7 +33,11 @@ const Configuracoes = () => {
       <Navbar />
 
       <section className="title-section">
-        <h2 className="main-title">Configurações</h2>
+        <div>
+          <span className="page-eyebrow">Preferências</span>
+          <h2 className="main-title">Configurações</h2>
+          <p className="page-subtitle">Ajuste notificações, privacidade e acesso da sua conta.</p>
+        </div>
       </section>
 
       <main className="settings-content">
@@ -44,7 +48,7 @@ const Configuracoes = () => {
             <div className="setting-item">
               <div className="setting-info">
                 <span className="setting-name">Email marketing</span>
-                <span className="setting-desc">Receber promoções por email</span>
+                <span className="setting-desc">Receber novidades e recomendações por email</span>
               </div>
               <label className="toggle-switch">
                 <input type="checkbox" checked={settings.emailMarketing} onChange={() => handleToggle('emailMarketing')} />
@@ -105,7 +109,7 @@ const Configuracoes = () => {
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
                 placeholder="Digite EXCLUIR"
-                style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '2px solid #ddd', marginBottom: '1.5rem', fontFamily: 'Poppins, sans-serif', boxSizing: 'border-box' }}
+                className="delete-confirm-input"
               />
               <div className="modal-actions">
                 <button
