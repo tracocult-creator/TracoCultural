@@ -19,10 +19,10 @@ const Favoritos = () => {
       .finally(() => setLoading(false))
   }, [user])
 
-  const removerFavorito = async (id) => {
+  const removerFavorito = async (eventoId) => {
     try {
-      await removerFavoritoApi(id)
-      setFavoritos((prev) => prev.filter((e) => e.id !== id))
+      await removerFavoritoApi(eventoId)
+      setFavoritos((prev) => prev.filter((f) => f.evento.id !== eventoId))
     } catch {}
   }
 
@@ -50,15 +50,15 @@ const Favoritos = () => {
           </div>
         ) : (
           <div className="favorites-grid">
-            {favoritos.map((evento) => {
-              const titulo = evento.nome || evento.titulo || 'Evento sem nome'
-              const imagem = evento.cardImage ? `data:image/jpeg;base64,${evento.cardImage}` : evento.image
-              const categoria = evento.categoria?.nome || evento.tipo
-              const data = evento.dataInicio ? new Date(evento.dataInicio).toLocaleDateString('pt-BR') : evento.data
-              const local = evento.cidade || evento.local || 'Local a confirmar'
+            {favoritos.map((fav) => {
+              const titulo = fav.evento.nome
+              const imagem = fav.evento.cardImage ? `data:image/jpeg;base64,${fav.evento.cardImage}` : null
+              const categoria = fav.evento.categoria?.nome
+              const data = fav.evento.dataInicio ? new Date(fav.evento.dataInicio).toLocaleDateString('pt-BR') : null
+              const local = fav.evento.cidade || 'Local a confirmar'
 
               return (
-              <div key={evento.id} className="favorite-card">
+              <div key={fav.id} className="favorite-card">
                 <div className="favorite-image-wrap">
                   {imagem ? (
                     <img src={imagem} alt={titulo} className="favorite-image" />
@@ -75,7 +75,7 @@ const Favoritos = () => {
                   <p className="favorite-location"><i className="bi bi-geo-alt"></i> {local}</p>
                   <div className="favorite-actions">
                     <button className="btn-ver-mais">Ver mais</button>
-                    <button className="btn-remover" onClick={() => removerFavorito(evento.id)}>
+                    <button className="btn-remover" onClick={() => removerFavorito(fav.evento.id)}>
                       <i className="bi bi-trash"></i>
                     </button>
                   </div>

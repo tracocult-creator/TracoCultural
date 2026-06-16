@@ -5,11 +5,6 @@ import '../estilos/Modal.css'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../servicos/api'
 
-const estadosBR = [
-  'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS',
-  'MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
-]
-
 const categorias = [
   'Todas', 'Social', 'Música', 'Cultura & Arte', 'Profissional',
   'Educação', 'Tecnologia', 'Bem-Estar', 'Esporte', 'Gastronomia',
@@ -38,25 +33,26 @@ const Home = () => {
   const [editForm, setEditForm] = useState(null)
   const [editLoading, setEditLoading] = useState(false)
   const [favoritando, setFavoritando] = useState(null)
+  const [comentarios, setComentarios] = useState([])
+  const [novoComentario, setNovoComentario] = useState('')
 
   const buscarEventos = useCallback(() => {
     setLoading(true)
     const params = {}
     if (uf) params.cidade = uf
 
-    // ← URLs corrigidas: sem /api/v1/ (já está no baseURL do api.js)
     api.get('/eventos', { params })
       .then(({ data }) => setEventos(data))
       .catch(() => setEventos([]))
       .finally(() => setLoading(false))
-  }, [uf, category, dateFilter, busca])
+  }, [uf])
 
   useEffect(() => {
     buscarEventos()
   }, [buscarEventos])
 
   const isOwner = (evento) =>
-    user && evento.usuario && user.id === evento.usuario.id  // ← era evento.idUsuarioFk
+    user && evento.idUsuarioFk && user.id === evento.idUsuarioFk
 
   const handleVerMais = (evento) => {
     setSelectedEvent({
@@ -65,17 +61,22 @@ const Home = () => {
       date: formatarData(evento.dataInicio, evento.dataFim),
       location: evento.cidade,
       descricao: evento.descricao || 'Sem descrição disponível.',
-      linkexterno: evento.linkExterno,  // ← era evento.linkexterno (L maiúsculo no backend)
+      linkexterno: evento.linkExterno,
       eventoOriginal: evento,
     })
+    setComentarios([])
+    setNovoComentario('')
     setShowEventModal(true)
+    api.get(`/comentarios?eventoId=${evento.id}`)
+      .then(({ data }) => setComentarios(data))
+      .catch(() => setComentarios([]))
   }
 
   const handleFavoritar = async (eventoId) => {
     if (!user) return
     setFavoritando(eventoId)
     try {
-      await api.post('/favoritos', { idEventoFk: eventoId })  // ← era eventoId, backend espera idEventoFk
+      await api.post('/favoritos', { idEventoFk: eventoId })
     } catch {}
     finally { setFavoritando(null) }
   }
@@ -83,7 +84,7 @@ const Home = () => {
   const handleDeletar = async (eventoId) => {
     if (!window.confirm('Tem certeza que deseja deletar este evento?')) return
     try {
-      await api.delete(`/eventos/${eventoId}`)  // ← removido /api/v1/ e ?idUsuario
+      await api.delete(`/eventos/${eventoId}`)
       setEventos((prev) => prev.filter((e) => e.id !== eventoId))
       setShowEventModal(false)
     } catch {
@@ -99,7 +100,7 @@ const Home = () => {
       dataInicio: evento.dataInicio ? evento.dataInicio.slice(0, 16) : '',
       dataFim: evento.dataFim ? evento.dataFim.slice(0, 16) : '',
       cidade: evento.cidade || '',
-      linkExterno: evento.linkExterno || '',  // ← L maiúsculo
+      linkExterno: evento.linkExterno || '',
     })
     setShowEditModal(true)
   }
@@ -112,7 +113,7 @@ const Home = () => {
         dataInicio: new Date(editForm.dataInicio).toISOString(),
         dataFim: editForm.dataFim ? new Date(editForm.dataFim).toISOString() : null,
       }
-      const { data } = await api.put(`/eventos/${editForm.id}`, payload)  // ← removido /api/v1/
+      const { data } = await api.put(`/eventos/${editForm.id}`, payload)
       setEventos((prev) => prev.map((e) => (e.id === editForm.id ? { ...e, ...data } : e)))
       setShowEditModal(false)
       setShowEventModal(false)
@@ -122,6 +123,27 @@ const Home = () => {
       setEditLoading(false)
     }
   }
+
+  const handleEnviarComentario = async () => {
+    if (!novoComentario.trim()) return
+    try {
+      const { data } = await api.post('/comentarios', {
+        eventoId: selectedEvent.eventoOriginal.id,
+        texto: novoComentario,
+      })
+      setComentarios((prev) => [...prev, data])
+      setNovoComentario('')
+    } catch {}
+  }
+
+  const eventosFiltrados = eventos.filter((e) => {
+    const matchBusca = !busca ||
+      e.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+      e.descricao?.toLowerCase().includes(busca.toLowerCase()) ||
+      e.cidade?.toLowerCase().includes(busca.toLowerCase())
+    const matchCategoria = category === 'Todas' || e.categoria?.nome === category
+    return matchBusca && matchCategoria
+  })
 
   return (
     <div className="home-page">
@@ -139,15 +161,13 @@ const Home = () => {
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
-          <select
+          <input
+            type="text"
             className="location-select"
+            placeholder="Filtrar por cidade..."
             value={uf}
             onChange={(e) => setUf(e.target.value)}
-            aria-label="Selecionar estado"
-          >
-            <option value="">Todos os estados</option>
-            {estadosBR.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
+          />
           <button className="filter-button" onClick={() => setShowFilterModal(true)}>
             <i className="bi bi-sliders"></i> Filtros
           </button>
@@ -161,7 +181,7 @@ const Home = () => {
           <p className="page-subtitle">Descubra eventos, salve favoritos e acompanhe experiências perto de você.</p>
         </div>
         <div className="home-summary">
-          <span>{eventos.length}</span>
+          <span>{eventosFiltrados.length}</span>
           <small>eventos encontrados</small>
         </div>
       </section>
@@ -169,10 +189,10 @@ const Home = () => {
       <main className="events-grid">
         {loading ? (
           <p style={{ gridColumn: '1/-1', textAlign: 'center' }}>Carregando eventos...</p>
-        ) : eventos.length === 0 ? (
+        ) : eventosFiltrados.length === 0 ? (
           <p style={{ gridColumn: '1/-1', textAlign: 'center' }}>Nenhum evento encontrado.</p>
         ) : (
-          eventos.map((evento) => (
+          eventosFiltrados.map((evento) => (
             <div key={evento.id} className="event-card">
               <div className="event-image-wrapper">
                 {evento.cardImage ? (
@@ -313,18 +333,22 @@ const Home = () => {
               <div className="comments-section">
                 <h3 className="comments-title">Avaliações e Comentários</h3>
                 <div className="comment-form">
-                  <textarea className="comment-input" placeholder="Deixe seu comentário sobre o evento..." rows="3"></textarea>
-                  <button className="comment-submit">Enviar</button>
+                  <textarea
+                    className="comment-input"
+                    value={novoComentario}
+                    onChange={(e) => setNovoComentario(e.target.value)}
+                    placeholder="Deixe seu comentário..."
+                    rows="3"
+                  />
+                  <button className="comment-submit" onClick={handleEnviarComentario}>Enviar</button>
                 </div>
                 <div className="comments-list">
-                  <div className="comment-item">
-                    <div className="comment-author">Maria Silva</div>
-                    <div className="comment-text">Evento incrível! Super recomendo para quem gosta de arte e cultura.</div>
-                  </div>
-                  <div className="comment-item">
-                    <div className="comment-author">João Santos</div>
-                    <div className="comment-text">Organização perfeita e programação diversificada. Já estou ansioso para o próximo!</div>
-                  </div>
+                  {comentarios.map((c, i) => (
+                    <div key={c.id ?? i} className="comment-item">
+                      <div className="comment-author">{c.usuario?.nome || c.autor || 'Usuário'}</div>
+                      <div className="comment-text">{c.texto || c.conteudo}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

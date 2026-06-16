@@ -44,7 +44,7 @@ const Perfil = () => {
     setProfile(base)
     setEditProfile(base)
 
-    api.get(`/eventos?idUsuario=${user.id}`)
+    api.get('/eventos/meus')
       .then(({ data }) => setUserEvents(data))
       .catch(() => setUserEvents([]))
   }, [user])

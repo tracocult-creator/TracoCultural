@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Navbar from '../componentes/Navbar'
 import '../estilos/SettingsPage.css'
 import { useAuth } from '../contexts/AuthContext'
+import api from '../servicos/api'
 
 const Configuracoes = () => {
   const { user, logout } = useAuth()
@@ -17,10 +18,16 @@ const Configuracoes = () => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     if (confirmText !== 'EXCLUIR') return
     setLoading(true)
-    logout()
+    try {
+      await api.delete(`/usuarios/${user.id}`)
+      logout()
+    } catch {
+      alert('Erro ao excluir conta.')
+      setLoading(false)
+    }
   }
 
   const openDeleteModal = () => {
