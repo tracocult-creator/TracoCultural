@@ -38,26 +38,29 @@ const CriarEvento = () => {
   })
   const [imagem, setImagem] = useState(null)
   const [imagemPreview, setImagemPreview] = useState(null)
+  const [erroDataFim, setErroDataFim] = useState('')
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+  const [erroImagem, setErroImagem] = useState('')
+  const [toast, setToast] = useState(false)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleImagem = (e) => {
-    const file = e.target.files[0]
+  const aplicarImagem = (file) => {
     if (!file) return
+    if (file.size > 2 * 1024 * 1024) { setErroImagem('Imagem deve ter no máximo 2MB'); return }
+    setErroImagem('')
     setImagem(file)
     setImagemPreview(URL.createObjectURL(file))
   }
 
+  const handleImagem = (e) => aplicarImagem(e.target.files[0])
+
   const handleDrop = (e) => {
     e.preventDefault()
-    const file = e.dataTransfer.files[0]
-    if (!file) return
-    setImagem(file)
-    setImagemPreview(URL.createObjectURL(file))
+    aplicarImagem(e.dataTransfer.files[0])
   }
 
   const handleSubmit = async (e) => {
@@ -65,9 +68,15 @@ const CriarEvento = () => {
     setErro('')
 
     if (!form.nome || !form.dataInicio || !form.cidade || !form.categoriaId) {
-      setErro('Preencha todos os campos obrigatorios.')
+      setErro('Preencha todos os campos obrigatórios.')
       return
     }
+    if (form.dataFim && form.dataFim <= form.dataInicio) {
+      setErro('')
+      setErroDataFim('Data de término deve ser posterior à data de início.')
+      return
+    }
+    setErroDataFim('')
 
     setLoading(true)
     try {
@@ -95,7 +104,8 @@ const CriarEvento = () => {
       }
 
       await api.post('/eventos', payload)
-      navigate('/home')
+      setToast(true)
+      setTimeout(() => navigate('/home'), 3000)
     } catch (err) {
       setErro(err.response?.data?.message || 'Erro ao criar evento. Tente novamente.')
     } finally {
@@ -160,6 +170,7 @@ const CriarEvento = () => {
           </div>
 
           {erro && <div className="criar-evento-erro">{erro}</div>}
+          {toast && <div className="criar-evento-toast">Evento publicado com sucesso!</div>}
 
           <form className="criar-evento-form" onSubmit={handleSubmit}>
 
@@ -197,6 +208,7 @@ const CriarEvento = () => {
                   style={{ display: 'none' }}
                 />
               </div>
+              {erroImagem && <span className="criar-evento-field-error">{erroImagem}</span>}
             </div>
 
             <div className="form-section">
@@ -257,7 +269,7 @@ const CriarEvento = () => {
                   />
                 </div>
                 <div className="form-col">
-                  <label className="form-sublabel">Termino (opcional)</label>
+                  <label className="form-sublabel">Término (opcional)</label>
                   <input
                     className="form-input"
                     type="datetime-local"
@@ -266,6 +278,7 @@ const CriarEvento = () => {
                     onChange={handleChange}
                     min={form.dataInicio}
                   />
+                  {erroDataFim && <span className="criar-evento-field-error">{erroDataFim}</span>}
                 </div>
               </div>
             </div>

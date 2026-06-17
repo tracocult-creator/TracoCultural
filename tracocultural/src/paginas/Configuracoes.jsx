@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
 import '../estilos/SettingsPage.css'
 import { useAuth } from '../contexts/AuthContext'
@@ -6,6 +7,7 @@ import api from '../servicos/api'
 
 const Configuracoes = () => {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [settings, setSettings] = useState({
     emailMarketing: user?.emailMarketing ?? false,
     localizacao: user?.localizacao ?? true,
@@ -13,6 +15,7 @@ const Configuracoes = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const [loading, setLoading] = useState(false)
+  const [erroDelete, setErroDelete] = useState('')
 
   const handleToggle = (key) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -20,18 +23,21 @@ const Configuracoes = () => {
 
   const handleDeleteAccount = async () => {
     if (confirmText !== 'EXCLUIR') return
+    setErroDelete('')
     setLoading(true)
     try {
       await api.delete(`/usuarios/${user.id}`)
       logout()
-    } catch {
-      alert('Erro ao excluir conta.')
+      navigate('/', { state: { mensagem: 'Sua conta foi encerrada.' } })
+    } catch (err) {
+      setErroDelete(err.response?.data?.message || 'Erro ao excluir conta. Tente novamente.')
       setLoading(false)
     }
   }
 
   const openDeleteModal = () => {
     setConfirmText('')
+    setErroDelete('')
     setShowDeleteModal(true)
   }
 
@@ -118,6 +124,7 @@ const Configuracoes = () => {
                 placeholder="Digite EXCLUIR"
                 className="delete-confirm-input"
               />
+              {erroDelete && <p className="delete-erro">{erroDelete}</p>}
               <div className="modal-actions">
                 <button
                   className="btn-confirm-delete"

@@ -4,6 +4,7 @@ import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../servicos/api'
+import { getComentarios, criarComentario, deletarComentario } from '../servicos/api'
 
 const categorias = [
   'Todas', 'Social', 'Música', 'Cultura & Arte', 'Profissional',
@@ -14,6 +15,16 @@ const categorias = [
 const formatarData = (inicio, fim) => {
   const d = new Date(inicio).toLocaleDateString('pt-BR')
   return fim ? `${d} → ${new Date(fim).toLocaleDateString('pt-BR')}` : d
+}
+
+const dataRelativa = (dataStr) => {
+  const diff = (new Date(dataStr) - Date.now()) / 1000
+  const fmt = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' })
+  const abs = Math.abs(diff)
+  if (abs < 60) return fmt.format(Math.round(diff), 'second')
+  if (abs < 3600) return fmt.format(Math.round(diff / 60), 'minute')
+  if (abs < 86400) return fmt.format(Math.round(diff / 3600), 'hour')
+  return fmt.format(Math.round(diff / 86400), 'day')
 }
 
 const Home = () => {
@@ -34,7 +45,9 @@ const Home = () => {
   const [editLoading, setEditLoading] = useState(false)
   const [favoritando, setFavoritando] = useState(null)
   const [comentarios, setComentarios] = useState([])
+  const [loadingComentarios, setLoadingComentarios] = useState(false)
   const [novoComentario, setNovoComentario] = useState('')
+  const [enviandoComentario, setEnviandoComentario] = useState(false)
 
   const buscarEventos = useCallback(() => {
     setLoading(true)
@@ -67,9 +80,11 @@ const Home = () => {
     setComentarios([])
     setNovoComentario('')
     setShowEventModal(true)
-    api.get(`/comentarios?eventoId=${evento.id}`)
+    setLoadingComentarios(true)
+    getComentarios(evento.id)
       .then(({ data }) => setComentarios(data))
       .catch(() => setComentarios([]))
+      .finally(() => setLoadingComentarios(false))
   }
 
   const handleFavoritar = async (eventoId) => {
@@ -125,14 +140,23 @@ const Home = () => {
   }
 
   const handleEnviarComentario = async () => {
-    if (!novoComentario.trim()) return
+    if (!novoComentario.trim() || !user) return
+    setEnviandoComentario(true)
     try {
-      const { data } = await api.post('/comentarios', {
-        eventoId: selectedEvent.eventoOriginal.id,
-        texto: novoComentario,
-      })
-      setComentarios((prev) => [...prev, data])
+      await criarComentario(selectedEvent.eventoOriginal.id, novoComentario)
       setNovoComentario('')
+      const { data } = await getComentarios(selectedEvent.eventoOriginal.id)
+      setComentarios(data)
+    } catch {} finally {
+      setEnviandoComentario(false)
+    }
+  }
+
+  const handleDeletarComentario = async (comentarioId) => {
+    try {
+      await deletarComentario(selectedEvent.eventoOriginal.id, comentarioId)
+      const { data } = await getComentarios(selectedEvent.eventoOriginal.id)
+      setComentarios(data)
     } catch {}
   }
 
@@ -331,24 +355,43 @@ const Home = () => {
                 {selectedEvent.descricao.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
               </div>
               <div className="comments-section">
-                <h3 className="comments-title">Avaliações e Comentários</h3>
-                <div className="comment-form">
-                  <textarea
-                    className="comment-input"
-                    value={novoComentario}
-                    onChange={(e) => setNovoComentario(e.target.value)}
-                    placeholder="Deixe seu comentário..."
-                    rows="3"
-                  />
-                  <button className="comment-submit" onClick={handleEnviarComentario}>Enviar</button>
-                </div>
+                <h3 className="comments-title">Comentários</h3>
+                {user && (
+                  <div className="comment-form">
+                    <textarea
+                      className="comment-input"
+                      value={novoComentario}
+                      onChange={(e) => setNovoComentario(e.target.value)}
+                      placeholder="Deixe seu comentário..."
+                      rows="3"
+                      disabled={enviandoComentario}
+                    />
+                    <button className="comment-submit" onClick={handleEnviarComentario} disabled={enviandoComentario}>
+                      {enviandoComentario ? 'Enviando...' : 'Comentar'}
+                    </button>
+                  </div>
+                )}
                 <div className="comments-list">
-                  {comentarios.map((c, i) => (
-                    <div key={c.id ?? i} className="comment-item">
-                      <div className="comment-author">{c.usuario?.nome || c.autor || 'Usuário'}</div>
-                      <div className="comment-text">{c.texto || c.conteudo}</div>
-                    </div>
-                  ))}
+                  {loadingComentarios ? (
+                    <p className="comments-empty">Carregando...</p>
+                  ) : comentarios.length === 0 ? (
+                    <p className="comments-empty">Nenhum comentário ainda. Seja o primeiro!</p>
+                  ) : (
+                    comentarios.map((c, i) => (
+                      <div key={c.id ?? i} className="comment-item">
+                        <div className="comment-header">
+                          <span className="comment-author">{c.usuario?.nome || c.autor || 'Usuário'}</span>
+                          <span className="comment-date">{c.criadoEm ? dataRelativa(c.criadoEm) : ''}</span>
+                          {user && c.idUsuarioFk === user.id && (
+                            <button className="comment-delete" onClick={() => handleDeletarComentario(c.id)} title="Excluir">
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          )}
+                        </div>
+                        <div className="comment-text">{c.texto || c.conteudo}</div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

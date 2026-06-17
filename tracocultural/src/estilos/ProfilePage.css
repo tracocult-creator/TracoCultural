@@ -242,6 +242,42 @@
   flex-shrink: 0;
 }
 
+.modal-sucesso-bar {
+  background: #1e7e47;
+  color: #fff;
+  text-align: center;
+  padding: .65rem 1rem;
+  font-size: .88rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.modal-abas {
+  display: flex;
+  border-bottom: 2px solid #ede8e7;
+  margin: 1rem 1.5rem 0;
+  gap: .25rem;
+}
+
+.modal-aba {
+  background: none;
+  border: none;
+  padding: .65rem 1rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color .2s;
+}
+
+.modal-aba--ativa {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
 .edit-modal h3 {
   margin: 0;
   padding: 1.5rem 1.5rem 0;

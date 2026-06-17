@@ -227,9 +227,16 @@ input:checked + .slider:before {
   padding: .8rem .9rem;
   border-radius: 10px;
   border: 2px solid #ddd;
-  margin-bottom: 1.5rem;
+  margin-bottom: .75rem;
   font-family: 'Poppins', sans-serif;
   box-sizing: border-box;
+}
+
+.delete-erro {
+  color: #c0392b;
+  font-size: .82rem;
+  margin: 0 0 1rem;
+  font-weight: 500;
 }
 
 .delete-modal h3 {

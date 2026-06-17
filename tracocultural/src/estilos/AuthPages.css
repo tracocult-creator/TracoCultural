@@ -157,6 +157,16 @@
   border: 1px solid #c3e6cb;
   font-weight: 600;
 }
+.success-message {
+  background: #f0faf4;
+  color: #1e7e47;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: .86rem;
+  text-align: center;
+  border: 1px solid #c3e6cb;
+  font-weight: 600;
+}
 
 /* Botão submit — gradiente + brilho no hover */
 .btn-submit {

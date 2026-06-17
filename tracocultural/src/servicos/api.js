@@ -10,17 +10,21 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/logar'
+// navigate é injetado pelo hook useAxiosInterceptor (ver App.jsx)
+export const setupInterceptor401 = (navigate) => {
+  const id = api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        navigate('/logar', { replace: true })
+      }
+      return Promise.reject(error)
     }
-    return Promise.reject(error)
-  }
-)
+  )
+  return () => api.interceptors.response.eject(id)
+}
 
 export const loginUsuario = (email, senha) =>
   api.post('/auth/login', { email, senha })  // ← era /usuarios/auth/login
@@ -42,5 +46,14 @@ export const getEventos = (params) =>
 
 export const getEventoPorId = (id) =>
   api.get(`/eventos/${id}`)
+
+export const getComentarios = (eventoId) =>
+  api.get(`/eventos/${eventoId}/comentarios`)
+
+export const criarComentario = (eventoId, texto) =>
+  api.post(`/eventos/${eventoId}/comentarios`, { texto })
+
+export const deletarComentario = (eventoId, comentarioId) =>
+  api.delete(`/eventos/${eventoId}/comentarios/${comentarioId}`)
 
 export default api
