@@ -117,6 +117,21 @@
 .form-group input.error  { border-color: #e74c3c; }
 .form-group input:disabled { background: #f5f5f5; opacity: .7; cursor: not-allowed; }
 
+.toggle-senha {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  opacity: .6;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+  transition: var(--t);
+}
+.toggle-senha:hover { opacity: 1; }
+
 .field-error {
   color: #c0392b;
   font-size: .76rem;
@@ -131,6 +146,16 @@
   text-align: center;
   border: 1px solid #fad7d7;
   font-weight: 500;
+}
+.success-message {
+  background: #f0faf4;
+  color: #1e7e47;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: .86rem;
+  text-align: center;
+  border: 1px solid #c3e6cb;
+  font-weight: 600;
 }
 
 /* Botão submit — gradiente + brilho no hover */

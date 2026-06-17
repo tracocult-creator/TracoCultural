@@ -10,8 +10,10 @@ const Cadastrar = () => {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
   const [erros, setErros] = useState({})
   const [loading, setLoading] = useState(false)
+  const [sucesso, setSucesso] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuth()
 
@@ -19,7 +21,8 @@ const Cadastrar = () => {
     const novosErros = {}
     if (!nome.trim()) novosErros.nome = 'Nome é obrigatório.'
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) novosErros.email = 'Email inválido.'
-    if (senha.length < 6) novosErros.senha = 'Senha deve ter no mínimo 6 caracteres.'
+    if (senha.length < 8) novosErros.senha = 'Senha deve ter no mínimo 8 caracteres.'
+    if (senha !== confirmarSenha) novosErros.confirmarSenha = 'As senhas não coincidem.'
     return novosErros
   }
 
@@ -30,22 +33,20 @@ const Cadastrar = () => {
     setErros({})
     setLoading(true)
     try {
-      console.log('Register payload:', { nome, email, senha })
       const { data } = await cadastrarUsuario({ nome, email, senha })
-      console.log('Register success:', data)
       login(data)
-      navigate('/home')
+      setSucesso(true)
+      setTimeout(() => navigate('/home'), 1500)
     } catch (err) {
-      console.error('Register error:', err.response?.status, err.response?.data, err.request, err.message)
       const status = err.response?.status
       const msg = status === 409
         ? 'Este email já está cadastrado.'
         : err.response?.data?.message || 'Erro ao criar conta. Tente novamente.'
       setErros({ geral: msg })
     } finally {
-     setLoading(false)
+      setLoading(false)
     }
- }
+  }
 
   return (
     <div className="auth-page">
@@ -78,11 +79,20 @@ const Cadastrar = () => {
               <label>Senha</label>
               <div className="input-wrapper">
                 <i className="bi bi-lock input-icon"></i>
-                <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" className={erros.senha ? 'error' : ''} />
+                <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 8 caracteres" className={erros.senha ? 'error' : ''} />
               </div>
               {erros.senha && <span className="field-error">{erros.senha}</span>}
             </div>
-            <button type="submit" className="btn-submit" disabled={loading}>
+            <div className="form-group">
+              <label>Confirmar senha</label>
+              <div className="input-wrapper">
+                <i className="bi bi-lock-fill input-icon"></i>
+                <input type="password" value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} placeholder="Repita a senha" className={erros.confirmarSenha ? 'error' : ''} />
+              </div>
+              {erros.confirmarSenha && <span className="field-error">{erros.confirmarSenha}</span>}
+            </div>
+            {sucesso && <div className="success-message">Bem-vindo ao TracoCultural!</div>}
+            <button type="submit" className="btn-submit" disabled={loading || sucesso}>
               {loading ? 'Cadastrando...' : 'Criar conta'}
             </button>
           </form>

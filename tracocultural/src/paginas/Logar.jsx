@@ -8,21 +8,35 @@ import logo from '../assets/TRAÇO.png'
 const Logar = () => {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const [erro, setErro] = useState('')
+  const [erros, setErros] = useState({})
   const [loading, setLoading] = useState(false)
+  const [mostrarSenha, setMostrarSenha] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuth()
 
+  const validar = () => {
+    const novosErros = {}
+    if (!email.trim()) novosErros.email = 'Email é obrigatório.'
+    if (!senha) novosErros.senha = 'Senha é obrigatória.'
+    return novosErros
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setErro('')
+    const novosErros = validar()
+    if (Object.keys(novosErros).length > 0) { setErros(novosErros); return }
+    setErros({})
     setLoading(true)
     try {
       const { data } = await loginUsuario(email, senha)
       login(data)
       navigate('/home')
     } catch (err) {
-      setErro(err.response?.data?.message || 'Email ou senha incorretos.')
+      const status = err.response?.status
+      const msg = status === 429
+        ? 'Muitas tentativas de login. Aguarde alguns minutos.'
+        : err.response?.data?.message || 'Email ou senha incorretos.'
+      setErros({ geral: msg })
     } finally {
       setLoading(false)
     }
@@ -38,7 +52,7 @@ const Logar = () => {
             <p>Acesse sua conta Traço Cultural</p>
           </div>
           <form onSubmit={handleSubmit} className="auth-form">
-            {erro && <div className="error-message">{erro}</div>}
+            {erros.geral && <div className="error-message">{erros.geral}</div>}
             <div className="form-group">
               <label>Email</label>
               <div className="input-wrapper">
@@ -48,24 +62,34 @@ const Logar = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  required
+                  className={erros.email ? 'error' : ''}
                   disabled={loading}
                 />
               </div>
+              {erros.email && <span className="field-error">{erros.email}</span>}
             </div>
             <div className="form-group">
               <label>Senha</label>
               <div className="input-wrapper">
                 <i className="bi bi-lock input-icon"></i>
                 <input
-                  type="password"
+                  type={mostrarSenha ? 'text' : 'password'}
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
-                  required
+                  className={erros.senha ? 'error' : ''}
                   disabled={loading}
                 />
+                <button
+                  type="button"
+                  className="toggle-senha"
+                  onClick={() => setMostrarSenha((v) => !v)}
+                  tabIndex={-1}
+                >
+                  <i className={`bi bi-${mostrarSenha ? 'eye-slash' : 'eye'}`}></i>
+                </button>
               </div>
+              {erros.senha && <span className="field-error">{erros.senha}</span>}
             </div>
             <button type="submit" className="btn-submit" disabled={loading}>
               {loading ? 'Entrando...' : 'Entrar'}

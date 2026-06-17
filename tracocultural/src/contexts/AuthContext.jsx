@@ -9,10 +9,19 @@ export const AuthProvider = ({ children }) => {
   })
 
   const login = (userData) => {
-    setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
-    if (userData.token) {
-      localStorage.setItem('token', userData.token)
+    const token = userData.token || userData.accessToken || userData.access_token || userData.jwt
+    if (token) {
+      localStorage.setItem('token', token)
+      const userWithoutToken = { ...userData }
+      delete userWithoutToken.token
+      delete userWithoutToken.accessToken
+      delete userWithoutToken.access_token
+      delete userWithoutToken.jwt
+      setUser(userWithoutToken)
+      localStorage.setItem('user', JSON.stringify(userWithoutToken))
+    } else {
+      setUser(userData)
+      localStorage.setItem('user', JSON.stringify(userData))
     }
   }
 
