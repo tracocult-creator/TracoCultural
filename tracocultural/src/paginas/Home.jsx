@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
 import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
@@ -29,6 +30,7 @@ const dataRelativa = (dataStr) => {
 
 const Home = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const [eventos, setEventos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -239,7 +241,7 @@ const Home = () => {
                 <p className="event-date"><i className="bi bi-calendar3"></i> {formatarData(evento.dataInicio, evento.dataFim)}</p>
                 <p className="event-location"><i className="bi bi-geo-alt"></i> {evento.cidade}</p>
                 <div className="event-actions">
-                  <button className="btn-ver-mais" onClick={() => handleVerMais(evento)}>Ver mais</button>
+                  <button className="btn-ver-mais" onClick={() => navigate(`/eventos/${evento.id}`)}>Ver mais</button>
                   <button
                     className="btn-favoritar"
                     onClick={() => handleFavoritar(evento.id)}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
 import '../estilos/SettingsPage.css'
 import { useAuth } from '../contexts/AuthContext'
-import api from '../servicos/api'
+import { deletarUsuario } from '../servicos/api'
 
 const Configuracoes = () => {
   const { user, logout } = useAuth()
@@ -26,7 +26,7 @@ const Configuracoes = () => {
     setErroDelete('')
     setLoading(true)
     try {
-      await api.delete(`/usuarios/${user.id}`)
+      await deletarUsuario(user.id)
       logout()
       navigate('/', { state: { mensagem: 'Sua conta foi encerrada.' } })
     } catch (err) {

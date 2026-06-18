@@ -50,7 +50,7 @@ const Perfil = () => {
     setProfile(base)
     setEditProfile(base)
 
-    api.get('/eventos/meus')
+    api.get(`/eventos/meus`)
       .then(({ data }) => setUserEvents(data))
       .catch(() => setUserEvents([]))
   }, [user])
@@ -69,7 +69,13 @@ const Perfil = () => {
     setErro('')
     setLoading(true)
     try {
-      const { data } = await api.put(`/usuarios/${profile.id}`, editProfile)
+      const { data } = await api.put(`/usuarios/${profile.id}`, {
+        nome: editProfile.nome,
+        email: editProfile.email,
+        icone: editProfile.icone,
+        corFundo: editProfile.corFundo,
+        estado: editProfile.estado,
+      })
       setProfile(data)
       login(data)
       mostrarSucesso()

@@ -10,50 +10,47 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// navigate é injetado pelo hook useAxiosInterceptor (ver App.jsx)
-export const setupInterceptor401 = (navigate) => {
-  const id = api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (error.response?.status === 401) {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        navigate('/logar', { replace: true })
-      }
-      return Promise.reject(error)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.location.href = '/logar'
     }
-  )
-  return () => api.interceptors.response.eject(id)
-}
+    return Promise.reject(error)
+  }
+)
 
+// AUTH
 export const loginUsuario = (email, senha) =>
-  api.post('/auth/login', { email, senha })  // ← era /usuarios/auth/login
+  api.post('/auth/login', { email, senha })
 
 export const cadastrarUsuario = (dados) =>
   api.post('/auth/register', dados)
 
-export const getFavoritos = () =>
-  api.get('/favoritos')
+// USUARIOS
+export const getUsuario = (id) => api.get(`/usuarios/${id}`)
+export const atualizarUsuario = (id, dados) => api.put(`/usuarios/${id}`, dados)
+export const deletarUsuario = (id) => api.delete(`/usuarios/${id}`)
 
-export const removerFavorito = (eventoId) =>
-  api.delete(`/favoritos/${eventoId}`)
+// EVENTOS
+export const getEventos = (params) => api.get('/eventos', { params })
+export const getEventoPorId = (id) => api.get(`/eventos/${id}`)
+export const criarEvento = (payload) => api.post('/eventos', payload)
+export const getEventosDoUsuario = (idUsuario) => api.get('/eventos', { params: { idUsuario } })
 
-export const adicionarFavorito = (eventoId) =>
-  api.post('/favoritos', { idEventoFk: eventoId })  // ← backend espera idEventoFk
-
-export const getEventos = (params) =>
-  api.get('/eventos', { params })  // ← adicionado para uso no Home.jsx
-
-export const getEventoPorId = (id) =>
-  api.get(`/eventos/${id}`)
-
+// COMENTÁRIOS
 export const getComentarios = (eventoId) =>
   api.get(`/eventos/${eventoId}/comentarios`)
-
 export const criarComentario = (eventoId, texto) =>
   api.post(`/eventos/${eventoId}/comentarios`, { texto })
-
 export const deletarComentario = (eventoId, comentarioId) =>
   api.delete(`/eventos/${eventoId}/comentarios/${comentarioId}`)
+
+// FAVORITOS
+export const getFavoritos = () => api.get('/favoritos')
+export const adicionarFavorito = (eventoId) => api.post('/favoritos', { idEventoFk: eventoId })
+export const removerFavorito = (eventoId) => api.delete(`/favoritos/${eventoId}`)
 
 export default api

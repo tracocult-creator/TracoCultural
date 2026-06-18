@@ -11,6 +11,7 @@ import Favoritos from './paginas/Favoritos'
 import Perfil from './paginas/Perfil'
 import Configuracoes from './paginas/Configuracoes'
 import CriarEvento from './paginas/CriarEvento'
+import EventoDetalhe from './paginas/EventoDetalhe'
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth()
@@ -28,6 +29,7 @@ function AppRoutes() {
       <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
       <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />
       <Route path="/criar-evento" element={<PrivateRoute><CriarEvento /></PrivateRoute>} />
+      <Route path="/eventos/:id" element={<EventoDetalhe />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

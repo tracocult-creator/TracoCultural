@@ -74,7 +74,7 @@ const Favoritos = () => {
                   {data && <p className="favorite-date"><i className="bi bi-calendar3"></i> {data}</p>}
                   <p className="favorite-location"><i className="bi bi-geo-alt"></i> {local}</p>
                   <div className="favorite-actions">
-                    <button className="btn-ver-mais">Ver mais</button>
+                    <button className="btn-ver-mais" onClick={() => navigate(`/eventos/${fav.evento.id}`)}>Ver mais</button>
                     <button className="btn-remover" onClick={() => removerFavorito(fav.evento.id)}>
                       <i className="bi bi-trash"></i>
                     </button>
