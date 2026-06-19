@@ -233,9 +233,9 @@ const CriarEvento = () => {
                 onChange={handleChange}
                 placeholder="Descreva o evento: programacao, atracoes, informacoes de acesso, etc."
                 rows={5}
-                maxLength={255}
+                maxLength={3000}
               />
-              <small className="form-hint">{form.descricao.length}/255 caracteres</small>
+              <small className="form-hint">{form.descricao.length}/3000 caracteres</small>
             </div>
 
             <div className="form-section">

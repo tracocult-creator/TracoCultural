@@ -4,7 +4,7 @@
 
 .criar-evento-page {
   min-height: 100vh;
-  background: var(--bg-pattern);
+  background: --bg-gradient linear-gradient(135deg, #3C2321 0%, #8E5E56 50%, #A67B72 100%);
   color: #f0e6e0;
 }
 
@@ -121,7 +121,7 @@
 }
 
 .criar-evento-header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .criar-evento-header h1 {
