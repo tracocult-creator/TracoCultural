@@ -7,15 +7,15 @@ import '../estilos/CriarEvento.css'
 
 const CATEGORIAS = [
   { id: 1,  nome: 'Social' },
-  { id: 2,  nome: 'Musica' },
+  { id: 2,  nome: 'Música' },
   { id: 3,  nome: 'Cultura & Arte' },
   { id: 4,  nome: 'Profissional' },
-  { id: 5,  nome: 'Educacao' },
+  { id: 5,  nome: 'Educação' },
   { id: 6,  nome: 'Tecnologia' },
   { id: 7,  nome: 'Bem-Estar' },
   { id: 8,  nome: 'Esporte' },
   { id: 9,  nome: 'Gastronomia' },
-  { id: 10, nome: 'Comercio' },
+  { id: 10, nome: 'Comércio' },
   { id: 11, nome: 'Kids' },
   { id: 12, nome: 'Religioso' },
   { id: 13, nome: 'Comunidade' },
@@ -80,12 +80,10 @@ const CriarEvento = () => {
 
     setLoading(true)
     try {
-      // Converte imagem para base64 se existir
       let cardImageBase64 = null
       if (imagem) {
         cardImageBase64 = await new Promise((resolve) => {
           const reader = new FileReader()
-          // Jackson maps a raw Base64 JSON string to byte[]; keep the data URL prefix out.
           reader.onload = () => resolve(reader.result.split(',')[1])
           reader.readAsDataURL(imagem)
         })
@@ -120,7 +118,8 @@ const CriarEvento = () => {
       <div className="criar-evento-layout">
 
         {/* Preview */}
-        <div className="criar-evento-preview">
+        <aside className="criar-evento-preview">
+          <p className="preview-eyebrow">Pré-visualização</p>
           <div className="preview-card">
             <div
               className="preview-banner"
@@ -129,7 +128,7 @@ const CriarEvento = () => {
               {!imagemPreview && (
                 <div className="preview-banner-placeholder">
                   <i className="bi bi-image"></i>
-                  <span>Preview do banner</span>
+                  <span>Banner do evento</span>
                 </div>
               )}
               {form.categoriaId && (
@@ -143,8 +142,8 @@ const CriarEvento = () => {
               {form.dataInicio && (
                 <p className="preview-info">
                   <i className="bi bi-calendar3"></i>{' '}
-                  {new Date(form.dataInicio).toLocaleDateString('pt-BR')}
-                  {form.dataFim && ` -> ${new Date(form.dataFim).toLocaleDateString('pt-BR')}`}
+                  {new Date(form.dataInicio).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  {form.dataFim && ` → ${new Date(form.dataFim).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`}
                 </p>
               )}
               {form.cidade && (
@@ -154,26 +153,26 @@ const CriarEvento = () => {
               )}
               {form.descricao && (
                 <p className="preview-descricao">
-                  {form.descricao.slice(0, 120)}{form.descricao.length > 120 ? '...' : ''}
+                  {form.descricao.slice(0, 100)}{form.descricao.length > 100 ? '…' : ''}
                 </p>
               )}
             </div>
           </div>
-          <p className="preview-label">Pre-visualizacao do card</p>
-        </div>
+        </aside>
 
-        {/* Formulario */}
-        <div className="criar-evento-form-wrapper">
+        {/* Formulário */}
+        <main className="criar-evento-form-wrapper">
           <div className="criar-evento-header">
             <h1>Criar Evento</h1>
-            <p>Compartilhe sua experiencia cultural com a comunidade</p>
+            <p>Compartilhe sua experiência cultural com a comunidade</p>
           </div>
 
-          {erro && <div className="criar-evento-erro">{erro}</div>}
-          {toast && <div className="criar-evento-toast">Evento publicado com sucesso!</div>}
+          {erro && <div className="criar-evento-erro"><i className="bi bi-exclamation-circle"></i> {erro}</div>}
+          {toast && <div className="criar-evento-toast"><i className="bi bi-check-circle-fill"></i> Evento publicado com sucesso!</div>}
 
           <form className="criar-evento-form" onSubmit={handleSubmit}>
 
+            {/* Banner */}
             <div className="form-section">
               <label className="form-label">Banner do Evento</label>
               <div
@@ -196,8 +195,8 @@ const CriarEvento = () => {
                 ) : (
                   <div className="upload-placeholder">
                     <i className="bi bi-cloud-arrow-up"></i>
-                    <span>Arraste uma imagem ou <strong>clique para selecionar</strong></span>
-                    <small>JPG, PNG ou WEBP - Recomendado 1200x600px</small>
+                    <span>Arraste ou <strong>clique para selecionar</strong></span>
+                    <small>JPG, PNG ou WEBP · máx. 2 MB · recomendado 1200×600 px</small>
                   </div>
                 )}
                 <input
@@ -208,9 +207,10 @@ const CriarEvento = () => {
                   style={{ display: 'none' }}
                 />
               </div>
-              {erroImagem && <span className="criar-evento-field-error">{erroImagem}</span>}
+              {erroImagem && <span className="form-field-error">{erroImagem}</span>}
             </div>
 
+            {/* Nome */}
             <div className="form-section">
               <label className="form-label">Nome do Evento <span className="obrigatorio">*</span></label>
               <input
@@ -218,26 +218,30 @@ const CriarEvento = () => {
                 name="nome"
                 value={form.nome}
                 onChange={handleChange}
-                placeholder="Ex: Festival de Jazz de Sao Paulo"
+                placeholder="Ex: Festival de Jazz de São Paulo"
                 maxLength={100}
                 required
               />
             </div>
 
+            {/* Descrição */}
             <div className="form-section">
-              <label className="form-label">Descricao</label>
+              <div className="form-label-row">
+                <label className="form-label">Descrição</label>
+                <small className="form-hint">{form.descricao.length}/3000</small>
+              </div>
               <textarea
                 className="form-textarea"
                 name="descricao"
                 value={form.descricao}
                 onChange={handleChange}
-                placeholder="Descreva o evento: programacao, atracoes, informacoes de acesso, etc."
+                placeholder="Programação, atrações, informações de acesso…"
                 rows={5}
                 maxLength={3000}
               />
-              <small className="form-hint">{form.descricao.length}/3000 caracteres</small>
             </div>
 
+            {/* Categoria */}
             <div className="form-section">
               <label className="form-label">Categoria <span className="obrigatorio">*</span></label>
               <div className="categoria-grid">
@@ -254,11 +258,12 @@ const CriarEvento = () => {
               </div>
             </div>
 
+            {/* Datas */}
             <div className="form-section">
-              <label className="form-label">Data e Horario <span className="obrigatorio">*</span></label>
+              <label className="form-label">Data e Horário <span className="obrigatorio">*</span></label>
               <div className="form-row">
                 <div className="form-col">
-                  <label className="form-sublabel">Inicio</label>
+                  <label className="form-sublabel">Início</label>
                   <input
                     className="form-input"
                     type="datetime-local"
@@ -269,7 +274,7 @@ const CriarEvento = () => {
                   />
                 </div>
                 <div className="form-col">
-                  <label className="form-sublabel">Término (opcional)</label>
+                  <label className="form-sublabel">Término <span className="form-optional">(opcional)</span></label>
                   <input
                     className="form-input"
                     type="datetime-local"
@@ -278,11 +283,12 @@ const CriarEvento = () => {
                     onChange={handleChange}
                     min={form.dataInicio}
                   />
-                  {erroDataFim && <span className="criar-evento-field-error">{erroDataFim}</span>}
+                  {erroDataFim && <span className="form-field-error">{erroDataFim}</span>}
                 </div>
               </div>
             </div>
 
+            {/* Cidade */}
             <div className="form-section">
               <label className="form-label">Cidade / Local <span className="obrigatorio">*</span></label>
               <input
@@ -290,14 +296,17 @@ const CriarEvento = () => {
                 name="cidade"
                 value={form.cidade}
                 onChange={handleChange}
-                placeholder="Ex: Sao Paulo, SP"
+                placeholder="Ex: São Paulo, SP"
                 maxLength={45}
                 required
               />
             </div>
 
+            {/* Link */}
             <div className="form-section">
-              <label className="form-label">Link Oficial do Evento <span className="form-optional">(opcional)</span></label>
+              <label className="form-label">
+                Link Oficial <span className="form-optional">(opcional)</span>
+              </label>
               <input
                 className="form-input"
                 type="url"
@@ -319,14 +328,14 @@ const CriarEvento = () => {
               </button>
               <button type="submit" className="btn-publicar" disabled={loading}>
                 {loading
-                  ? <><i className="bi bi-arrow-repeat spin"></i> Publicando...</>
-                  : <><i className="bi bi-send"></i> Publicar Evento</>
+                  ? <><i className="bi bi-arrow-repeat spin"></i> Publicando…</>
+                  : <><i className="bi bi-send-fill"></i> Publicar evento</>
                 }
               </button>
             </div>
 
           </form>
-        </div>
+        </main>
       </div>
     </div>
   )
