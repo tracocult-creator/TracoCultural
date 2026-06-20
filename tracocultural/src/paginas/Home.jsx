@@ -5,28 +5,30 @@ import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../servicos/api'
-import { getComentarios, criarComentario, deletarComentario } from '../servicos/api'
 
-const categorias = [
+const CATEGORIAS = [
   'Todas', 'Social', 'Música', 'Cultura & Arte', 'Profissional',
   'Educação', 'Tecnologia', 'Bem-Estar', 'Esporte', 'Gastronomia',
   'Comércio', 'Kids', 'Religioso', 'Comunidade', 'Geek', 'Viagem',
 ]
 
 const formatarData = (inicio, fim) => {
-  const d = new Date(inicio).toLocaleDateString('pt-BR')
-  return fim ? `${d} → ${new Date(fim).toLocaleDateString('pt-BR')}` : d
+  const opts = { day: '2-digit', month: 'short', year: 'numeric' }
+  const d = new Date(inicio).toLocaleDateString('pt-BR', opts)
+  return fim ? `${d} → ${new Date(fim).toLocaleDateString('pt-BR', opts)}` : d
 }
 
-const dataRelativa = (dataStr) => {
-  const diff = (new Date(dataStr) - Date.now()) / 1000
-  const fmt = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' })
-  const abs = Math.abs(diff)
-  if (abs < 60) return fmt.format(Math.round(diff), 'second')
-  if (abs < 3600) return fmt.format(Math.round(diff / 60), 'minute')
-  if (abs < 86400) return fmt.format(Math.round(diff / 3600), 'hour')
-  return fmt.format(Math.round(diff / 86400), 'day')
-}
+/* Skeleton cards durante o loading */
+const SkeletonCard = () => (
+  <div className="event-card event-card--skeleton">
+    <div className="skeleton-image" />
+    <div className="event-content" style={{ gap: '0.5rem' }}>
+      <div className="skeleton-line skeleton-line--title" />
+      <div className="skeleton-line skeleton-line--short" />
+      <div className="skeleton-line skeleton-line--shorter" />
+    </div>
+  </div>
+)
 
 const Home = () => {
   const { user } = useAuth()
@@ -40,16 +42,10 @@ const Home = () => {
   const [dateFilter, setDateFilter] = useState('')
 
   const [showFilterModal, setShowFilterModal] = useState(false)
-  const [showEventModal, setShowEventModal] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editForm, setEditForm] = useState(null)
   const [editLoading, setEditLoading] = useState(false)
   const [favoritando, setFavoritando] = useState(null)
-  const [comentarios, setComentarios] = useState([])
-  const [loadingComentarios, setLoadingComentarios] = useState(false)
-  const [novoComentario, setNovoComentario] = useState('')
-  const [enviandoComentario, setEnviandoComentario] = useState(false)
 
   const buscarEventos = useCallback(() => {
     setLoading(true)
@@ -66,47 +62,14 @@ const Home = () => {
     buscarEventos()
   }, [buscarEventos])
 
-  const isOwner = (evento) =>
-    user && evento.idUsuarioFk && user.id === evento.idUsuarioFk
-
-  const handleVerMais = (evento) => {
-    setSelectedEvent({
-      image: evento.cardImage ? `data:image/jpeg;base64,${evento.cardImage}` : null,
-      title: evento.nome,
-      date: formatarData(evento.dataInicio, evento.dataFim),
-      location: evento.cidade,
-      descricao: evento.descricao || 'Sem descrição disponível.',
-      linkexterno: evento.linkExterno,
-      eventoOriginal: evento,
-    })
-    setComentarios([])
-    setNovoComentario('')
-    setShowEventModal(true)
-    setLoadingComentarios(true)
-    getComentarios(evento.id)
-      .then(({ data }) => setComentarios(data))
-      .catch(() => setComentarios([]))
-      .finally(() => setLoadingComentarios(false))
-  }
-
-  const handleFavoritar = async (eventoId) => {
+  const handleFavoritar = async (e, eventoId) => {
+    e.stopPropagation()
     if (!user) return
     setFavoritando(eventoId)
     try {
       await api.post('/favoritos', { idEventoFk: eventoId })
     } catch {}
     finally { setFavoritando(null) }
-  }
-
-  const handleDeletar = async (eventoId) => {
-    if (!window.confirm('Tem certeza que deseja deletar este evento?')) return
-    try {
-      await api.delete(`/eventos/${eventoId}`)
-      setEventos((prev) => prev.filter((e) => e.id !== eventoId))
-      setShowEventModal(false)
-    } catch {
-      alert('Erro ao deletar evento.')
-    }
   }
 
   const handleAbrirEditar = (evento) => {
@@ -133,33 +96,11 @@ const Home = () => {
       const { data } = await api.put(`/eventos/${editForm.id}`, payload)
       setEventos((prev) => prev.map((e) => (e.id === editForm.id ? { ...e, ...data } : e)))
       setShowEditModal(false)
-      setShowEventModal(false)
     } catch {
       alert('Erro ao editar evento.')
     } finally {
       setEditLoading(false)
     }
-  }
-
-  const handleEnviarComentario = async () => {
-    if (!novoComentario.trim() || !user) return
-    setEnviandoComentario(true)
-    try {
-      await criarComentario(selectedEvent.eventoOriginal.id, novoComentario)
-      setNovoComentario('')
-      const { data } = await getComentarios(selectedEvent.eventoOriginal.id)
-      setComentarios(data)
-    } catch {} finally {
-      setEnviandoComentario(false)
-    }
-  }
-
-  const handleDeletarComentario = async (comentarioId) => {
-    try {
-      await deletarComentario(selectedEvent.eventoOriginal.id, comentarioId)
-      const { data } = await getComentarios(selectedEvent.eventoOriginal.id)
-      setComentarios(data)
-    } catch {}
   }
 
   const eventosFiltrados = eventos.filter((e) => {
@@ -175,6 +116,22 @@ const Home = () => {
     <div className="home-page">
       <Navbar />
 
+      {/* ── Hero ── */}
+      <section className="home-hero">
+        <div className="home-hero-inner">
+          <span className="home-hero-eyebrow">
+            <i className="bi bi-stars"></i> Agenda cultural
+          </span>
+          <h1 className="home-hero-title">
+            Descubra o que<br /><em>acontece perto de você</em>
+          </h1>
+          <p className="home-hero-sub">
+            Eventos de música, arte, gastronomia e muito mais — salve favoritos e fique por dentro da cena cultural.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Search ── */}
       <section className="search-section">
         <div className="search-container">
           <div className="search-input-wrapper">
@@ -182,35 +139,69 @@ const Home = () => {
             <input
               type="text"
               className="search-input"
-              placeholder="Pesquisar eventos, artistas ou lugares"
+              placeholder="Pesquisar eventos, artistas ou lugares…"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
-      
+          <input
+            type="text"
+            className="location-input"
+            placeholder="Cidade…"
+            value={uf}
+            onChange={(e) => setUf(e.target.value)}
+          />
+          <button className="filter-button" onClick={() => setShowFilterModal(true)}>
+            <i className="bi bi-sliders"></i> Filtros
+          </button>
         </div>
       </section>
 
-      <section className="title-section">
-        <div>
-          <span className="page-eyebrow">Agenda cultural</span>
-          <h2 className="main-title">O que vamos fazer?</h2>
-          <p className="page-subtitle">Descubra eventos, salve favoritos e acompanhe experiências perto de você.</p>
+      {/* ── Category chips ── */}
+      <div className="category-strip-wrapper">
+        <div className="category-strip">
+          {CATEGORIAS.map((cat) => (
+            <button
+              key={cat}
+              className={`category-chip${category === cat ? ' category-chip--active' : ''}`}
+              onClick={() => setCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
-        <div className="home-summary">
-          <span>{eventosFiltrados.length}</span>
-          <small>eventos encontrados</small>
-        </div>
-      </section>
+      </div>
 
+      {/* ── Results header ── */}
+      <div className="results-header">
+        <h2 className="results-title">
+          {category === 'Todas' ? 'Todos os eventos' : category}
+        </h2>
+        {!loading && (
+          <span className="results-count">
+            <i className="bi bi-calendar3"></i>
+            {eventosFiltrados.length} {eventosFiltrados.length === 1 ? 'evento' : 'eventos'}
+          </span>
+        )}
+      </div>
+
+      {/* ── Grid ── */}
       <main className="events-grid">
         {loading ? (
-          <p style={{ gridColumn: '1/-1', textAlign: 'center' }}>Carregando eventos...</p>
+          Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
         ) : eventosFiltrados.length === 0 ? (
-          <p style={{ gridColumn: '1/-1', textAlign: 'center' }}>Nenhum evento encontrado.</p>
+          <div className="home-state-wrapper">
+            <i className="bi bi-calendar-x home-state-icon"></i>
+            <strong style={{ color: 'rgba(255,255,255,.7)' }}>Nenhum evento encontrado</strong>
+            <span>Tente ajustar os filtros ou pesquisar por outra cidade.</span>
+          </div>
         ) : (
           eventosFiltrados.map((evento) => (
-            <div key={evento.id} className="event-card">
+            <div
+              key={evento.id}
+              className="event-card"
+              onClick={() => navigate(`/eventos/${evento.id}`)}
+            >
               <div className="event-image-wrapper">
                 {evento.cardImage ? (
                   <img
@@ -223,22 +214,39 @@ const Home = () => {
                     <i className="bi bi-calendar-event"></i>
                   </div>
                 )}
+
                 {evento.categoria && (
                   <span className="event-category-badge">{evento.categoria.nome}</span>
                 )}
-              </div>
-              <div className="event-content">
-                <h3 className="event-title">{evento.nome}</h3>
-                <p className="event-date"><i className="bi bi-calendar3"></i> {formatarData(evento.dataInicio, evento.dataFim)}</p>
-                <p className="event-location"><i className="bi bi-geo-alt"></i> {evento.cidade}</p>
-                <div className="event-actions">
-                  <button className="btn-ver-mais" onClick={() => navigate(`/eventos/${evento.id}`)}>Ver mais</button>
+
+                {user && (
                   <button
-                    className="btn-favoritar"
-                    onClick={() => handleFavoritar(evento.id)}
+                    className="event-fav-btn"
+                    onClick={(e) => handleFavoritar(e, evento.id)}
                     disabled={favoritando === evento.id}
+                    title="Favoritar"
                   >
                     <i className="bi bi-heart"></i>
+                  </button>
+                )}
+              </div>
+
+              <div className="event-content">
+                <h3 className="event-title">{evento.nome}</h3>
+                <p className="event-date">
+                  <i className="bi bi-calendar3"></i>
+                  {formatarData(evento.dataInicio, evento.dataFim)}
+                </p>
+                <p className="event-location">
+                  <i className="bi bi-geo-alt"></i>
+                  {evento.cidade}
+                </p>
+                <div className="event-actions">
+                  <button
+                    className="btn-ver-mais"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/eventos/${evento.id}`) }}
+                  >
+                    Ver mais
                   </button>
                 </div>
               </div>
@@ -247,30 +255,32 @@ const Home = () => {
         )}
       </main>
 
-      {/* Modal de Filtros */}
+      {/* ── Modal de Filtros ── */}
       {showFilterModal && (
         <div className="modal-overlay" onClick={() => setShowFilterModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Filtros</h3>
             <div className="filter-group">
-              <label>Categoria:</label>
+              <label>Categoria</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Selecionar categoria">
-                {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
+                {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="filter-group">
-              <label>Data:</label>
+              <label>Data</label>
               <input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
             </div>
             <div className="modal-actions">
               <button onClick={() => setShowFilterModal(false)}>Aplicar</button>
-              <button onClick={() => { setCategory('Todas'); setUf(''); setDateFilter(''); setShowFilterModal(false) }}>Limpar</button>
+              <button onClick={() => { setCategory('Todas'); setUf(''); setDateFilter(''); setShowFilterModal(false) }}>
+                Limpar
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal de Edição */}
+      {/* ── Modal de Edição ── */}
       {showEditModal && editForm && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
           <div className="edit-evento-modal" onClick={(e) => e.stopPropagation()}>
@@ -298,95 +308,11 @@ const Home = () => {
             <input className="form-input" value={editForm.cidade} onChange={(e) => setEditForm({ ...editForm, cidade: e.target.value })} maxLength={45} />
 
             <label>Link Externo</label>
-            <input className="form-input" type="url" value={editForm.linkExterno} onChange={(e) => setEditForm({ ...editForm, linkExterno: e.target.value })} placeholder="https://..." />
+            <input className="form-input" type="url" value={editForm.linkExterno} onChange={(e) => setEditForm({ ...editForm, linkExterno: e.target.value })} placeholder="https://…" />
 
             <div className="modal-actions">
-              <button onClick={handleSalvarEdicao} disabled={editLoading}>{editLoading ? 'Salvando...' : 'Salvar'}</button>
+              <button onClick={handleSalvarEdicao} disabled={editLoading}>{editLoading ? 'Salvando…' : 'Salvar'}</button>
               <button onClick={() => setShowEditModal(false)} disabled={editLoading}>Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Detalhes do Evento */}
-      {showEventModal && selectedEvent && (
-        <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
-          <div className="event-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowEventModal(false)}>×</button>
-            <div className="event-modal-header">
-              {selectedEvent.image && (
-                <img src={selectedEvent.image} alt={selectedEvent.title} className="event-modal-image" />
-              )}
-              <div className="event-modal-info-section">
-                <h2 className="event-modal-title">{selectedEvent.title}</h2>
-                <p className="event-modal-info">📅 {selectedEvent.date} | 📍 {selectedEvent.location}</p>
-                <div className="event-modal-actions">
-                  {selectedEvent.linkexterno ? (
-                    <a href={selectedEvent.linkexterno} target="_blank" rel="noreferrer" className="btn-ingressos">INGRESSOS</a>
-                  ) : (
-                    <button className="btn-ingressos">INGRESSOS</button>
-                  )}
-                  <button className="btn-icon"><i className="bi bi-share"></i></button>
-                  <button className="btn-icon" onClick={() => handleFavoritar(selectedEvent.eventoOriginal?.id)}>
-                    <i className="bi bi-heart"></i>
-                  </button>
-                  {selectedEvent.eventoOriginal && isOwner(selectedEvent.eventoOriginal) && (
-                    <>
-                      <button className="btn-icon btn-editar" onClick={() => handleAbrirEditar(selectedEvent.eventoOriginal)}>
-                        <i className="bi bi-pencil"></i>
-                      </button>
-                      <button className="btn-icon btn-deletar" onClick={() => handleDeletar(selectedEvent.eventoOriginal.id)}>
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="event-modal-body">
-              <div className="event-modal-description">
-                {selectedEvent.descricao.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
-              </div>
-              <div className="comments-section">
-                <h3 className="comments-title">Comentários</h3>
-                {user && (
-                  <div className="comment-form">
-                    <textarea
-                      className="comment-input"
-                      value={novoComentario}
-                      onChange={(e) => setNovoComentario(e.target.value)}
-                      placeholder="Deixe seu comentário..."
-                      rows="3"
-                      disabled={enviandoComentario}
-                    />
-                    <button className="comment-submit" onClick={handleEnviarComentario} disabled={enviandoComentario}>
-                      {enviandoComentario ? 'Enviando...' : 'Comentar'}
-                    </button>
-                  </div>
-                )}
-                <div className="comments-list">
-                  {loadingComentarios ? (
-                    <p className="comments-empty">Carregando...</p>
-                  ) : comentarios.length === 0 ? (
-                    <p className="comments-empty">Nenhum comentário ainda. Seja o primeiro!</p>
-                  ) : (
-                    comentarios.map((c, i) => (
-                      <div key={c.id ?? i} className="comment-item">
-                        <div className="comment-header">
-                          <span className="comment-author">{c.usuario?.nome || c.autor || 'Usuário'}</span>
-                          <span className="comment-date">{c.criadoEm ? dataRelativa(c.criadoEm) : ''}</span>
-                          {user && c.idUsuarioFk === user.id && (
-                            <button className="comment-delete" onClick={() => handleDeletarComentario(c.id)} title="Excluir">
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          )}
-                        </div>
-                        <div className="comment-text">{c.texto || c.conteudo}</div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         </div>
