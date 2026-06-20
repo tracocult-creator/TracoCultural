@@ -8,6 +8,7 @@ import {
   criarComentario,
   deletarComentario,
 } from '../servicos/api'
+import '../estilos/EventoDetalhe.css'
 
 const formatarDataRelativa = (dataStr) => {
   const agora = new Date()
@@ -19,6 +20,13 @@ const formatarDataRelativa = (dataStr) => {
   if (diffH < 24) return `há ${diffH}h`
   return data.toLocaleDateString('pt-BR')
 }
+
+const getIniciais = (nome = '') =>
+  nome
+    .split(' ')
+    .slice(0, 2)
+    .map((n) => n[0]?.toUpperCase() || '')
+    .join('')
 
 const EventoDetalhe = () => {
   const { id } = useParams()
@@ -59,7 +67,7 @@ const EventoDetalhe = () => {
       setNovoComentario('')
       carregarComentarios()
     } catch (err) {
-      setErro(err.response?.data?.message || 'Erro ao comentar.')
+      setErro(err.response?.data?.message || 'Não foi possível enviar o comentário.')
     } finally {
       setEnviando(false)
     }
@@ -72,92 +80,191 @@ const EventoDetalhe = () => {
     } catch {}
   }
 
-  if (loadingEvento) return <><Navbar /><p style={{ padding: '2rem' }}>Carregando evento...</p></>
+  if (loadingEvento) {
+    return (
+      <div className="evento-detalhe-page">
+        <Navbar />
+        <div className="evento-detalhe-loading">
+          <i className="bi bi-hourglass-split"></i> Carregando evento…
+        </div>
+      </div>
+    )
+  }
+
   if (!evento) return null
 
-  return (
-    <div>
-      <Navbar />
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
+  const temImagem = Boolean(evento.cardImage)
 
-        {evento.cardImage && (
+  return (
+    <div className="evento-detalhe-page">
+      <Navbar />
+
+      {/* Hero */}
+      {temImagem && (
+        <div className="evento-hero">
           <img
             src={`data:image/jpeg;base64,${evento.cardImage}`}
             alt={evento.nome}
-            style={{ width: '100%', borderRadius: '12px', marginBottom: '1.5rem', maxHeight: '350px', objectFit: 'cover' }}
           />
-        )}
+          <div className="evento-hero-overlay" />
+          <button className="evento-back-btn" onClick={() => navigate(-1)}>
+            <i className="bi bi-arrow-left"></i> Voltar
+          </button>
+        </div>
+      )}
 
-        <h1 style={{ marginBottom: '0.5rem' }}>{evento.nome}</h1>
-        <p style={{ color: '#666' }}>
-          📅 {new Date(evento.dataInicio).toLocaleDateString('pt-BR')}
-          {evento.dataFim && ` → ${new Date(evento.dataFim).toLocaleDateString('pt-BR')}`}
-        </p>
-        <p style={{ color: '#666' }}>📍 {evento.cidade}</p>
-        {evento.categoria && <p style={{ color: '#888' }}>🏷 {evento.categoria.nome}</p>}
-        {evento.descricao && <p style={{ marginTop: '1rem', lineHeight: 1.6 }}>{evento.descricao}</p>}
-        {evento.linkExterno && (
-          <a href={evento.linkExterno} target="_blank" rel="noreferrer"
-            style={{ display: 'inline-block', marginTop: '1rem', color: '#8E5E56' }}>
-            🔗 Saiba mais
-          </a>
-        )}
+      <div className="evento-detalhe-container">
+        <div className={`evento-main-card${!temImagem ? ' evento-main-card--no-hero' : ''}`}>
 
-        <div style={{ marginTop: '2.5rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>Comentários ({comentarios.length})</h3>
+          {/* Botão voltar sem hero */}
+          {!temImagem && (
+            <button
+              className="evento-back-btn"
+              style={{ position: 'relative', top: 'unset', left: 'unset', marginBottom: '1rem' }}
+              onClick={() => navigate(-1)}
+            >
+              <i className="bi bi-arrow-left"></i> Voltar
+            </button>
+          )}
 
-          {user && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <textarea
-                value={novoComentario}
-                onChange={(e) => setNovoComentario(e.target.value)}
-                placeholder="Escreva um comentário..."
-                maxLength={500}
-                rows={3}
-                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                <small style={{ color: '#999' }}>{novoComentario.length}/500</small>
-                <button
-                  onClick={handleComentar}
-                  disabled={enviando || !novoComentario.trim()}
-                  style={{ padding: '0.5rem 1.2rem', background: '#8E5E56', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
-                >
-                  {enviando ? 'Enviando...' : 'Comentar'}
-                </button>
-              </div>
-              {erro && <p style={{ color: 'red', marginTop: '0.5rem' }}>{erro}</p>}
+          {/* Categoria */}
+          {evento.categoria && (
+            <span className="evento-categoria-badge">
+              <i className="bi bi-tag"></i>
+              {evento.categoria.nome}
+            </span>
+          )}
+
+          {/* Título */}
+          <h1 className="evento-titulo">{evento.nome}</h1>
+
+          {/* Meta info */}
+          <div className="evento-meta">
+            <span className="evento-meta-pill">
+              <i className="bi bi-calendar3"></i>
+              {new Date(evento.dataInicio).toLocaleDateString('pt-BR', {
+                day: '2-digit', month: 'long', year: 'numeric',
+              })}
+              {evento.dataFim &&
+                ` → ${new Date(evento.dataFim).toLocaleDateString('pt-BR', {
+                  day: '2-digit', month: 'long', year: 'numeric',
+                })}`}
+            </span>
+            <span className="evento-meta-pill">
+              <i className="bi bi-geo-alt"></i>
+              {evento.cidade}
+            </span>
+          </div>
+
+          {/* Descrição */}
+          {evento.descricao && (
+            <>
+              <div className="evento-divider" />
+              <p className="evento-descricao">{evento.descricao}</p>
+            </>
+          )}
+
+          {/* Link externo */}
+          {evento.linkExterno && (
+            <a
+              href={evento.linkExterno}
+              target="_blank"
+              rel="noreferrer"
+              className="evento-link-externo"
+            >
+              <i className="bi bi-box-arrow-up-right"></i> Saiba mais
+            </a>
+          )}
+
+          {/* ── Comentários ── */}
+          <div className="evento-divider" style={{ marginTop: '2rem' }} />
+
+          <div className="comentarios-section">
+            <div className="comentarios-header">
+              <h3 className="comentarios-titulo">Comentários</h3>
+              <span className="comentarios-count">{comentarios.length}</span>
             </div>
-          )}
 
-          {loadingComentarios ? (
-            <p style={{ color: '#999' }}>Carregando comentários...</p>
-          ) : comentarios.length === 0 ? (
-            <p style={{ color: '#999', fontStyle: 'italic' }}>Nenhum comentário ainda. Seja o primeiro!</p>
-          ) : (
-            comentarios.map((c) => (
-              <div key={c.id} style={{ padding: '1rem', background: '#f9f9f9', borderRadius: '8px', marginBottom: '0.8rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <strong>{c.nomeUsuario || c.usuario?.nome || 'Usuário'}</strong>
-                    <span style={{ color: '#999', fontSize: '0.8rem', marginLeft: '0.5rem' }}>
-                      {formatarDataRelativa(c.dataCriacao || c.criadoEm)}
-                    </span>
-                    <p style={{ margin: '0.4rem 0 0', lineHeight: 1.5 }}>{c.texto}</p>
-                  </div>
-                  {user && user.id === c.idUsuarioFk && (
-                    <button
-                      onClick={() => handleDeletarComentario(c.id)}
-                      style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', fontSize: '1rem' }}
-                      title="Remover comentário"
-                    >
-                      <i className="bi bi-trash"></i>
-                    </button>
-                  )}
+            {/* Formulário */}
+            {user ? (
+              <div className="comentario-form">
+                <textarea
+                  className="comentario-textarea"
+                  value={novoComentario}
+                  onChange={(e) => setNovoComentario(e.target.value)}
+                  placeholder="Compartilhe sua experiência sobre este evento…"
+                  maxLength={500}
+                  rows={3}
+                />
+                <div className="comentario-form-footer">
+                  <span className="comentario-char-count">
+                    {novoComentario.length}/500
+                  </span>
+                  <button
+                    className="comentario-submit-btn"
+                    onClick={handleComentar}
+                    disabled={enviando || !novoComentario.trim()}
+                  >
+                    <i className="bi bi-send"></i>
+                    {enviando ? 'Enviando…' : 'Publicar'}
+                  </button>
                 </div>
+                {erro && (
+                  <p className="comentario-erro">
+                    <i className="bi bi-exclamation-circle"></i> {erro}
+                  </p>
+                )}
               </div>
-            ))
-          )}
+            ) : (
+              <div className="comentario-login-prompt">
+                <i className="bi bi-lock"></i> Faça login para deixar um comentário.
+              </div>
+            )}
+
+            {/* Lista */}
+            {loadingComentarios ? (
+              <div className="comentarios-empty">
+                <i className="bi bi-hourglass-split"></i>
+                Carregando comentários…
+              </div>
+            ) : comentarios.length === 0 ? (
+              <div className="comentarios-empty">
+                <i className="bi bi-chat-dots"></i>
+                Nenhum comentário ainda — seja o primeiro!
+              </div>
+            ) : (
+              <div className="comentarios-lista">
+                {comentarios.map((c) => {
+                  const nomeAutor = c.nomeUsuario || c.usuario?.nome || 'Usuário'
+                  return (
+                    <div key={c.id} className="comentario-item">
+                      <div className="comentario-item-header">
+                        <div className="comentario-autor-info">
+                          <div className="comentario-avatar">
+                            {getIniciais(nomeAutor)}
+                          </div>
+                          <span className="comentario-nome">{nomeAutor}</span>
+                          <span className="comentario-data">
+                            {formatarDataRelativa(c.dataCriacao || c.criadoEm)}
+                          </span>
+                        </div>
+                        {user && user.id === c.idUsuarioFk && (
+                          <button
+                            className="comentario-deletar-btn"
+                            onClick={() => handleDeletarComentario(c.id)}
+                            title="Remover comentário"
+                          >
+                            <i className="bi bi-trash3"></i>
+                          </button>
+                        )}
+                      </div>
+                      <p className="comentario-texto">{c.texto}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

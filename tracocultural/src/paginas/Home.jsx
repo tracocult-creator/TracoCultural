@@ -187,16 +187,7 @@ const Home = () => {
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
-          <input
-            type="text"
-            className="location-select"
-            placeholder="Filtrar por cidade..."
-            value={uf}
-            onChange={(e) => setUf(e.target.value)}
-          />
-          <button className="filter-button" onClick={() => setShowFilterModal(true)}>
-            <i className="bi bi-sliders"></i> Filtros
-          </button>
+      
         </div>
       </section>
 
