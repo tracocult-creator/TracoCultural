@@ -5,7 +5,7 @@ import logo from '../assets/TRAÇO.png'
 
 const Navbar = () => {
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
 
   const handleLogout = () => {
     if (window.confirm('Tem certeza que deseja sair?')) {
@@ -35,6 +35,11 @@ const Navbar = () => {
         <button className="nav-button nav-button--criar" onClick={() => navigate('/criar-evento')}>
           <i className="bi bi-plus-circle"></i> Criar Evento
         </button>
+        {user?.isAdm && (
+          <button className="nav-button" style={{ color: '#d4a373', borderColor: 'rgba(212,163,115,.3)' }} onClick={() => navigate('/admin')}>
+            <i className="bi bi-shield-check"></i> Admin
+          </button>
+        )}
         <button className="nav-button" onClick={handleLogout}>
           <i className="bi bi-box-arrow-right"></i> Sair
         </button>

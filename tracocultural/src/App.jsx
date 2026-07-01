@@ -12,10 +12,18 @@ import Perfil from './paginas/Perfil'
 import Configuracoes from './paginas/Configuracoes'
 import CriarEvento from './paginas/CriarEvento'
 import EventoDetalhe from './paginas/EventoDetalhe'
+import Admin from './paginas/Admin'
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth()
   return user ? children : <Navigate to="/logar" replace />
+}
+
+const AdminRoute = ({ children }) => {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/logar" replace />
+  if (!user.isAdm) return <Navigate to="/home" replace />
+  return children
 }
 
 function AppRoutes() {
@@ -30,6 +38,7 @@ function AppRoutes() {
       <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />
       <Route path="/criar-evento" element={<PrivateRoute><CriarEvento /></PrivateRoute>} />
       <Route path="/eventos/:id" element={<EventoDetalhe />} />
+      <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
