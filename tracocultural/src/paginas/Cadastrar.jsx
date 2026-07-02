@@ -39,10 +39,15 @@ const Cadastrar = () => {
       setTimeout(() => navigate('/home'), 1500)
     } catch (err) {
       const status = err.response?.status
-      const msg = status === 409
-        ? 'Este email já está cadastrado.'
-        : err.response?.data?.message || 'Erro ao criar conta. Tente novamente.'
-      setErros({ geral: msg })
+      const msgBackend = err.response?.data?.message
+
+      if (status === 409) {
+        setErros({ email: 'Este email já está cadastrado.' })
+      } else if (status === 400 && msgBackend?.toLowerCase().includes('domínio')) {
+        setErros({ email: 'Esse domínio de email não existe. Confira se digitou corretamente.' })
+      } else {
+        setErros({ geral: msgBackend || 'Erro ao criar conta. Tente novamente.' })
+      }
     } finally {
       setLoading(false)
     }
