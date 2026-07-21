@@ -7,6 +7,7 @@ import WelcomePage from './componentes/WelcomePage'
 import Home from './paginas/Home'
 import Logar from './paginas/Logar'
 import Cadastrar from './paginas/Cadastrar'
+import VerificarCodigo from './paginas/VerificarCodigo'
 import Favoritos from './paginas/Favoritos'
 import Perfil from './paginas/Perfil'
 import Configuracoes from './paginas/Configuracoes'
@@ -32,6 +33,7 @@ function AppRoutes() {
       <Route path="/" element={<WelcomePage />} />
       <Route path="/logar" element={<Logar />} />
       <Route path="/cadastrar" element={<Cadastrar />} />
+      <Route path="/verificar-codigo" element={<VerificarCodigo />} />
       <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
       <Route path="/favoritos" element={<PrivateRoute><Favoritos /></PrivateRoute>} />
       <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
