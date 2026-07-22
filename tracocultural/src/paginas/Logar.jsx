@@ -90,6 +90,9 @@ const Logar = () => {
                 </button>
               </div>
               {erros.senha && <span className="field-error">{erros.senha}</span>}
+              <Link to="/esqueci-senha" className="auth-link" style={{ alignSelf: 'flex-end', fontSize: '.82rem' }}>
+                Esqueceu a senha?
+              </Link>
             </div>
             <button type="submit" className="btn-submit" disabled={loading}>
               {loading ? 'Entrando...' : 'Entrar'}

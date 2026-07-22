@@ -35,6 +35,12 @@ export const verificarCodigo = (email, codigo) =>
 export const reenviarCodigo = (email) =>
   api.post('/auth/reenviar-codigo', { email })
 
+export const esqueciSenha = (email) =>
+  api.post('/auth/esqueci-senha', { email })
+
+export const redefinirSenha = (email, codigo, novaSenha) =>
+  api.post('/auth/redefinir-senha', { email, codigo, novaSenha })
+
 // USUARIOS
 export const getUsuario = (id) => api.get(`/usuarios/${id}`)
 export const atualizarUsuario = (id, dados) => api.put(`/usuarios/${id}`, dados)
