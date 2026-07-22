@@ -18,6 +18,7 @@ const Cadastrar = () => {
   const navigate = useNavigate()
 
   const validar = () => {
+
     const novosErros = {}
 
     if (!nome.trim()) {
@@ -44,7 +45,9 @@ const Cadastrar = () => {
     return novosErros
   }
 
+
   const handleSubmit = async (e) => {
+
     e.preventDefault()
 
     const novosErros = validar()
@@ -68,6 +71,7 @@ const Cadastrar = () => {
       navigate('/verificar-codigo', { state: { email } })
 
     } catch (err) {
+
       const status = err.response?.status
       const msgBackend = err.response?.data?.message
 
@@ -87,14 +91,24 @@ const Cadastrar = () => {
           geral: msgBackend || 'Erro ao criar conta. Tente novamente.'
         })
       }
+
     } finally {
+
       setLoading(false)
+
     }
+
   }
 
+
   return (
+
     <div className="auth-page">
+
+
       <div className="auth-container">
+
+
         <div className="auth-card">
 
           <img
@@ -104,8 +118,11 @@ const Cadastrar = () => {
           />
 
           <div className="auth-header">
+
             <h2>Criar conta</h2>
+
             <p>Junte-se ao Traço Cultural</p>
+
           </div>
 
           <form
@@ -119,8 +136,11 @@ const Cadastrar = () => {
             )}
 
             <div className="form-group">
+
               <label>Nome</label>
+
               <div className="input-wrapper">
+
                 <i className="bi bi-person input-icon"></i>
                 <input
                   type="text"
@@ -138,8 +158,11 @@ const Cadastrar = () => {
             </div>
 
             <div className="form-group">
+
               <label>Email</label>
+
               <div className="input-wrapper">
+
                 <i className="bi bi-envelope input-icon"></i>
                 <input
                   type="email"
@@ -157,8 +180,11 @@ const Cadastrar = () => {
             </div>
 
             <div className="form-group">
+
               <label>Senha</label>
+
               <div className="input-wrapper">
+
                 <i className="bi bi-lock input-icon"></i>
                 <input
                   type="password"
@@ -189,8 +215,11 @@ const Cadastrar = () => {
             </div>
 
             <div className="form-group">
+
               <label>Confirmar senha</label>
+
               <div className="input-wrapper">
+
                 <i className="bi bi-lock-fill input-icon"></i>
                 <input
                   type="password"
@@ -219,6 +248,7 @@ const Cadastrar = () => {
               disabled={loading || sucesso}
             >
               {loading ? 'Cadastrando...' : 'Criar conta'}
+
             </button>
 
           </form>
@@ -236,9 +266,13 @@ const Cadastrar = () => {
           </div>
 
         </div>
+
       </div>
+
     </div>
+
   )
+
 }
 
 export default Cadastrar
