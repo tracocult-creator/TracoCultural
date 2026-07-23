@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useNavigate } from 'react-router-dom'
@@ -36,6 +36,15 @@ const iconeVoce = new L.DivIcon({
 })
 
 const CENTRO_PADRAO = [-14.235, -51.9253] // centro aproximado do Brasil
+
+function formatarDataCurta(data) {
+  if (!data) return ''
+  return new Date(data).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
 
 const cacheCidades = {}
 
@@ -95,7 +104,14 @@ function CorrigirTamanhoMapa() {
  * de propósito — assim pode ser usado tanto na página /mapa quanto dentro
  * de um modal (ex: botão "Ver no mapa" na Home).
  */
-const MapaEventos = ({ altura = '65vh', dentroModal = false }) => {
+const MapaEventos = ({
+  altura = '65vh',
+  dentroModal = false,
+  busca = '',
+  categoria = 'Todos',
+  mostrarContador = true,
+  aoAtualizarContagem,
+}) => {
   const navigate = useNavigate()
   const [posicaoUsuario, setPosicaoUsuario] = useState(null)
   const [erroLocalizacao, setErroLocalizacao] = useState('')
@@ -150,16 +166,39 @@ const MapaEventos = ({ altura = '65vh', dentroModal = false }) => {
     carregarEventos()
   }, [])
 
+  const eventosFiltrados = useMemo(() => {
+    const termo = busca.trim().toLowerCase()
+    return marcadoresEventos.filter((evento) => {
+      const matchBusca =
+        !termo ||
+        evento.nome?.toLowerCase().includes(termo) ||
+        evento.cidade?.toLowerCase().includes(termo)
+      const matchCategoria = categoria === 'Todos' || evento.categoria?.nome === categoria
+      return matchBusca && matchCategoria
+    })
+  }, [marcadoresEventos, busca, categoria])
+
+  useEffect(() => {
+    if (aoAtualizarContagem) aoAtualizarContagem(eventosFiltrados.length, carregando)
+  }, [eventosFiltrados, carregando, aoAtualizarContagem])
+
   return (
     <div className={`mapa-eventos-wrapper${dentroModal ? ' mapa-eventos-wrapper--modal' : ''}`}>
-      <div className="mapa-eventos-status">
-        <span>
-          {carregando
-            ? 'Carregando eventos no mapa...'
-            : `${marcadoresEventos.length} evento(s) localizado(s)`}
-        </span>
-        {erroLocalizacao && <span className="mapa-aviso">{erroLocalizacao}</span>}
-      </div>
+      {mostrarContador && (
+        <div className="mapa-eventos-status">
+          <span>
+            {carregando
+              ? 'Carregando eventos no mapa...'
+              : `${eventosFiltrados.length} evento(s) localizado(s)`}
+          </span>
+          {erroLocalizacao && <span className="mapa-aviso">{erroLocalizacao}</span>}
+        </div>
+      )}
+      {!mostrarContador && erroLocalizacao && (
+        <div className="mapa-eventos-status mapa-eventos-status--flutuante">
+          <span className="mapa-aviso">{erroLocalizacao}</span>
+        </div>
+      )}
 
       <div
         className={`mapa-container mapa-container--tema${dentroModal ? ' mapa-container--modal' : ''}`}
@@ -186,23 +225,33 @@ const MapaEventos = ({ altura = '65vh', dentroModal = false }) => {
             </Marker>
           )}
 
-          {marcadoresEventos.map((evento) => (
+          {eventosFiltrados.map((evento) => (
             <Marker key={evento.id} position={evento.coords} icon={iconeEvento}>
               <Popup className="popup-evento">
-                <div className="popup-evento-conteudo">
-                  <span className="popup-evento-categoria">
-                    {evento.categoria?.nome || 'Evento'}
-                  </span>
-                  <strong className="popup-evento-titulo">{evento.nome}</strong>
-                  <span className="popup-evento-cidade">
-                    <i className="bi bi-geo-alt-fill"></i> {evento.cidade}
-                  </span>
-                  <button
-                    className="mapa-popup-btn"
-                    onClick={() => navigate(`/eventos/${evento.id}`)}
-                  >
-                    Ver detalhes
-                  </button>
+                <div
+                  className="popup-evento-conteudo"
+                  onClick={() => navigate(`/eventos/${evento.id}`)}
+                >
+                  <div className="popup-evento-imagem">
+                    {evento.cardImage ? (
+                      <img
+                        src={`data:image/jpeg;base64,${evento.cardImage}`}
+                        alt={evento.nome}
+                      />
+                    ) : (
+                      <i className="bi bi-calendar-event"></i>
+                    )}
+                  </div>
+                  <div className="popup-evento-info">
+                    <strong className="popup-evento-titulo">{evento.nome}</strong>
+                    <span className="popup-evento-linha">
+                      <i className="bi bi-calendar3"></i>
+                      {formatarDataCurta(evento.dataInicio)}
+                    </span>
+                    <span className="popup-evento-linha">
+                      <i className="bi bi-geo-alt-fill"></i> {evento.cidade}
+                    </span>
+                  </div>
                 </div>
               </Popup>
             </Marker>
