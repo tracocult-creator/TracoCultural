@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
 import '../estilos/HomePage.css'
@@ -46,6 +46,16 @@ const Home = () => {
   const [editForm, setEditForm] = useState(null)
   const [editLoading, setEditLoading] = useState(false)
   const [favoritando, setFavoritando] = useState(null)
+  const categoryRef = useRef(null)
+
+const scrollCategorias = (direction) => {
+  if (!categoryRef.current) return
+
+  categoryRef.current.scrollBy({
+    left: direction === 'left' ? -300 : 300,
+    behavior: 'smooth'
+  })
+}
 
   const buscarEventos = useCallback(() => {
     setLoading(true)
@@ -157,20 +167,38 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── Category chips ── */}
-      <div className="category-strip-wrapper">
-        <div className="category-strip">
-          {CATEGORIAS.map((cat) => (
-            <button
-              key={cat}
-              className={`category-chip${category === cat ? ' category-chip--active' : ''}`}
-              onClick={() => setCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
+     <div className="category-strip-wrapper">
+
+  <button
+    className="category-arrow"
+    onClick={() => scrollCategorias('left')}
+  >
+    <i className="bi bi-chevron-left"></i>
+  </button>
+
+  <div
+    className="category-strip"
+    ref={categoryRef}
+  >
+    {CATEGORIAS.map((cat) => (
+      <button
+        key={cat}
+        className={`category-chip${category === cat ? ' category-chip--active' : ''}`}
+        onClick={() => setCategory(cat)}
+      >
+        {cat}
+      </button>
+    ))}
+  </div>
+
+  <button
+    className="category-arrow"
+    onClick={() => scrollCategorias('right')}
+  >
+    <i className="bi bi-chevron-right"></i>
+  </button>
+
+</div>
 
       {/* ── Results header ── */}
       <div className="results-header">

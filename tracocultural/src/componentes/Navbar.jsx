@@ -1,17 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import logo from '../assets/TRAÇO.png'
+import '../estilos/Modal.css'
 
 const Navbar = () => {
   const navigate = useNavigate()
   const { logout, user } = useAuth()
+  const [mostrarConfirmacao, setMostrarConfirmacao] = useState(false)
 
-  const handleLogout = () => {
-    if (window.confirm('Tem certeza que deseja sair?')) {
-      logout()
-      navigate('/')
-    }
+  const confirmarLogout = () => {
+    logout()
+    navigate('/')
   }
 
   return (
@@ -22,6 +22,9 @@ const Navbar = () => {
       <nav className="navbar-nav">
         <button className="nav-button" onClick={() => navigate('/home')}>
           <i className="bi bi-house"></i> Home
+        </button>
+        <button className="nav-button" onClick={() => navigate('/mapa')}>
+          <i className="bi bi-geo-alt"></i> Mapa
         </button>
         <button className="nav-button" onClick={() => navigate('/favoritos')}>
           <i className="bi bi-heart"></i> Favoritos
@@ -40,10 +43,25 @@ const Navbar = () => {
             <i className="bi bi-shield-check"></i> Admin
           </button>
         )}
-        <button className="nav-button" onClick={handleLogout}>
+        <button className="nav-button" onClick={() => setMostrarConfirmacao(true)}>
           <i className="bi bi-box-arrow-right"></i> Sair
         </button>
       </nav>
+
+      {mostrarConfirmacao && (
+        <div className="modal-overlay" onClick={() => setMostrarConfirmacao(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Sair da conta</h3>
+            <p style={{ padding: '0.75rem 1.5rem 0', color: 'var(--color-text-muted)', fontSize: '.9rem' }}>
+              Tem certeza que deseja sair?
+            </p>
+            <div className="modal-actions">
+              <button onClick={confirmarLogout}>Sair</button>
+              <button onClick={() => setMostrarConfirmacao(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

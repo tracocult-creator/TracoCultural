@@ -10,6 +10,7 @@ import Cadastrar from './paginas/Cadastrar'
 import VerificarCodigo from './paginas/VerificarCodigo'
 import EsqueciSenha from './paginas/EsqueciSenha'
 import RedefinirSenha from './paginas/RedefinirSenha'
+import Mapa from './paginas/Mapa'
 import Favoritos from './paginas/Favoritos'
 import Perfil from './paginas/Perfil'
 import Configuracoes from './paginas/Configuracoes'
@@ -39,6 +40,7 @@ function AppRoutes() {
       <Route path="/esqueci-senha" element={<EsqueciSenha />} />
       <Route path="/redefinir-senha" element={<RedefinirSenha />} />
       <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+      <Route path="/mapa" element={<PrivateRoute><Mapa /></PrivateRoute>} />
       <Route path="/favoritos" element={<PrivateRoute><Favoritos /></PrivateRoute>} />
       <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
       <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />

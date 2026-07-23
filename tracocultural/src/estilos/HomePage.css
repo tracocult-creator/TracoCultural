@@ -246,21 +246,31 @@
   box-shadow: 0 12px 28px rgba(212,163,115,.55);
 }
 
-/* ═══════════════════════════════════════════
-   CATEGORY CHIPS
-═══════════════════════════════════════════ */
-.category-strip-wrapper {
-  padding: 1.4rem clamp(1.2rem, 4vw, 3rem) 0;
+.category-strip-wrapper{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:1.4rem clamp(1.2rem,4vw,3rem) 0;
 }
 
-.category-strip {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.4rem;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+.category-strip{
+    flex:1;
+
+    display:flex;
+    gap:.5rem;
+
+    overflow-x:auto;
+    scroll-behavior:smooth;
+
+    scrollbar-width:none;
+    -ms-overflow-style:none;
 }
+
+.category-strip::-webkit-scrollbar{
+    display:none;
+}
+
 .category-strip::-webkit-scrollbar { display: none; }
 
 .category-chip {
@@ -559,4 +569,38 @@
   }
 
   .results-header { flex-direction: column; align-items: flex-start; }
+}
+.category-arrow{
+    width:42px;
+    height:42px;
+
+    min-width:42px;
+    min-height:42px;
+
+    border:none;
+    border-radius:50%;
+
+    background:#D9A46A;
+    color:#4B2E2A;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    padding:0;
+    flex-shrink:0;
+
+    transition:.2s;
+}
+
+.category-arrow:hover{
+    transform:scale(1.08);
+    background:#c98d4d;
+}
+
+.category-arrow i{
+    font-size:20px;
+    line-height:1;
 }
