@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
+import MapaEventos from '../componentes/MapaEventos'
 import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
 import { useAuth } from '../contexts/AuthContext'
@@ -42,6 +43,7 @@ const Home = () => {
   const [dateFilter, setDateFilter] = useState('')
 
   const [showFilterModal, setShowFilterModal] = useState(false)
+  const [showMapaModal, setShowMapaModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editForm, setEditForm] = useState(null)
   const [editLoading, setEditLoading] = useState(false)
@@ -163,6 +165,9 @@ const scrollCategorias = (direction) => {
           />
           <button className="filter-button" onClick={() => setShowFilterModal(true)}>
             <i className="bi bi-sliders"></i> Filtros
+          </button>
+          <button className="filter-button" onClick={() => setShowMapaModal(true)}>
+            <i className="bi bi-geo-alt"></i> Ver no mapa
           </button>
         </div>
       </section>
@@ -303,6 +308,19 @@ const scrollCategorias = (direction) => {
               <button onClick={() => { setCategory('Todas'); setUf(''); setDateFilter(''); setShowFilterModal(false) }}>
                 Limpar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal do Mapa ── */}
+      {showMapaModal && (
+        <div className="modal-overlay" onClick={() => setShowMapaModal(false)}>
+          <div className="mapa-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowMapaModal(false)}>×</button>
+            <h3>Eventos no mapa</h3>
+            <div className="mapa-modal-body">
+              <MapaEventos altura="100%" dentroModal />
             </div>
           </div>
         </div>

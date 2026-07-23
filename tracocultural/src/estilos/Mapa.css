@@ -17,6 +17,124 @@
   height: 100%;
 }
 
+/* ── Tema visual dos tiles ──
+   O CartoDB "light_all" é cinza neutro por padrão; aplicamos um filtro
+   pra puxar pro tom terroso/dourado da paleta do TracoCultural, sem
+   precisar de um provedor de mapa pago com estilo customizado. */
+.mapa-container--tema .leaflet-tile-pane {
+  filter: sepia(0.45) saturate(1.35) hue-rotate(-8deg) brightness(0.97) contrast(1.02);
+}
+
+/* ── Pino de evento (gota dourada) ── */
+.marcador-evento svg {
+  filter: drop-shadow(0 4px 6px rgba(60, 35, 33, .45));
+  transition: transform .18s ease;
+}
+
+.marcador-evento:hover svg {
+  transform: translateY(-2px) scale(1.08);
+}
+
+/* ── Popup customizado (mini-card do design system) ── */
+.leaflet-popup-content-wrapper {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 0;
+  overflow: hidden;
+}
+
+.leaflet-popup-content-wrapper::before {
+  content: '';
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  min-width: 190px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.leaflet-popup-tip {
+  background: var(--color-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.leaflet-popup-close-button {
+  color: var(--color-white) !important;
+  top: 8px !important;
+  right: 8px !important;
+  font-size: 1.1rem !important;
+  z-index: 2;
+}
+
+.popup-evento-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  padding: .9rem 1rem 1rem;
+  position: relative;
+}
+
+.popup-evento-conteudo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+}
+
+.popup-evento-categoria {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  background: var(--color-amber);
+  color: var(--color-primary-dark);
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  padding: .2rem .55rem;
+  border-radius: var(--radius-pill);
+  margin-top: 1.15rem;
+}
+
+.popup-evento-titulo {
+  font-size: .98rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  line-height: 1.25;
+  margin-top: .15rem;
+}
+
+.popup-evento-cidade {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .8rem;
+  color: var(--color-text-muted);
+}
+
+.mapa-popup-btn {
+  margin-top: .5rem;
+  align-self: flex-start;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: transform .15s ease;
+}
+
+.mapa-popup-btn:hover {
+  transform: translateY(-1px);
+}
+
 .mapa-header {
   padding: 2rem 3rem 1rem;
   color: var(--color-white);
@@ -47,17 +165,33 @@
   box-shadow: var(--shadow-lg);
 }
 
-.mapa-popup-btn {
-  margin-top: .5rem;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: white;
-  border: none;
-  padding: 6px 14px;
-  border-radius: var(--radius-pill);
-  font-size: .82rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+/* Dentro do modal a gente não quer a margem "de página" nem a sombra
+   grande — o próprio card do modal já cuida do respiro e do shadow */
+.mapa-container--modal {
+  margin: 0;
+  box-shadow: none;
+  border: 1px solid #ede8e7;
+}
+
+.mapa-eventos-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.mapa-eventos-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, .75);
+}
+
+/* Dentro do modal o fundo é claro (branco), então o texto precisa
+   ser escuro pra manter contraste */
+.mapa-eventos-wrapper--modal .mapa-eventos-status {
+  color: var(--color-text-muted);
 }
 
 .marcador-voce-ponto {
