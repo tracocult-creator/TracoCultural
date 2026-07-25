@@ -9,6 +9,62 @@
   background: var(--bg-pattern);
 }
 
+/* Página "só o mapa" — o mapa é literalmente o fundo da tela inteira
+   (position: fixed, inset: 0), e por cima dele só ficam a navbar
+   e as barras flutuantes (busca/contador/categorias). */
+.mapa-page-full {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mapa-fundo-mapa {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.mapa-fundo-mapa .leaflet-container {
+  border-radius: 0;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Busca + contador flutuando no topo do mapa em tela cheia */
+.mapa-topo-flutuante {
+  position: absolute;
+  top: calc(1.25rem + 64px); /* abaixo da navbar */
+  left: 1.25rem;
+  right: 1.25rem;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.mapa-topo-flutuante .mapa-busca-wrapper input {
+  box-shadow: var(--shadow-md);
+}
+
+.mapa-contador-flutuante {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--color-white);
+  color: var(--color-text-muted);
+  font-size: .82rem;
+  font-weight: 600;
+  padding: .6rem 1.1rem;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+
 /* Corrige conflito com regras globais de CSS (tipo img { max-width: 100% })
    que quebram o posicionamento das imagens do mapa (tiles) do Leaflet */
 .leaflet-container img {
@@ -413,6 +469,20 @@
     padding: .5rem .85rem;
     font-size: .8rem;
   }
+  .mapa-topo-flutuante {
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+  .mapa-topo-flutuante .mapa-busca-wrapper {
+    flex: 1;
+  }
+  .mapa-topo-flutuante .mapa-busca-wrapper input {
+    width: 100%;
+  }
+  .mapa-contador-flutuante {
+    display: none;
+  }
 }
 
 @media (max-width: 560px) {
@@ -420,3 +490,5 @@
     display: none;
   }
 }
+
+

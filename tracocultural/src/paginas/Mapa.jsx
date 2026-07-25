@@ -35,66 +35,59 @@ const Mapa = () => {
     : CATEGORIAS_PRINCIPAIS
 
   return (
-    <div className="mapa-page">
-      <Navbar />
-
-      <div className="mapa-header">
-        <div className="mapa-header-titulo">
-          <h2>Eventos perto de você</h2>
-          <p>
-            {carregandoContagem
-              ? 'Carregando eventos...'
-              : `${contagem} evento(s) localizado(s)`}
-          </p>
-        </div>
-
-        <div className="mapa-header-acoes">
-          <div className="mapa-busca-wrapper">
-            <i className="bi bi-search"></i>
-            <input
-              type="text"
-              placeholder="Buscar evento ou localidade..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-            />
-          </div>
-          <button type="button" className="mapa-filtros-btn">
-            <i className="bi bi-sliders"></i> Filtros
-          </button>
-        </div>
-      </div>
-
-      <div className="mapa-shell">
+    <div className="mapa-page-full">
+      {/* Mapa cobrindo literalmente a tela inteira, de ponta a ponta */}
+      <div className="mapa-fundo-mapa">
         <MapaEventos
-          altura="65vh"
+          altura="100%"
           busca={busca}
           categoria={categoria}
           mostrarContador={false}
           aoAtualizarContagem={aoAtualizarContagem}
+          scrollWheelZoom
         />
+      </div>
 
-        <div className="mapa-categorias-bar">
-          {categorias.map((cat) => (
-            <button
-              key={cat.nome}
-              type="button"
-              className={`mapa-categoria-chip${categoria === cat.nome ? ' mapa-categoria-chip--ativo' : ''}`}
-              style={categoria === cat.nome ? { background: cat.cor, borderColor: cat.cor } : { color: cat.cor }}
-              onClick={() => setCategoria(cat.nome)}
-            >
-              <i className={`bi ${cat.icone}`}></i>
-              {cat.nome}
-            </button>
-          ))}
-          <button
-            type="button"
-            className="mapa-categoria-chip mapa-categoria-chip--mais"
-            onClick={() => setMostrarExtras((v) => !v)}
-            title="Mais categorias"
-          >
-            <i className={`bi ${mostrarExtras ? 'bi-x-lg' : 'bi-three-dots'}`}></i>
-          </button>
+      {/* Só a navbar e as categorias ficam por cima do mapa */}
+      <Navbar />
+
+      <div className="mapa-topo-flutuante">
+        <div className="mapa-busca-wrapper">
+          <i className="bi bi-search"></i>
+          <input
+            type="text"
+            placeholder="Buscar evento ou localidade..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
         </div>
+        <div className="mapa-contador-flutuante">
+          <i className={`bi ${carregandoContagem ? 'bi-hourglass-split' : 'bi-geo-alt-fill'}`}></i>
+          {carregandoContagem ? 'Carregando eventos...' : `${contagem} evento(s) localizado(s)`}
+        </div>
+      </div>
+
+      <div className="mapa-categorias-bar">
+        {categorias.map((cat) => (
+          <button
+            key={cat.nome}
+            type="button"
+            className={`mapa-categoria-chip${categoria === cat.nome ? ' mapa-categoria-chip--ativo' : ''}`}
+            style={categoria === cat.nome ? { background: cat.cor, borderColor: cat.cor } : { color: cat.cor }}
+            onClick={() => setCategoria(cat.nome)}
+          >
+            <i className={`bi ${cat.icone}`}></i>
+            {cat.nome}
+          </button>
+        ))}
+        <button
+          type="button"
+          className="mapa-categoria-chip mapa-categoria-chip--mais"
+          onClick={() => setMostrarExtras((v) => !v)}
+          title="Mais categorias"
+        >
+          <i className={`bi ${mostrarExtras ? 'bi-x-lg' : 'bi-three-dots'}`}></i>
+        </button>
       </div>
     </div>
   )
