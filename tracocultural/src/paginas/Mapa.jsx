@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import Navbar from '../componentes/Navbar'
 import MapaEventos from '../componentes/MapaEventos'
+import ErrorBoundary from '../componentes/ErrorBoundary'
 import '../estilos/Mapa.css'
 
 const CATEGORIAS_PRINCIPAIS = [
@@ -38,14 +39,16 @@ const Mapa = () => {
     <div className="mapa-page-full">
       {/* Mapa cobrindo literalmente a tela inteira, de ponta a ponta */}
       <div className="mapa-fundo-mapa">
-        <MapaEventos
-          altura="100%"
-          busca={busca}
-          categoria={categoria}
-          mostrarContador={false}
-          aoAtualizarContagem={aoAtualizarContagem}
-          scrollWheelZoom
-        />
+        <ErrorBoundary>
+          <MapaEventos
+            altura="100vh"
+            busca={busca}
+            categoria={categoria}
+            mostrarContador={false}
+            aoAtualizarContagem={aoAtualizarContagem}
+            scrollWheelZoom
+          />
+        </ErrorBoundary>
       </div>
 
       {/* Só a navbar e as categorias ficam por cima do mapa */}

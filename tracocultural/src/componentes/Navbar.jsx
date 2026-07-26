@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import logo from '../assets/TRAÇO.png'
 import '../estilos/Modal.css'
+import '../estilos/temaClaro.css'
 
 const Navbar = () => {
   const navigate = useNavigate()

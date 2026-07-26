@@ -7,9 +7,15 @@
 }
 
 .profile-page .title-section {
-  padding: 2rem clamp(1rem, 3vw, 2.5rem) 1rem;
+  padding: 2.4rem clamp(1rem, 3vw, 2.5rem) 1.4rem;
   max-width: 1020px;
   margin: 0 auto;
+  animation: profileFadeUp .5s ease both;
+}
+
+@keyframes profileFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .main-title {
@@ -24,14 +30,25 @@
 }
 
 .profile-card {
+  position: relative;
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.1));
   border-radius: 22px;
-  padding: 2rem;
+  padding: 2.2rem 2rem;
   backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255,255,255,.32);
   max-width: 760px;
   margin: 0 auto;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 16px 40px rgba(0,0,0,.28), var(--shadow-md);
+  overflow: hidden;
+  animation: profileFadeUp .55s ease .05s both;
+}
+
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary-dark), var(--color-amber));
 }
 
 .profile-header {
@@ -51,10 +68,36 @@
   font-size: 2.8rem;
   font-weight: 800;
   color: white;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+  border: 3px solid rgba(255, 255, 255, 0.35);
   flex-shrink: 0;
 }
+
+.profile-avatar--editavel {
+  position: relative;
+  padding: 0;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  overflow: hidden;
+  font-family: inherit;
+  transition: var(--transition);
+}
+.profile-avatar--editavel:hover { transform: scale(1.03); }
+
+.profile-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 15, 12, 0.55);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-size: 1.4rem;
+  color: #fff;
+}
+.profile-avatar--editavel:hover .profile-avatar-overlay { opacity: 1; }
 
 .profile-info {
   display: flex;
@@ -68,6 +111,7 @@
   font-weight: 800;
   letter-spacing: -0.5px;
   margin: 0;
+  text-shadow: 0 2px 12px rgba(0,0,0,.18);
 }
 
 .profile-email {
@@ -132,6 +176,24 @@
   padding: 1rem;
   border-radius: 16px;
   background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.08);
+  transition: var(--transition);
+}
+.profile-stats div:hover {
+  background: rgba(255,255,255,.15);
+  transform: translateY(-2px);
+}
+.profile-stats i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(212,163,115,.18);
+  font-size: .85rem;
+  color: var(--color-accent);
+  margin-bottom: .5rem;
 }
 .profile-stats strong,
 .profile-stats span {
@@ -152,6 +214,7 @@
   max-width: 1020px;
   margin-left: auto;
   margin-right: auto;
+  animation: profileFadeUp .55s ease .1s both;
 }
 
 .user-events-title {
@@ -168,13 +231,46 @@
 }
 
 .no-events {
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .6rem;
+  padding: 2.5rem 2rem;
   border: 1px dashed rgba(255,255,255,.22);
   border-radius: 18px;
   background: rgba(255,255,255,.07);
+  text-align: center;
+}
+.no-events i {
+  font-size: 1.8rem;
+  color: rgba(255,255,255,.4);
+}
+.no-events p {
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.95rem;
   font-weight: 300;
+  margin: 0;
+}
+
+.btn-criar-primeiro-evento {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-top: .4rem;
+  padding: 0.7rem 1.6rem;
+  background: var(--color-amber);
+  color: var(--color-primary-dark);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  box-shadow: var(--shadow-amber);
+  transition: var(--transition);
+}
+.btn-criar-primeiro-evento:hover {
+  background: var(--color-amber-dark);
+  transform: translateY(-2px);
 }
 
 .profile-page .event-card {
@@ -182,11 +278,21 @@
   border: 1px solid rgba(255,255,255,.18);
   border-radius: 18px;
   overflow: hidden;
+  transition: var(--transition);
+}
+.profile-page .event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0,0,0,.25);
+  border-color: rgba(255,255,255,.3);
 }
 .profile-page .event-image {
   width: 100%;
   height: 165px;
   object-fit: cover;
+  transition: transform .35s ease;
+}
+.profile-page .event-card:hover .event-image {
+  transform: scale(1.06);
 }
 .profile-page .event-image--empty {
   display: flex;

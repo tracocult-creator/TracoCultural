@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
 import MapaEventos from '../componentes/MapaEventos'
+import ErrorBoundary from '../componentes/ErrorBoundary'
 import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
 import { useAuth } from '../contexts/AuthContext'
@@ -320,7 +321,9 @@ const scrollCategorias = (direction) => {
             <button className="modal-close" onClick={() => setShowMapaModal(false)}>×</button>
             <h3>Eventos no mapa</h3>
             <div className="mapa-modal-body">
-              <MapaEventos altura="100%" dentroModal />
+              <ErrorBoundary>
+                <MapaEventos altura="100%" />
+              </ErrorBoundary>
             </div>
           </div>
         </div>

@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../servicos/api'
 import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../componentes/Navbar'
 import '../estilos/ProfilePage.css'
 
 const estados = ['SP', 'RJ', 'MG', 'RS', 'BA', 'PR', 'SC', 'PE', 'DF']
+const NOMES_ESTADOS = {
+  SP: 'São Paulo', RJ: 'Rio de Janeiro', MG: 'Minas Gerais', RS: 'Rio Grande do Sul',
+  BA: 'Bahia', PR: 'Paraná', SC: 'Santa Catarina', PE: 'Pernambuco', DF: 'Distrito Federal',
+}
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const primeiraLetra = (nome) => (nome || '?')[0].toUpperCase()
 
 const Perfil = () => {
   const { user, login } = useAuth()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [editProfile, setEditProfile] = useState({})
   const [isEditing, setIsEditing] = useState(false)
   const [aba, setAba] = useState('dados')
   const [loading, setLoading] = useState(false)
   const [userEvents, setUserEvents] = useState([])
+  const [userFavoritos, setUserFavoritos] = useState([])
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState(false)
 
@@ -37,6 +44,10 @@ const Perfil = () => {
     api.get(`/eventos/meus`)
       .then(({ data }) => setUserEvents(data))
       .catch(() => setUserEvents([]))
+
+    api.get('/favoritos')
+      .then(({ data }) => setUserFavoritos(Array.isArray(data) ? data : []))
+      .catch(() => setUserFavoritos([]))
   }, [user])
 
   const mostrarSucesso = (fechar = true) => {
@@ -113,13 +124,24 @@ const Perfil = () => {
       <main className="profile-content">
         <div className="profile-card">
           <div className="profile-header">
-            <div className="profile-avatar" style={{ backgroundColor: '#8E5E56' }}>
+            <button
+              type="button"
+              className="profile-avatar profile-avatar--editavel"
+              onClick={abrirModal}
+              title="Editar perfil"
+            >
               {primeiraLetra(profile.nome)}
-            </div>
+              <span className="profile-avatar-overlay">
+                <i className="bi bi-pencil-fill"></i>
+              </span>
+            </button>
             <div className="profile-info">
               <h3 className="profile-name">{profile.nome}</h3>
               <p className="profile-email">{profile.email}</p>
-              <p className="profile-location">📍 {profile.estado}</p>
+              <p className="profile-location">
+                📍 {NOMES_ESTADOS[profile.estado] || profile.estado}
+                {NOMES_ESTADOS[profile.estado] && ` (${profile.estado})`}
+              </p>
             </div>
             <button className="btn-edit-profile" onClick={abrirModal}>
               <i className="bi bi-pencil"></i> Editar
@@ -127,12 +149,14 @@ const Perfil = () => {
           </div>
           <div className="profile-stats">
             <div>
+              <i className="bi bi-calendar-event"></i>
               <strong>{userEvents.length}</strong>
               <span>eventos criados</span>
             </div>
             <div>
-              <strong>{profile.estado}</strong>
-              <span>estado</span>
+              <i className="bi bi-heart-fill"></i>
+              <strong>{userFavoritos.length}</strong>
+              <span>favoritos salvos</span>
             </div>
           </div>
         </div>
@@ -159,7 +183,13 @@ const Perfil = () => {
               ))}
             </div>
           ) : (
-            <p className="no-events">Você ainda não criou nenhum evento.</p>
+            <div className="no-events">
+              <i className="bi bi-calendar-plus"></i>
+              <p>Você ainda não criou nenhum evento.</p>
+              <button className="btn-criar-primeiro-evento" onClick={() => navigate('/criar-evento')}>
+                <i className="bi bi-plus-lg"></i> Criar meu primeiro evento
+              </button>
+            </div>
           )}
         </section>
 
