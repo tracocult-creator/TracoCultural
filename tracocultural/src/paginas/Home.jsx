@@ -133,13 +133,13 @@ const scrollCategorias = (direction) => {
       <section className="home-hero">
         <div className="home-hero-inner">
           <span className="home-hero-eyebrow">
-            <i className="bi bi-stars"></i> Agenda cultural
+            <i className="bi bi-stars"></i> Sua Agenda Cultural
           </span>
           <h1 className="home-hero-title">
             Descubra o que<br /><em>acontece perto de você</em>
           </h1>
           <p className="home-hero-sub">
-            Eventos de música, arte, gastronomia e muito mais — salve favoritos e fique por dentro da cena cultural.
+            Eventos diversos pra você ficar por dentro!
           </p>
         </div>
       </section>
