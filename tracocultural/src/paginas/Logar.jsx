@@ -33,6 +33,10 @@ const Logar = () => {
       navigate('/home')
     } catch (err) {
       const status = err.response?.status
+      if (status === 403 && err.response?.data?.emailNaoConfirmado) {
+        navigate('/verificar-codigo', { state: { email, origem: 'login' } })
+        return
+      }
       const msg = status === 429
         ? 'Muitas tentativas de login. Aguarde alguns minutos.'
         : err.response?.data?.message || 'Email ou senha incorretos.'
