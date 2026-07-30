@@ -358,7 +358,7 @@
 }
 
 .mapa-eventos-status--flutuante .mapa-aviso {
-  color: #b3453a !important;
+  color: var(--color-danger-dark) !important;
 }
 
 /* Dentro do modal o fundo é claro (branco), então o texto precisa

@@ -39,11 +39,8 @@ const Home = () => {
   const [eventos, setEventos] = useState([])
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState('')
-  const [uf, setUf] = useState('')
   const [category, setCategory] = useState('Todas')
-  const [dateFilter, setDateFilter] = useState('')
 
-  const [showFilterModal, setShowFilterModal] = useState(false)
   const [showMapaModal, setShowMapaModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editForm, setEditForm] = useState(null)
@@ -62,14 +59,11 @@ const scrollCategorias = (direction) => {
 
   const buscarEventos = useCallback(() => {
     setLoading(true)
-    const params = {}
-    if (uf) params.cidade = uf
-
-    api.get('/eventos', { params })
+    api.get('/eventos')
       .then(({ data }) => setEventos(data))
       .catch(() => setEventos([]))
       .finally(() => setLoading(false))
-  }, [uf])
+  }, [])
 
   useEffect(() => {
     buscarEventos()
@@ -157,16 +151,6 @@ const scrollCategorias = (direction) => {
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
-          <input
-            type="text"
-            className="location-input"
-            placeholder="Cidade…"
-            value={uf}
-            onChange={(e) => setUf(e.target.value)}
-          />
-          <button className="filter-button" onClick={() => setShowFilterModal(true)}>
-            <i className="bi bi-sliders"></i> Filtros
-          </button>
           <button className="filter-button" onClick={() => setShowMapaModal(true)}>
             <i className="bi bi-geo-alt"></i> Ver no mapa
           </button>
@@ -275,44 +259,11 @@ const scrollCategorias = (direction) => {
                   <i className="bi bi-geo-alt"></i>
                   {evento.cidade}
                 </p>
-                <div className="event-actions">
-                  <button
-                    className="btn-ver-mais"
-                    onClick={(e) => { e.stopPropagation(); navigate(`/eventos/${evento.id}`) }}
-                  >
-                    Ver mais
-                  </button>
-                </div>
               </div>
             </div>
           ))
         )}
       </main>
-
-      {/* ── Modal de Filtros ── */}
-      {showFilterModal && (
-        <div className="modal-overlay" onClick={() => setShowFilterModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Filtros</h3>
-            <div className="filter-group">
-              <label>Categoria</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Selecionar categoria">
-                {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div className="filter-group">
-              <label>Data</label>
-              <input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
-            </div>
-            <div className="modal-actions">
-              <button onClick={() => setShowFilterModal(false)}>Aplicar</button>
-              <button onClick={() => { setCategory('Todas'); setUf(''); setDateFilter(''); setShowFilterModal(false) }}>
-                Limpar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Modal do Mapa ── */}
       {showMapaModal && (

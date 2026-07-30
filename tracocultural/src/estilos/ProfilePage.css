@@ -156,12 +156,12 @@
   font-size: .9rem;
 }
 .profile-alert--success {
-  color: #1f6f3b;
+  color: var(--color-success-dark);
   background: rgba(255,255,255,.92);
 }
 .profile-alert--error {
-  color: #c0392b;
-  background: rgba(231,76,60,.1);
+  color: var(--color-danger-dark);
+  background: rgba(var(--color-danger-rgb),.1);
 }
 
 .profile-stats {
@@ -351,7 +351,7 @@
 }
 
 .modal-sucesso-bar {
-  background: #1e7e47;
+  background: var(--color-success-dark);
   color: #fff;
   text-align: center;
   padding: .65rem 1rem;

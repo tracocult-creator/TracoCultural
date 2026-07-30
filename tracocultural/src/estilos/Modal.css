@@ -297,7 +297,7 @@
 .comment-delete {
   background: none;
   border: none;
-  color: #c0392b;
+  color: var(--color-danger-dark);
   cursor: pointer;
   font-size: .85rem;
   padding: 0;
@@ -358,10 +358,10 @@
   transform: scale(1.1);
 }
 
-.btn-editar { color: #2980b9 !important; background: rgba(41, 128, 185, 0.08) !important; }
-.btn-editar:hover { background: rgba(41, 128, 185, 0.18) !important; }
-.btn-deletar { color: #c0392b !important; background: rgba(192, 57, 43, 0.08) !important; }
-.btn-deletar:hover { background: rgba(192, 57, 43, 0.18) !important; }
+.btn-editar { color: var(--color-primary) !important; background: rgba(var(--color-primary-rgb), 0.1) !important; }
+.btn-editar:hover { background: rgba(var(--color-primary-rgb), 0.2) !important; }
+.btn-deletar { color: var(--color-danger-dark) !important; background: rgba(var(--color-danger-dark-rgb), 0.08) !important; }
+.btn-deletar:hover { background: rgba(var(--color-danger-dark-rgb), 0.18) !important; }
 
 /* ── Autor ── */
 .event-modal-autor {

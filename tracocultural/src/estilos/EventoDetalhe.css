@@ -296,7 +296,7 @@
 .comentario-erro {
   margin-top: 0.6rem;
   font-size: 0.8rem;
-  color: #f87171;
+  color: var(--color-danger-light);
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -373,7 +373,7 @@
   flex-shrink: 0;
 }
 .comentario-deletar-btn:hover {
-  color: #f87171;
+  color: var(--color-danger-light);
   background: rgba(248, 113, 113, 0.12);
 }
 

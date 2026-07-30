@@ -212,16 +212,16 @@ input:checked + .slider::before {
 
 /* ── Danger zone ── */
 .danger-section {
-  border-color: rgba(231,76,60,.22) !important;
-  background: linear-gradient(180deg, rgba(231,76,60,.07), rgba(231,76,60,.03)) !important;
+  border-color: rgba(var(--color-danger-rgb),.22) !important;
+  background: linear-gradient(180deg, rgba(var(--color-danger-rgb),.07), rgba(var(--color-danger-rgb),.03)) !important;
 }
 
 .danger-section .section-header {
-  border-bottom-color: rgba(231,76,60,.15);
+  border-bottom-color: rgba(var(--color-danger-rgb),.15);
 }
 
 .danger-section .section-header i {
-  color: #f87171;
+  color: var(--color-danger-light);
 }
 
 .danger-section .section-title {
@@ -240,9 +240,9 @@ input:checked + .slider::before {
   align-items: center;
   gap: 0.55rem;
   padding: 0.75rem 1.2rem;
-  background: rgba(231,76,60,.1);
-  color: #f87171;
-  border: 1px solid rgba(231,76,60,.25);
+  background: rgba(var(--color-danger-rgb),.1);
+  color: var(--color-danger-light);
+  border: 1px solid rgba(var(--color-danger-rgb),.25);
   border-radius: var(--r-md);
   font-family: 'Poppins', sans-serif;
   font-size: 0.88rem;
@@ -251,9 +251,9 @@ input:checked + .slider::before {
   transition: var(--t);
 }
 .btn-danger:hover {
-  background: rgba(231,76,60,.2);
-  border-color: rgba(231,76,60,.5);
-  color: #fca5a5;
+  background: rgba(var(--color-danger-rgb),.2);
+  border-color: rgba(var(--color-danger-rgb),.5);
+  color: var(--color-danger-light);
 }
 
 /* ═══════════════════════════════════════════
@@ -279,7 +279,7 @@ input:checked + .slider::before {
 
 .delete-modal {
   background: #1e1210;
-  border: 1px solid rgba(231,76,60,.25);
+  border: 1px solid rgba(var(--color-danger-rgb),.25);
   border-radius: var(--r-lg);
   padding: 2rem;
   width: 90%;
@@ -297,20 +297,20 @@ input:checked + .slider::before {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(231,76,60,.15);
-  border: 1px solid rgba(231,76,60,.3);
+  background: rgba(var(--color-danger-rgb),.15);
+  border: 1px solid rgba(var(--color-danger-rgb),.3);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  color: #f87171;
+  color: var(--color-danger-light);
   margin: 0 auto 1.2rem;
 }
 
 .delete-modal h3 {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #f87171;
+  color: var(--color-danger-light);
   margin: 0 0 0.6rem;
   text-align: center;
 }
@@ -348,13 +348,13 @@ input:checked + .slider::before {
 }
 .delete-confirm-input:focus {
   outline: none;
-  border-color: rgba(231,76,60,.5);
+  border-color: rgba(var(--color-danger-rgb),.5);
   background: rgba(255,255,255,.09);
 }
 .delete-confirm-input::placeholder { color: rgba(255,255,255,.3); }
 
 .delete-erro {
-  color: #f87171;
+  color: var(--color-danger-light);
   font-size: 0.78rem;
   margin: 0 0 1rem;
   text-align: center;
@@ -373,7 +373,7 @@ input:checked + .slider::before {
 .btn-confirm-delete {
   flex: 1;
   padding: 0.75rem;
-  background: #e74c3c;
+  background: var(--color-danger);
   color: #fff;
   border: none;
   border-radius: var(--r-pill);
@@ -382,10 +382,10 @@ input:checked + .slider::before {
   font-weight: 600;
   cursor: pointer;
   transition: var(--t);
-  box-shadow: 0 4px 14px rgba(231,76,60,.4);
+  box-shadow: 0 4px 14px rgba(var(--color-danger-rgb),.4);
 }
 .btn-confirm-delete:hover:not(:disabled) {
-  background: #c0392b;
+  background: var(--color-danger-dark);
   transform: translateY(-1px);
 }
 .btn-confirm-delete:disabled {
@@ -429,4 +429,3 @@ input:checked + .slider::before {
 
   .delete-modal-actions { flex-direction: column; }
 }
-

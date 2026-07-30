@@ -58,7 +58,11 @@ const Favoritos = () => {
               const local = fav.evento.cidade || 'Local a confirmar'
 
               return (
-              <div key={fav.id} className="favorite-card">
+              <div
+                key={fav.id}
+                className="favorite-card"
+                onClick={() => navigate(`/eventos/${fav.evento.id}`)}
+              >
                 <div className="favorite-image-wrap">
                   {imagem ? (
                     <img src={imagem} alt={titulo} className="favorite-image" />
@@ -68,17 +72,18 @@ const Favoritos = () => {
                     </div>
                   )}
                   {categoria && <span className="favorite-badge">{categoria}</span>}
+                  <button
+                    className="favorite-remove-btn"
+                    title="Remover dos favoritos"
+                    onClick={(e) => { e.stopPropagation(); removerFavorito(fav.evento.id) }}
+                  >
+                    <i className="bi bi-trash"></i>
+                  </button>
                 </div>
                 <div className="favorite-content">
                   <h3 className="favorite-title">{titulo}</h3>
                   {data && <p className="favorite-date"><i className="bi bi-calendar3"></i> {data}</p>}
                   <p className="favorite-location"><i className="bi bi-geo-alt"></i> {local}</p>
-                  <div className="favorite-actions">
-                    <button className="btn-ver-mais" onClick={() => navigate(`/eventos/${fav.evento.id}`)}>Ver mais</button>
-                    <button className="btn-remover" onClick={() => removerFavorito(fav.evento.id)}>
-                      <i className="bi bi-trash"></i>
-                    </button>
-                  </div>
                 </div>
               </div>
               )

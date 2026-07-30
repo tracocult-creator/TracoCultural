@@ -16,6 +16,25 @@
   --color-text:          #2d1f1d;
   --color-text-muted:    #7a6360;
 
+  /* RGB helpers (para usar com alpha) */
+  --color-primary-rgb: 142, 94, 86;
+  --color-accent-rgb:  212, 163, 115;
+
+  /* Semânticos — harmonizados com a paleta terracota/âmbar,
+     em vez do vermelho/verde saturados "de sistema" */
+  --color-danger-rgb:       190, 74, 58;   /* terracota-vermelho */
+  --color-danger:           rgb(var(--color-danger-rgb));
+  --color-danger-dark-rgb:  156, 56, 42;
+  --color-danger-dark:      rgb(var(--color-danger-dark-rgb));
+  --color-danger-light:     #e8a99b;       /* para texto sobre fundos escuros */
+  --color-danger-bg-light:  #fbede9;       /* para fundos claros (cards brancos) */
+
+  --color-success-rgb:      92, 138, 76;   /* verde-oliva, mais próximo dos marrons */
+  --color-success:          rgb(var(--color-success-rgb));
+  --color-success-dark-rgb: 66, 104, 54;
+  --color-success-dark:     rgb(var(--color-success-dark-rgb));
+  --color-success-bg-light: #eef4e8;       /* para fundos claros (cards brancos) */
+
   /* Gradientes */
   --bg-gradient: linear-gradient(135deg, #3C2321 0%, #8E5E56 50%, #A67B72 100%);
   --bg-pattern:
