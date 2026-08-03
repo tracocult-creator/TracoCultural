@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import '../estilos/AuthPages.css'
-import { redefinirSenha, esqueciSenha } from '../servicos/api'
+import '../estilos/RedefinirSenha.css'
+import { redefinirSenha, esqueciSenha, VerificarCodigo } from '../servicos/api'
 import logo from '../assets/TRAÇO.png'
+
 
 const TAMANHO_CODIGO = 6
 const TEMPO_REENVIO = 60
@@ -23,6 +24,7 @@ const RedefinirSenha = () => {
   const [reenviando, setReenviando] = useState(false)
   const [reenviado, setReenviado] = useState(false)
   const [contador, setContador] = useState(TEMPO_REENVIO)
+  const [codigoStatus, setCodigoStatus] = useState('vazio') // vazio | checando | valido | invalido
 
   const inputsRef = useRef([])
 
@@ -35,6 +37,32 @@ const RedefinirSenha = () => {
   useEffect(() => {
     inputsRef.current[0]?.focus()
   }, [])
+
+  useEffect(() => {
+    const codigo = digitos.join('')
+    if (codigo.length < TAMANHO_CODIGO) {
+      setCodigoStatus('vazio')
+      return
+    }
+    if (!email.trim()) {
+      setCodigoStatus('vazio')
+      return
+    }
+    let cancelado = false
+    setCodigoStatus('checando')
+    const checar = async () => {
+      try {
+        const { data } = await VerificarCodigo(email, codigo)
+        if (cancelado) return
+        setCodigoStatus(data?.valido ? 'valido' : 'invalido')
+      } catch {
+        if (!cancelado) setCodigoStatus('invalido')
+      }
+    }
+    const t = setTimeout(checar, 300) // pequeno debounce pra evitar chamada a cada tecla ao colar
+    return () => { cancelado = true; clearTimeout(t) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [digitos, email])
 
   const focarIndice = (i) => {
     inputsRef.current[i]?.focus()
@@ -93,6 +121,10 @@ const RedefinirSenha = () => {
       setErro('Digite o código completo de 6 dígitos.')
       return
     }
+    if (codigoStatus !== 'valido') {
+      setErro('Aguarde a confirmação do código antes de continuar.')
+      return
+    }
     const senhaForte =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/
     if (!senhaForte.test(novaSenha)) {
@@ -137,6 +169,7 @@ const RedefinirSenha = () => {
       setReenviado(true)
       setContador(TEMPO_REENVIO)
       setDigitos(Array(TAMANHO_CODIGO).fill(''))
+      setCodigoStatus('vazio')
       focarIndice(0)
       setTimeout(() => setReenviado(false), 4000)
     } catch (err) {
@@ -148,9 +181,17 @@ const RedefinirSenha = () => {
 
   return (
     <div className="auth-page">
-      <div className="auth-container">
+      <div className="rs-painel">
+        <img src={logo} alt="Traço Cultural" className="rs-painel-logo" />
+        <div className="rs-painel-icone">
+          <i className="bi bi-shield-lock"></i>
+        </div>
+        <h1>Vamos recuperar o acesso à sua conta</h1>
+        <p>Confirme o código enviado por email e escolha uma nova senha para continuar explorando o Traço Cultural.</p>
+      </div>
+
+      <div className="rs-form-lado">
         <div className="auth-card">
-          <img src={logo} alt="Traço Cultural" className="auth-logo" />
           <div className="auth-header">
             <h2>Redefinir senha</h2>
             <p>
@@ -193,55 +234,71 @@ const RedefinirSenha = () => {
                     value={d}
                     onChange={(e) => handleChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
-                    className={`codigo-digito ${erro ? 'error' : ''}`}
+                    className={`codigo-digito ${erro || codigoStatus === 'invalido' ? 'error' : ''}`}
                     disabled={loading || sucesso}
                   />
                 ))}
               </div>
+              {codigoStatus === 'checando' && (
+                <p className="codigo-status codigo-status--checando">Verificando código...</p>
+              )}
+              {codigoStatus === 'invalido' && (
+                <p className="codigo-status codigo-status--invalido">Código incorreto ou expirado.</p>
+              )}
+              {codigoStatus === 'valido' && (
+                <p className="codigo-status codigo-status--valido">✓ Código confirmado</p>
+              )}
             </div>
 
-            <div className="form-group">
-              <label>Nova senha</label>
-              <div className="input-wrapper">
-                <i className="bi bi-lock input-icon"></i>
-                <input
-                  type="password"
-                  value={novaSenha}
-                  onChange={(e) => setNovaSenha(e.target.value)}
-                  placeholder="Ex: Traco123@"
-                  disabled={loading || sucesso}
-                />
+            <div
+              className={`campos-senha ${codigoStatus === 'valido' ? 'campos-senha--revelado' : ''}`}
+              aria-hidden={codigoStatus !== 'valido'}
+            >
+              <div className="form-group">
+                <label>Nova senha</label>
+                <div className="input-wrapper">
+                  <i className="bi bi-lock input-icon"></i>
+                  <input
+                    type="password"
+                    value={novaSenha}
+                    onChange={(e) => setNovaSenha(e.target.value)}
+                    placeholder="Ex: Traco123@"
+                    disabled={loading || sucesso || codigoStatus !== 'valido'}
+                    tabIndex={codigoStatus === 'valido' ? 0 : -1}
+                  />
+                </div>
+                <p className="senha-requisito">
+                  A senha deve conter:
+                  <br />
+                  • mínimo 8 caracteres
+                  <br />
+                  • uma letra maiúscula
+                  <br />
+                  • uma letra minúscula
+                  <br />
+                  • um número
+                  <br />
+                  • um caractere especial (@, $, !, %, *, ?, &)
+                </p>
               </div>
-              <p className="senha-requisito">
-                A senha deve conter:
-                <br />
-                • mínimo 8 caracteres
-                <br />
-                • uma letra maiúscula
-                <br />
-                • uma letra minúscula
-                <br />
-                • um número
-                <br />
-                • um caractere especial (@, $, !, %, *, ?, &)
-              </p>
-            </div>
 
-            <div className="form-group">
-              <label>Confirmar nova senha</label>
-              <div className="input-wrapper">
-                <i className="bi bi-lock-fill input-icon"></i>
-                <input
-                  type="password"
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                  placeholder="Repita a nova senha"
-                  disabled={loading || sucesso}
-                />
+              <div className="form-group">
+                <label>Confirmar nova senha</label>
+                <div className="input-wrapper">
+                  <i className="bi bi-lock-fill input-icon"></i>
+                  <input
+                    type="password"
+                    value={confirmarSenha}
+                    onChange={(e) => setConfirmarSenha(e.target.value)}
+                    placeholder="Repita a nova senha"
+                    disabled={loading || sucesso || codigoStatus !== 'valido'}
+                    tabIndex={codigoStatus === 'valido' ? 0 : -1}
+                  />
+                </div>
               </div>
             </div>
 
-            <button type="submit" className="btn-submit" disabled={loading || sucesso}>
+            <button type="submit" className="btn-submit" disabled={loading || sucesso || codigoStatus !== 'valido'}>
               {loading ? 'Redefinindo...' : 'Redefinir senha'}
             </button>
           </form>
@@ -269,5 +326,6 @@ const RedefinirSenha = () => {
     </div>
   )
 }
+
 
 export default RedefinirSenha

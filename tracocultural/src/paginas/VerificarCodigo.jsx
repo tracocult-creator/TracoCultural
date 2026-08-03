@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import '../estilos/AuthPages.css'
-import { verificarCodigo, reenviarCodigo } from '../servicos/api'
+import '../estilos/VerificarCodigo.css'
+import { VerificarCodigo, reenviarCodigo } from '../servicos/api'
 import { useAuth } from '../contexts/AuthContext'
 import logo from '../assets/TRAÇO.png'
 
@@ -157,9 +157,20 @@ const VerificarCodigo = () => {
 
   return (
     <div className="auth-page">
-      <div className="auth-container">
+      <div className="vc-painel">
+        <img src={logo} alt="Traço Cultural" className="vc-painel-logo" />
+        <div className="vc-painel-icone">
+          <i className="bi bi-envelope-check"></i>
+        </div>
+        <h1>Falta pouco para confirmar sua conta</h1>
+        <p>Digite o código que enviamos por email para ativar seu acesso ao Traço Cultural.</p>
+        <div className="vc-selo">
+          <i className="bi bi-envelope-paper"></i>
+        </div>
+      </div>
+
+      <div className="vc-form-lado">
         <div className="auth-card">
-          <img src={logo} alt="Traço Cultural" className="auth-logo" />
           <div className="auth-header">
             <h2>Confirme seu email</h2>
             <p>

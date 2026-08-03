@@ -37,7 +37,6 @@ const Mapa = () => {
 
   return (
     <div className="mapa-page-full">
-      {/* Mapa cobrindo literalmente a tela inteira, de ponta a ponta */}
       <div className="mapa-fundo-mapa">
         <ErrorBoundary>
           <MapaEventos
@@ -51,7 +50,7 @@ const Mapa = () => {
         </ErrorBoundary>
       </div>
 
-      {/* Só a navbar e as categorias ficam por cima do mapa */}
+       
       <Navbar />
 
       <div className="mapa-topo-flutuante">

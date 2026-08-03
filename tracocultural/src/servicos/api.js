@@ -29,9 +29,6 @@ export const loginUsuario = (email, senha) =>
 export const cadastrarUsuario = (dados) =>
   api.post('/auth/register', dados)
 
-export const verificarCodigo = (email, codigo) =>
-  api.post('/auth/verificar-codigo', { email, codigo })
-
 export const reenviarCodigo = (email) =>
   api.post('/auth/reenviar-codigo', { email })
 
@@ -40,6 +37,11 @@ export const esqueciSenha = (email) =>
 
 export const redefinirSenha = (email, codigo, novaSenha) =>
   api.post('/auth/redefinir-senha', { email, codigo, novaSenha })
+
+export const VerificarCodigo = (email, codigo) =>
+  api.post('/auth/verificar-codigo', { email, codigo })
+
+
 
 // USUARIOS
 export const getUsuario = (id) => api.get(`/usuarios/${id}`)

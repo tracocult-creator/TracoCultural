@@ -1,10 +1,8 @@
-/* ═══════════════════════════════════════════
-   TRAÇO CULTURAL — DESIGN SYSTEM
-   ═══════════════════════════════════════════ */
+ 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Paleta */
+   
   --color-primary:       #8E5E56;
   --color-primary-dark:  #3C2321;
   --color-primary-light: #A67B72;
@@ -16,33 +14,31 @@
   --color-text:          #2d1f1d;
   --color-text-muted:    #7a6360;
 
-  /* RGB helpers (para usar com alpha) */
+   
   --color-primary-rgb: 142, 94, 86;
   --color-accent-rgb:  212, 163, 115;
 
-  /* Semânticos — harmonizados com a paleta terracota/âmbar,
-     em vez do vermelho/verde saturados "de sistema" */
-  --color-danger-rgb:       190, 74, 58;   /* terracota-vermelho */
+  
+  --color-danger-rgb:       190, 74, 58;    
   --color-danger:           rgb(var(--color-danger-rgb));
   --color-danger-dark-rgb:  156, 56, 42;
   --color-danger-dark:      rgb(var(--color-danger-dark-rgb));
-  --color-danger-light:     #e8a99b;       /* para texto sobre fundos escuros */
-  --color-danger-bg-light:  #fbede9;       /* para fundos claros (cards brancos) */
+  --color-danger-light:     #e8a99b;       
+  --color-danger-bg-light:  #fbede9;        
 
-  --color-success-rgb:      92, 138, 76;   /* verde-oliva, mais próximo dos marrons */
+  --color-success-rgb:      92, 138, 76;   
   --color-success:          rgb(var(--color-success-rgb));
   --color-success-dark-rgb: 66, 104, 54;
   --color-success-dark:     rgb(var(--color-success-dark-rgb));
-  --color-success-bg-light: #eef4e8;       /* para fundos claros (cards brancos) */
-
-  /* Gradientes */
+  --color-success-bg-light: #eef4e8;       
+  /* os gradientes */
   --bg-gradient: linear-gradient(135deg, #3C2321 0%, #8E5E56 50%, #A67B72 100%);
   --bg-pattern:
     radial-gradient(ellipse at 20% 20%, rgba(212,163,115,.18) 0%, transparent 55%),
     radial-gradient(ellipse at 80% 80%, rgba(60,35,33,.35)    0%, transparent 55%),
     var(--bg-gradient);
 
-  /* Glass */
+   
   --glass-bg:     rgba(255,255,255,.10);
   --glass-bg-md:  rgba(255,255,255,.16);
   --glass-border: rgba(255,255,255,.22);
@@ -56,8 +52,7 @@
   --shadow-accent:  0 8px 24px rgba(212,163,115,.45);
   --shadow-amber:   0 8px 24px rgba(212,163,115,.45);
   --shadow-primary: 0 8px 24px rgba(142, 94, 86,.40);
-
-  /* Raios */
+ 
   --r-sm:   10px;
   --r-md:   18px;
   --r-lg:   28px;
@@ -68,12 +63,12 @@
   --radius-lg:   28px;
   --radius-pill: 50px;
 
-  /* Transição padrão */
+ 
   --t: all .3s ease;
   --transition: all .3s ease;
 }
 
-/* ── Reset ── */
+ 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 html, body {
@@ -126,7 +121,7 @@ button:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2
   line-height: 1.6;
 }
 
-/* ── Scrollbar ── */
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(142,94,86,.4); border-radius: 3px; }
