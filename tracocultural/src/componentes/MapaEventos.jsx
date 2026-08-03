@@ -5,9 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { getEventos } from '../servicos/api'
 import 'leaflet/dist/leaflet.css'
 import '../estilos/Mapa.css'
-
-// Pino do evento: gota dourada com um pontinho branco no meio,
-// no lugar do pin azul padrão do Leaflet
+ 
 const iconeEvento = new L.DivIcon({
   className: 'marcador-evento',
   html: `
@@ -77,10 +75,7 @@ function RecentralizarMapa({ posicao }) {
   }, [posicao, map])
   return null
 }
-
-// Corrige o bug comum do Leaflet ficar "em branco" quando nasce dentro
-// de um layout flexível ou dentro de um modal (o mapa mede o tamanho
-// antes da hora / antes do overlay estar totalmente visível)
+ 
 function CorrigirTamanhoMapa() {
   const map = useMap()
   useEffect(() => {
@@ -98,12 +93,7 @@ function CorrigirTamanhoMapa() {
   return null
 }
 
-/**
- * Componente autocontido do mapa de eventos: geolocalização, geocodificação
- * de cidades e renderização dos marcadores. Não inclui Navbar nem título,
- * de propósito — assim pode ser usado tanto na página /mapa quanto dentro
- * de um modal (ex: botão "Ver no mapa" na Home).
- */
+ 
 const MapaEventos = ({
   altura = '65vh',
   dentroModal = false,

@@ -1,7 +1,5 @@
-/* ═══════════════════════════════════════════
-   ADMIN — Traço Cultural
-   ═══════════════════════════════════════════ */
 
+ 
 .admin-layout {
   display: flex;
   min-height: 100vh;
@@ -10,7 +8,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* ── Sidebar ── */
+
 .admin-sidebar {
   width: 240px;
   flex-shrink: 0;
@@ -89,7 +87,6 @@
   border-top: 1px solid rgba(255,255,255,.07);
 }
 
-/* ── Main ── */
 .admin-main {
   flex: 1;
   overflow-x: hidden;
@@ -140,7 +137,7 @@
   flex: 1;
 }
 
-/* ── Stat Cards ── */
+
 .admin-stats {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -180,7 +177,7 @@
   font-weight: 500;
 }
 
-/* ── Section header ── */
+
 .admin-section-header {
   display: flex;
   align-items: center;
@@ -196,7 +193,7 @@
   margin: 0;
 }
 
-/* ── Table ── */
+
 .admin-table-wrapper {
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.08);
@@ -240,7 +237,7 @@
   font-style: italic;
 }
 
-/* ── Badges ── */
+
 .admin-badge {
   display: inline-flex;
   align-items: center;
@@ -256,7 +253,7 @@
 .admin-badge--amber  { background: rgba(212,163,115,.15); color: var(--color-accent); border: 1px solid rgba(212,163,115,.25); }
 .admin-badge--gray   { background: rgba(255,255,255,.08); color: rgba(255,255,255,.45); border: 1px solid rgba(255,255,255,.1); }
 
-/* ── Action buttons ── */
+
 .admin-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 
 .admin-btn {
@@ -288,7 +285,6 @@
 .admin-btn--neutral  { background: rgba(255,255,255,.08); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.12); }
 .admin-btn--neutral:hover:not(:disabled)  { background: rgba(255,255,255,.14); }
 
-/* ── Modal ── */
 .admin-modal-overlay {
   position: fixed;
   inset: 0;
@@ -376,7 +372,7 @@
 
 .admin-field select option { background: #1a0e0c; }
 
-/* ── Toast ── */
+
 .admin-toast {
   position: fixed;
   bottom: 1.5rem;

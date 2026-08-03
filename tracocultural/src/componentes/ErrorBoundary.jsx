@@ -1,10 +1,5 @@
 import React from 'react'
 
-/**
- * Isola erros de renderização de um pedaço da árvore (ex: o mapa do Leaflet)
- * pra que, se algo quebrar ali, apareça uma mensagem visível em vez da área
- * ficar em branco e o erro só existir escondido no console.
- */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props)
@@ -16,7 +11,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(erro, info) {
-    // Loga sempre, mesmo em produção, com prefixo fácil de filtrar
+    
     console.error('[ErrorBoundary] Falha ao renderizar:', erro, info?.componentStack)
   }
 

@@ -144,7 +144,7 @@ const EventosAdmin = ({ showToast }) => {
         </div>
       )}
 
-      {/* Modal Editar */}
+      {/* mmodal editar */}
       {editTarget && (
         <div className="admin-modal-overlay" onClick={() => setEditTarget(null)}>
           <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
@@ -190,7 +190,7 @@ const EventosAdmin = ({ showToast }) => {
         </div>
       )}
 
-      {/* Modal Confirmar Delete */}
+      {/* confirmar delete */}
       {confirmDelete && (
         <div className="admin-modal-overlay" onClick={() => setConfirmDelete(null)}>
           <div className="admin-modal" style={{ maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
