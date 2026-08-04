@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import '../estilos/RedefinirSenha.css'
+import '../estilos/AuthSplit.css'
 import { redefinirSenha, esqueciSenha, VerificarCodigo } from '../servicos/api'
 import logo from '../assets/TRAÇO.png'
 
@@ -180,19 +180,19 @@ const RedefinirSenha = () => {
   }
 
   return (
-    <div className="auth-page">
-      <div className="rs-painel">
-        <img src={logo} alt="Traço Cultural" className="rs-painel-logo" />
-        <div className="rs-painel-icone">
+    <div className="asp-page">
+      <div className="asp-painel">
+        <img src={logo} alt="Traço Cultural" className="asp-painel-logo" />
+        <div className="asp-painel-icone">
           <i className="bi bi-shield-lock"></i>
         </div>
         <h1>Vamos recuperar o acesso à sua conta</h1>
         <p>Confirme o código enviado por email e escolha uma nova senha para continuar explorando o Traço Cultural.</p>
       </div>
 
-      <div className="rs-form-lado">
-        <div className="auth-card">
-          <div className="auth-header">
+      <div className="asp-form-lado">
+        <div className="asp-card">
+          <div className="asp-header">
             <h2>Redefinir senha</h2>
             <p>
               {emailInicial
@@ -201,16 +201,16 @@ const RedefinirSenha = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            {erro && <div className="error-message">{erro}</div>}
-            {sucesso && <div className="success-message">Senha redefinida com sucesso! Redirecionando para o login...</div>}
-            {reenviado && <div className="success-message">Código reenviado! Confira sua caixa de entrada.</div>}
+          <form onSubmit={handleSubmit} className="asp-form">
+            {erro && <div className="asp-error-message">{erro}</div>}
+            {sucesso && <div className="asp-success-message">Senha redefinida com sucesso! Redirecionando para o login...</div>}
+            {reenviado && <div className="asp-success-message">Código reenviado! Confira sua caixa de entrada.</div>}
 
             {!emailInicial && (
-              <div className="form-group">
+              <div className="asp-group">
                 <label>Email</label>
-                <div className="input-wrapper">
-                  <i className="bi bi-envelope input-icon"></i>
+                <div className="asp-input-wrapper">
+                  <i className="bi bi-envelope asp-input-icon"></i>
                   <input
                     type="email"
                     value={email}
@@ -221,9 +221,9 @@ const RedefinirSenha = () => {
               </div>
             )}
 
-            <div className="form-group">
+            <div className="asp-group">
               <label>Código de confirmação</label>
-              <div className="codigo-wrapper" onPaste={handlePaste}>
+              <div className="asp-codigo-wrapper" onPaste={handlePaste}>
                 {digitos.map((d, i) => (
                   <input
                     key={i}
@@ -234,30 +234,30 @@ const RedefinirSenha = () => {
                     value={d}
                     onChange={(e) => handleChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
-                    className={`codigo-digito ${erro || codigoStatus === 'invalido' ? 'error' : ''}`}
+                    className={`asp-codigo-digito ${erro || codigoStatus === 'invalido' ? 'error' : ''}`}
                     disabled={loading || sucesso}
                   />
                 ))}
               </div>
               {codigoStatus === 'checando' && (
-                <p className="codigo-status codigo-status--checando">Verificando código...</p>
+                <p className="asp-codigo-status asp-codigo-status--checando">Verificando código...</p>
               )}
               {codigoStatus === 'invalido' && (
-                <p className="codigo-status codigo-status--invalido">Código incorreto ou expirado.</p>
+                <p className="asp-codigo-status asp-codigo-status--invalido">Código incorreto ou expirado.</p>
               )}
               {codigoStatus === 'valido' && (
-                <p className="codigo-status codigo-status--valido">✓ Código confirmado</p>
+                <p className="asp-codigo-status asp-codigo-status--valido">✓ Código confirmado</p>
               )}
             </div>
 
             <div
-              className={`campos-senha ${codigoStatus === 'valido' ? 'campos-senha--revelado' : ''}`}
+              className={`asp-campos-senha ${codigoStatus === 'valido' ? 'asp-campos-senha--revelado' : ''}`}
               aria-hidden={codigoStatus !== 'valido'}
             >
-              <div className="form-group">
+              <div className="asp-group">
                 <label>Nova senha</label>
-                <div className="input-wrapper">
-                  <i className="bi bi-lock input-icon"></i>
+                <div className="asp-input-wrapper">
+                  <i className="bi bi-lock asp-input-icon"></i>
                   <input
                     type="password"
                     value={novaSenha}
@@ -267,7 +267,7 @@ const RedefinirSenha = () => {
                     tabIndex={codigoStatus === 'valido' ? 0 : -1}
                   />
                 </div>
-                <p className="senha-requisito">
+                <p className="asp-senha-requisito">
                   A senha deve conter:
                   <br />
                   • mínimo 8 caracteres
@@ -282,10 +282,10 @@ const RedefinirSenha = () => {
                 </p>
               </div>
 
-              <div className="form-group">
+              <div className="asp-group">
                 <label>Confirmar nova senha</label>
-                <div className="input-wrapper">
-                  <i className="bi bi-lock-fill input-icon"></i>
+                <div className="asp-input-wrapper">
+                  <i className="bi bi-lock-fill asp-input-icon"></i>
                   <input
                     type="password"
                     value={confirmarSenha}
@@ -298,20 +298,20 @@ const RedefinirSenha = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn-submit" disabled={loading || sucesso || codigoStatus !== 'valido'}>
+            <button type="submit" className="asp-btn-submit" disabled={loading || sucesso || codigoStatus !== 'valido'}>
               {loading ? 'Redefinindo...' : 'Redefinir senha'}
             </button>
           </form>
 
-          <div className="auth-links">
+          <div className="asp-links">
             <p>
               Não recebeu o código?{' '}
               {contador > 0 ? (
-                <span className="resend-timer">Reenviar em {contador}s</span>
+                <span className="asp-resend-timer">Reenviar em {contador}s</span>
               ) : (
                 <button
                   type="button"
-                  className="auth-link link-button"
+                  className="asp-link asp-link-button"
                   onClick={handleReenviar}
                   disabled={reenviando}
                 >
@@ -319,7 +319,7 @@ const RedefinirSenha = () => {
                 </button>
               )}
             </p>
-            <Link to="/logar" className="back-link">Voltar para o login</Link>
+            <Link to="/logar" className="asp-back-link">Voltar para o login</Link>
           </div>
         </div>
       </div>

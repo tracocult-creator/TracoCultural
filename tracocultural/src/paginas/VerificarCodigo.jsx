@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import '../estilos/VerificarCodigo.css'
-import { VerificarCodigo, reenviarCodigo } from '../servicos/api'
+import '../estilos/AuthSplit.css'
+import { VerificarCodigo as verificarCodigoApi, reenviarCodigo } from '../servicos/api'
 import { useAuth } from '../contexts/AuthContext'
 import logo from '../assets/TRAÇO.png'
 
@@ -113,7 +113,7 @@ const VerificarCodigo = () => {
     setErro('')
     setLoading(true)
     try {
-      const { data } = await verificarCodigo(email, codigo)
+      const { data } = await verificarCodigoApi(email, codigo)
       setSucesso(true)
       // Usa os dados do login já feitos no cadastro, se houver, senão os retornados aqui
       if (dadosLogin) login(dadosLogin)
@@ -156,41 +156,41 @@ const VerificarCodigo = () => {
   }
 
   return (
-    <div className="auth-page">
-      <div className="vc-painel">
-        <img src={logo} alt="Traço Cultural" className="vc-painel-logo" />
-        <div className="vc-painel-icone">
+    <div className="asp-page">
+      <div className="asp-painel">
+        <img src={logo} alt="Traço Cultural" className="asp-painel-logo" />
+        <div className="asp-painel-icone">
           <i className="bi bi-envelope-check"></i>
         </div>
         <h1>Falta pouco para confirmar sua conta</h1>
         <p>Digite o código que enviamos por email para ativar seu acesso ao Traço Cultural.</p>
-        <div className="vc-selo">
+        <div className="asp-selo">
           <i className="bi bi-envelope-paper"></i>
         </div>
       </div>
 
-      <div className="vc-form-lado">
-        <div className="auth-card">
-          <div className="auth-header">
+      <div className="asp-form-lado">
+        <div className="asp-card">
+          <div className="asp-header">
             <h2>Confirme seu email</h2>
             <p>
               {emailInicial
                 ? <>Enviamos um código de 6 dígitos para <strong>{emailInicial}</strong></>
                 : 'Digite seu email e o código de 6 dígitos que enviamos'}
             </p>
-            {infoInicial && <p className="senha-requisito">{infoInicial}</p>}
+            {infoInicial && <p className="asp-senha-requisito">{infoInicial}</p>}
           </div>
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            {erro && <div className="error-message">{erro}</div>}
-            {sucesso && <div className="success-message">Email confirmado com sucesso!</div>}
-            {reenviado && <div className="success-message">Código reenviado! Confira sua caixa de entrada.</div>}
+          <form onSubmit={handleSubmit} className="asp-form">
+            {erro && <div className="asp-error-message">{erro}</div>}
+            {sucesso && <div className="asp-success-message">Email confirmado com sucesso!</div>}
+            {reenviado && <div className="asp-success-message">Código reenviado! Confira sua caixa de entrada.</div>}
 
             {!emailInicial && (
-              <div className="form-group">
+              <div className="asp-group">
                 <label>Email</label>
-                <div className="input-wrapper">
-                  <i className="bi bi-envelope input-icon"></i>
+                <div className="asp-input-wrapper">
+                  <i className="bi bi-envelope asp-input-icon"></i>
                   <input
                     type="email"
                     value={email}
@@ -201,9 +201,9 @@ const VerificarCodigo = () => {
               </div>
             )}
 
-            <div className="form-group">
+            <div className="asp-group">
               <label>Código de confirmação</label>
-              <div className="codigo-wrapper" onPaste={handlePaste}>
+              <div className="asp-codigo-wrapper" onPaste={handlePaste}>
                 {digitos.map((d, i) => (
                   <input
                     key={i}
@@ -214,27 +214,27 @@ const VerificarCodigo = () => {
                     value={d}
                     onChange={(e) => handleChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
-                    className={`codigo-digito ${erro ? 'error' : ''}`}
+                    className={`asp-codigo-digito ${erro ? 'error' : ''}`}
                     disabled={loading || sucesso}
                   />
                 ))}
               </div>
             </div>
 
-            <button type="submit" className="btn-submit" disabled={loading || sucesso}>
+            <button type="submit" className="asp-btn-submit" disabled={loading || sucesso}>
               {loading ? 'Verificando...' : 'Confirmar código'}
             </button>
           </form>
 
-          <div className="auth-links">
+          <div className="asp-links">
             <p>
               Não recebeu o código?{' '}
               {contador > 0 ? (
-                <span className="resend-timer">Reenviar em {contador}s</span>
+                <span className="asp-resend-timer">Reenviar em {contador}s</span>
               ) : (
                 <button
                   type="button"
-                  className="auth-link link-button"
+                  className="asp-link asp-link-button"
                   onClick={handleReenviar}
                   disabled={reenviando}
                 >
@@ -242,7 +242,7 @@ const VerificarCodigo = () => {
                 </button>
               )}
             </p>
-            <Link to="/logar" className="back-link">Voltar para o login</Link>
+            <Link to="/logar" className="asp-back-link">Voltar para o login</Link>
           </div>
         </div>
       </div>

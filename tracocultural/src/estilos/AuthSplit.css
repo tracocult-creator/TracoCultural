@@ -1,14 +1,18 @@
-.auth-page {
+/* ============================================
+   Layout compartilhado (split-screen) para
+   Logar, Cadastrar e VerificarCodigo.
+   Painel colorido de um lado + formulário do outro.
+   ============================================ */
+
+.asp-page {
   min-height: 100vh;
   width: 100vw;
   display: flex;
   background: var(--color-white);
 }
 
-.auth-container { display: none; }
-
- 
-.vc-painel {
+/* ---------- Painel lateral (marca / mensagem) ---------- */
+.asp-painel {
   flex: 1 1 42%;
   position: relative;
   display: flex;
@@ -19,7 +23,7 @@
   overflow: hidden;
   color: var(--color-white);
 }
-.vc-painel::before {
+.asp-painel::before {
   content: '';
   position: absolute;
   width: 420px; height: 420px;
@@ -28,7 +32,7 @@
   filter: blur(30px);
   pointer-events: none;
 }
-.vc-painel::after {
+.asp-painel::after {
   content: '';
   position: absolute;
   width: 300px; height: 300px;
@@ -37,7 +41,7 @@
   filter: blur(20px);
   pointer-events: none;
 }
-.vc-painel-logo {
+.asp-painel-logo {
   height: 40px;
   width: auto;
   align-self: flex-start;
@@ -47,7 +51,7 @@
   position: relative;
   z-index: 1;
 }
-.vc-painel-icone {
+.asp-painel-icone {
   width: 56px;
   height: 56px;
   border-radius: 16px;
@@ -60,7 +64,7 @@
   position: relative;
   z-index: 1;
 }
-.vc-painel h1 {
+.asp-painel h1 {
   font-size: 2.1rem;
   font-weight: 800;
   letter-spacing: -1px;
@@ -69,7 +73,7 @@
   position: relative;
   z-index: 1;
 }
-.vc-painel p {
+.asp-painel p {
   font-size: .98rem;
   font-weight: 300;
   color: rgba(255,255,255,.8);
@@ -78,8 +82,7 @@
   position: relative;
   z-index: 1;
 }
- 
-.vc-selo {
+.asp-selo {
   position: absolute;
   bottom: 2.5rem;
   right: 2.5rem;
@@ -95,16 +98,17 @@
   z-index: 1;
 }
 
- 
-.vc-form-lado {
+/* ---------- Lado do formulário ---------- */
+.asp-form-lado {
   flex: 1 1 58%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2.5rem;
+  overflow-y: auto;
 }
 
-.auth-card {
+.asp-card {
   width: 100%;
   max-width: 400px;
   background: transparent;
@@ -113,41 +117,41 @@
   border-radius: 0;
 }
 
-.auth-logo { display: none; }
+.asp-logo { display: none; }
 
-.auth-header {
+.asp-header {
   text-align: left;
   margin-bottom: 2.25rem;
 }
-.auth-header h2 {
+.asp-header h2 {
   color: var(--color-primary-dark);
   font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -.5px;
   margin-bottom: .4rem;
 }
-.auth-header p {
+.asp-header p {
   color: var(--color-text-muted);
   font-size: .9rem;
   font-weight: 300;
 }
-.auth-header p strong {
+.asp-header p strong {
   color: var(--color-primary);
   font-weight: 700;
 }
- 
-.auth-form {
+
+.asp-form {
   display: flex;
   flex-direction: column;
-  gap: 1.35rem;
+  gap: 1.2rem;
 }
 
-.form-group {
+.asp-group {
   display: flex;
   flex-direction: column;
   gap: .4rem;
 }
-.form-group label {
+.asp-group label {
   color: var(--color-text);
   font-weight: 600;
   font-size: .78rem;
@@ -155,12 +159,12 @@
   text-transform: uppercase;
 }
 
-.input-wrapper {
+.asp-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
-.input-icon {
+.asp-input-icon {
   position: absolute;
   left: 0;
   color: var(--color-accent-dark);
@@ -168,7 +172,7 @@
   opacity: .8;
   pointer-events: none;
 }
-.form-group input {
+.asp-group input {
   width: 100%;
   padding: 10px 32px 10px 28px;
   border: none;
@@ -180,21 +184,120 @@
   color: var(--color-text);
   transition: var(--t);
 }
-.form-group input::placeholder { color: #cabdb5; }
-.form-group input:focus {
+.asp-group input::placeholder { color: #cabdb5; }
+.asp-group input:focus {
   outline: none;
   border-bottom-color: var(--color-accent-dark);
 }
-.form-group input.error { border-bottom-color: #e74c3c; }
-.form-group input:disabled { opacity: .55; cursor: not-allowed; }
+.asp-group input.error { border-bottom-color: #e74c3c; }
+.asp-group input:disabled { opacity: .55; cursor: not-allowed; }
 
- 
-.codigo-wrapper {
+.asp-toggle-senha {
+  position: absolute;
+  right: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-accent-dark);
+  opacity: .75;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+  transition: var(--t);
+}
+.asp-toggle-senha:hover { opacity: 1; }
+
+.asp-field-error {
+  color: #c0392b;
+  font-size: .76rem;
+  font-weight: 500;
+}
+
+.asp-senha-requisito {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.asp-resend-timer {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: .86rem;
+}
+.asp-link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--color-accent-dark);
+  font-weight: 700;
+}
+.asp-link-button:hover:not(:disabled) { text-decoration: underline; }
+.asp-link-button:disabled { opacity: .6; cursor: not-allowed; }
+
+.asp-error-message {
+  background: #fff0f0;
+  color: #c0392b;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: .85rem;
+  border-left: 4px solid #e74c3c;
+  font-weight: 500;
+}
+.asp-success-message {
+  background: #f0faf4;
+  color: #1e7e47;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: .85rem;
+  border-left: 4px solid #2ecc71;
+  font-weight: 600;
+}
+
+.asp-btn-submit {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-accent-dark);
+  color: var(--color-white);
+  border: none;
+  padding: 14px;
+  border-radius: var(--r-sm);
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .4px;
+  cursor: pointer;
+  transition: var(--t);
+  margin-top: .5rem;
+}
+.asp-btn-submit:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+.asp-btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+.asp-links {
+  text-align: left;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+.asp-links p { color: var(--color-text-muted); font-size: .87rem; }
+.asp-link { color: var(--color-accent-dark); font-weight: 700; }
+.asp-link:hover { text-decoration: underline; }
+.asp-back-link { color: #b3a9a3; font-size: .82rem; transition: var(--t); }
+.asp-back-link:hover { color: var(--color-accent-dark); }
+
+/* ---------- Código de confirmação (6 dígitos) ---------- */
+.asp-codigo-wrapper {
   display: flex;
   justify-content: space-between;
   gap: .5rem;
 }
-.codigo-digito {
+.asp-codigo-digito {
   width: 100%;
   aspect-ratio: 1 / 1;
   text-align: center;
@@ -210,110 +313,66 @@
   transition: var(--t);
   caret-color: var(--color-accent-dark);
 }
-.codigo-digito:focus {
+.asp-codigo-digito:focus {
   outline: none;
   border-bottom-color: var(--color-accent-dark);
   background: #fff;
 }
-.codigo-digito.error { border-bottom-color: #e74c3c; }
-.codigo-digito:disabled { opacity: .55; cursor: not-allowed; }
+.asp-codigo-digito.error { border-bottom-color: #e74c3c; }
+.asp-codigo-digito:disabled { opacity: .55; cursor: not-allowed; }
+
+.asp-codigo-digito:-webkit-autofill,
+.asp-codigo-digito:-webkit-autofill:hover,
+.asp-codigo-digito:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #fbf7f2 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 
 @media (max-width: 480px) {
-  .codigo-wrapper { gap: .35rem; }
-  .codigo-digito { font-size: 1.1rem; }
+  .asp-codigo-wrapper { gap: .35rem; }
+  .asp-codigo-digito { font-size: 1.1rem; }
 }
 
-.senha-requisito {
-  font-size: 11.5px;
-  color: var(--color-text-muted);
-  margin-top: 6px;
-  line-height: 1.5;
-}
-
-.resend-timer {
-  color: var(--color-text-muted);
-  font-weight: 600;
-  font-size: .86rem;
-}
-.link-button {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font-size: inherit;
-  font-family: inherit;
-  color: var(--color-accent-dark);
-  font-weight: 700;
-}
-.link-button:hover:not(:disabled) { text-decoration: underline; }
-.link-button:disabled { opacity: .6; cursor: not-allowed; }
-
-.error-message {
-  background: #fff0f0;
-  color: #c0392b;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: .85rem;
-  border-left: 4px solid #e74c3c;
-  font-weight: 500;
-}
-.success-message {
-  background: #f0faf4;
-  color: #1e7e47;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: .85rem;
-  border-left: 4px solid #2ecc71;
+.asp-codigo-status {
+  margin: .5rem 0 0 0;
+  font-size: .8rem;
   font-weight: 600;
 }
+.asp-codigo-status--checando { color: var(--color-text-muted); }
+.asp-codigo-status--invalido { color: #e74c3c; }
+.asp-codigo-status--valido { color: #2ecc71; }
 
- 
-.btn-submit {
-  position: relative;
-  overflow: hidden;
-  background: var(--color-accent-dark);
-  color: var(--color-white);
-  border: none;
-  padding: 14px;
-  border-radius: var(--r-sm);
-  font-size: .95rem;
-  font-weight: 700;
-  letter-spacing: .4px;
-  cursor: pointer;
-  transition: var(--t);
-  margin-top: .5rem;
-}
-.btn-submit:hover:not(:disabled) {
-  background: var(--color-primary-dark);
-  transform: translateY(-1px);
-}
-.btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-
- 
-.auth-links {
-  text-align: left;
-  margin-top: 2rem;
+/* ---------- Revelação progressiva dos campos de nova senha ---------- */
+.asp-campos-senha {
   display: flex;
   flex-direction: column;
-  gap: .6rem;
+  gap: 1.35rem;
+  opacity: .06;
+  filter: blur(2px);
+  transform: translateY(-6px);
+  pointer-events: none;
+  user-select: none;
+  transition: opacity .5s ease, filter .5s ease, transform .5s ease;
 }
-.auth-links p { color: var(--color-text-muted); font-size: .87rem; }
-.auth-link { color: var(--color-accent-dark); font-weight: 700; }
-.auth-link:hover { text-decoration: underline; }
-.back-link { color: #b3a9a3; font-size: .82rem; transition: var(--t); }
-.back-link:hover { color: var(--color-accent-dark); }
+.asp-campos-senha--revelado {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+  pointer-events: auto;
+  user-select: auto;
+}
 
- 
 @media (max-width: 860px) {
-  .auth-page { flex-direction: column; }
-  .vc-painel {
+  .asp-page { flex-direction: column; }
+  .asp-painel {
     flex: none;
     padding: 2.5rem 2rem;
     min-height: 200px;
     justify-content: flex-end;
   }
-  .vc-painel h1 { font-size: 1.5rem; }
-  .vc-painel p { display: none; }
-  .vc-selo { display: none; }
-  .vc-form-lado { padding: 2rem 1.5rem; }
+  .asp-painel h1 { font-size: 1.5rem; }
+  .asp-painel p { display: none; }
+  .asp-selo { display: none; }
+  .asp-form-lado { padding: 2rem 1.5rem; }
 }
