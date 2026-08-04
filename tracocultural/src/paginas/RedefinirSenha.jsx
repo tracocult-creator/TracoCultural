@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import '../estilos/AuthSplit.css'
-import { redefinirSenha, esqueciSenha, VerificarCodigo } from '../servicos/api'
+import { redefinirSenha, esqueciSenha } from '../servicos/api'
 import logo from '../assets/TRAÇO.png'
 
 
@@ -24,7 +24,6 @@ const RedefinirSenha = () => {
   const [reenviando, setReenviando] = useState(false)
   const [reenviado, setReenviado] = useState(false)
   const [contador, setContador] = useState(TEMPO_REENVIO)
-  const [codigoStatus, setCodigoStatus] = useState('vazio') // vazio | checando | valido | invalido
 
   const inputsRef = useRef([])
 
@@ -37,32 +36,6 @@ const RedefinirSenha = () => {
   useEffect(() => {
     inputsRef.current[0]?.focus()
   }, [])
-
-  useEffect(() => {
-    const codigo = digitos.join('')
-    if (codigo.length < TAMANHO_CODIGO) {
-      setCodigoStatus('vazio')
-      return
-    }
-    if (!email.trim()) {
-      setCodigoStatus('vazio')
-      return
-    }
-    let cancelado = false
-    setCodigoStatus('checando')
-    const checar = async () => {
-      try {
-        const { data } = await VerificarCodigo(email, codigo)
-        if (cancelado) return
-        setCodigoStatus(data?.valido ? 'valido' : 'invalido')
-      } catch {
-        if (!cancelado) setCodigoStatus('invalido')
-      }
-    }
-    const t = setTimeout(checar, 300) // pequeno debounce pra evitar chamada a cada tecla ao colar
-    return () => { cancelado = true; clearTimeout(t) }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [digitos, email])
 
   const focarIndice = (i) => {
     inputsRef.current[i]?.focus()
@@ -121,10 +94,6 @@ const RedefinirSenha = () => {
       setErro('Digite o código completo de 6 dígitos.')
       return
     }
-    if (codigoStatus !== 'valido') {
-      setErro('Aguarde a confirmação do código antes de continuar.')
-      return
-    }
     const senhaForte =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/
     if (!senhaForte.test(novaSenha)) {
@@ -169,7 +138,6 @@ const RedefinirSenha = () => {
       setReenviado(true)
       setContador(TEMPO_REENVIO)
       setDigitos(Array(TAMANHO_CODIGO).fill(''))
-      setCodigoStatus('vazio')
       focarIndice(0)
       setTimeout(() => setReenviado(false), 4000)
     } catch (err) {
@@ -234,26 +202,14 @@ const RedefinirSenha = () => {
                     value={d}
                     onChange={(e) => handleChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
-                    className={`asp-codigo-digito ${erro || codigoStatus === 'invalido' ? 'error' : ''}`}
+                    className={`asp-codigo-digito ${erro ? 'error' : ''}`}
                     disabled={loading || sucesso}
                   />
                 ))}
               </div>
-              {codigoStatus === 'checando' && (
-                <p className="asp-codigo-status asp-codigo-status--checando">Verificando código...</p>
-              )}
-              {codigoStatus === 'invalido' && (
-                <p className="asp-codigo-status asp-codigo-status--invalido">Código incorreto ou expirado.</p>
-              )}
-              {codigoStatus === 'valido' && (
-                <p className="asp-codigo-status asp-codigo-status--valido">✓ Código confirmado</p>
-              )}
             </div>
 
-            <div
-              className={`asp-campos-senha ${codigoStatus === 'valido' ? 'asp-campos-senha--revelado' : ''}`}
-              aria-hidden={codigoStatus !== 'valido'}
-            >
+            <div className="asp-campos-senha asp-campos-senha--revelado">
               <div className="asp-group">
                 <label>Nova senha</label>
                 <div className="asp-input-wrapper">
@@ -263,8 +219,7 @@ const RedefinirSenha = () => {
                     value={novaSenha}
                     onChange={(e) => setNovaSenha(e.target.value)}
                     placeholder="Ex: Traco123@"
-                    disabled={loading || sucesso || codigoStatus !== 'valido'}
-                    tabIndex={codigoStatus === 'valido' ? 0 : -1}
+                    disabled={loading || sucesso}
                   />
                 </div>
                 <p className="asp-senha-requisito">
@@ -291,14 +246,13 @@ const RedefinirSenha = () => {
                     value={confirmarSenha}
                     onChange={(e) => setConfirmarSenha(e.target.value)}
                     placeholder="Repita a nova senha"
-                    disabled={loading || sucesso || codigoStatus !== 'valido'}
-                    tabIndex={codigoStatus === 'valido' ? 0 : -1}
+                    disabled={loading || sucesso}
                   />
                 </div>
               </div>
             </div>
 
-            <button type="submit" className="asp-btn-submit" disabled={loading || sucesso || codigoStatus !== 'valido'}>
+            <button type="submit" className="asp-btn-submit" disabled={loading || sucesso}>
               {loading ? 'Redefinindo...' : 'Redefinir senha'}
             </button>
           </form>
@@ -319,7 +273,7 @@ const RedefinirSenha = () => {
                 </button>
               )}
             </p>
-            <Link to="/logar" className="asp-back-link">Voltar para o login</Link>
+            <Link to="/configuracoes" className="asp-back-link">Voltar para Configurações</Link>
           </div>
         </div>
       </div>

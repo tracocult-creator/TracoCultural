@@ -5,7 +5,7 @@ import '../estilos/temaClaro.css'
 import '../estilos/Modal.css' // .modal-overlay
 import '../estilos/SettingsPage.css' // reaproveitado só para o modal de exclusão de conta (.delete-modal...)
 import { useAuth } from '../contexts/AuthContext'
-import api, { deletarUsuario } from '../servicos/api'
+import api, { deletarUsuario, esqueciSenha } from '../servicos/api'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -17,7 +17,6 @@ const Configuracoes = () => {
 
   // Conta
   const [dados, setDados] = useState({ nome: user?.nome || '', email: user?.email || '' })
-  const [senhaForm, setSenhaForm] = useState({ senhaAtual: '', novaSenha: '', confirmar: '' })
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -35,6 +34,23 @@ const Configuracoes = () => {
   const [erroDelete, setErroDelete] = useState('')
   const [deletando, setDeletando] = useState(false)
 
+  // Redefinir senha
+  const [enviandoCodigo, setEnviandoCodigo] = useState(false)
+
+  const handleRedefinirSenha = async () => {
+    if (!user?.email) return
+    setErro('')
+    setEnviandoCodigo(true)
+    try {
+      await esqueciSenha(user.email)
+      navigate('/redefinir-senha', { state: { email: user.email } })
+    } catch (err) {
+      setErro(err.response?.data?.message || 'Erro ao enviar o código de redefinição. Tente novamente.')
+    } finally {
+      setEnviandoCodigo(false)
+    }
+  }
+
   const handleSalvar = async () => {
     setErro('')
     if (!dados.nome.trim()) { setErro('Nome é obrigatório.'); return }
@@ -43,12 +59,6 @@ const Configuracoes = () => {
     try {
       const { data } = await api.put(`/usuarios/${user.id}`, { nome: dados.nome, email: dados.email })
       login(data)
-      if (senhaForm.novaSenha) {
-        if (senhaForm.novaSenha.length < 8) { setErro('Nova senha deve ter no mínimo 8 caracteres.'); setLoading(false); return }
-        if (senhaForm.novaSenha !== senhaForm.confirmar) { setErro('As senhas não coincidem.'); setLoading(false); return }
-        await api.patch(`/usuarios/${user.id}/senha`, { senhaAtual: senhaForm.senhaAtual, novaSenha: senhaForm.novaSenha })
-        setSenhaForm({ senhaAtual: '', novaSenha: '', confirmar: '' })
-      }
       setSucesso(true)
       setTimeout(() => setSucesso(false), 3000)
     } catch (err) {
@@ -123,19 +133,16 @@ const Configuracoes = () => {
                 </div>
 
                 <div className="tc-form-field tc-form-field--full" style={{ marginTop: '.6rem' }}>
-                  <label style={{ fontSize: '.85rem', fontWeight: 700, color: 'var(--tc-text)' }}>Alterar senha</label>
-                </div>
-                <div className="tc-form-field">
-                  <label>Senha atual</label>
-                  <input type="password" placeholder="••••••••" value={senhaForm.senhaAtual} onChange={(e) => setSenhaForm({ ...senhaForm, senhaAtual: e.target.value })} />
-                </div>
-                <div className="tc-form-field">
-                  <label>Nova senha</label>
-                  <input type="password" placeholder="Mínimo 8 caracteres" value={senhaForm.novaSenha} onChange={(e) => setSenhaForm({ ...senhaForm, novaSenha: e.target.value })} />
-                </div>
-                <div className="tc-form-field">
-                  <label>Confirmar nova senha</label>
-                  <input type="password" placeholder="Repita a nova senha" value={senhaForm.confirmar} onChange={(e) => setSenhaForm({ ...senhaForm, confirmar: e.target.value })} />
+                  <label style={{ fontSize: '.85rem', fontWeight: 700, color: 'var(--tc-text)' }}>Senha</label>
+                  <button
+                    type="button"
+                    className="tc-btn-primary"
+                    style={{ marginTop: '.4rem' }}
+                    onClick={handleRedefinirSenha}
+                    disabled={enviandoCodigo}
+                  >
+                    {enviandoCodigo ? 'Enviando código…' : 'Redefinir senha'}
+                  </button>
                 </div>
               </div>
 
