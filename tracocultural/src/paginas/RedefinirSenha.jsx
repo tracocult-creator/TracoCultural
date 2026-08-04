@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import '../estilos/AuthSplit.css'
-import { redefinirSenha, esqueciSenha } from '../servicos/api'
+import { redefinirSenha, esqueciSenha, VerificarCodigo } from '../servicos/api'
 import logo from '../assets/TRAÇO.png'
 
 
@@ -15,7 +15,7 @@ const RedefinirSenha = () => {
   const emailInicial = location.state?.email || ''
 
   const [email, setEmail] = useState(emailInicial)
-  const [digitos, setDigitos] = useState(Array(TAMANHO_CODIGO).fill(''))
+  const [codigo, setCodigo] = useState('')
   const [novaSenha, setNovaSenha] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
   const [erro, setErro] = useState('')
@@ -25,7 +25,11 @@ const RedefinirSenha = () => {
   const [reenviado, setReenviado] = useState(false)
   const [contador, setContador] = useState(TEMPO_REENVIO)
 
-  const inputsRef = useRef([])
+  // codigoConfirmado: null = ainda não verificado, true = válido, false = inválido
+  const [verificando, setVerificando] = useState(false)
+  const [codigoConfirmado, setCodigoConfirmado] = useState(null)
+
+  const inputRef = useRef(null)
 
   useEffect(() => {
     if (contador <= 0) return
@@ -34,57 +38,47 @@ const RedefinirSenha = () => {
   }, [contador])
 
   useEffect(() => {
-    inputsRef.current[0]?.focus()
+    inputRef.current?.focus()
   }, [])
 
-  const focarIndice = (i) => {
-    inputsRef.current[i]?.focus()
-    inputsRef.current[i]?.select()
+  const digitos = codigo.padEnd(TAMANHO_CODIGO, ' ').split('')
+
+  const handleCodigoChange = (e) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, TAMANHO_CODIGO)
+    setCodigo(v)
+    // qualquer edição no código invalida a confirmação anterior
+    if (codigoConfirmado !== null) setCodigoConfirmado(null)
   }
 
-  const handleChange = (i, valor) => {
-    const v = valor.replace(/\D/g, '')
-    if (!v) {
-      const novos = [...digitos]
-      novos[i] = ''
-      setDigitos(novos)
+  const handleVerificarCodigo = async () => {
+    if (codigo.length < TAMANHO_CODIGO) {
+      setErro('Digite o código completo de 6 dígitos.')
       return
     }
-    const novos = [...digitos]
-    novos[i] = v[v.length - 1]
-    setDigitos(novos)
-    if (i < TAMANHO_CODIGO - 1) focarIndice(i + 1)
-  }
-
-  const handleKeyDown = (i, e) => {
-    if (e.key === 'Backspace') {
-      if (digitos[i]) {
-        const novos = [...digitos]
-        novos[i] = ''
-        setDigitos(novos)
-      } else if (i > 0) {
-        focarIndice(i - 1)
-      }
-    } else if (e.key === 'ArrowLeft' && i > 0) {
-      focarIndice(i - 1)
-    } else if (e.key === 'ArrowRight' && i < TAMANHO_CODIGO - 1) {
-      focarIndice(i + 1)
+    if (!email.trim()) {
+      setErro('Informe o email cadastrado.')
+      return
     }
-  }
-
-  const handlePaste = (e) => {
-    e.preventDefault()
-    const colado = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, TAMANHO_CODIGO)
-    if (!colado) return
-    const novos = Array(TAMANHO_CODIGO).fill('')
-    colado.split('').forEach((c, idx) => { novos[idx] = c })
-    setDigitos(novos)
-    focarIndice(Math.min(colado.length, TAMANHO_CODIGO - 1))
+    setErro('')
+    setVerificando(true)
+    try {
+      const { data } = await VerificarCodigo(email, codigo)
+      if (data?.valido) {
+        setCodigoConfirmado(true)
+      } else {
+        setCodigoConfirmado(false)
+        setErro('Código incorreto ou expirado.')
+      }
+    } catch (err) {
+      setCodigoConfirmado(false)
+      setErro(err.response?.data?.message || 'Não foi possível verificar o código agora.')
+    } finally {
+      setVerificando(false)
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const codigo = digitos.join('')
 
     if (!email.trim()) {
       setErro('Informe o email cadastrado.')
@@ -92,6 +86,10 @@ const RedefinirSenha = () => {
     }
     if (codigo.length < TAMANHO_CODIGO) {
       setErro('Digite o código completo de 6 dígitos.')
+      return
+    }
+    if (codigoConfirmado !== true) {
+      setErro('Verifique o código antes de continuar.')
       return
     }
     const senhaForte =
@@ -119,8 +117,9 @@ const RedefinirSenha = () => {
       } else {
         setErro(msgBackend || 'Erro ao redefinir a senha. Tente novamente.')
       }
-      setDigitos(Array(TAMANHO_CODIGO).fill(''))
-      focarIndice(0)
+      setCodigo('')
+      setCodigoConfirmado(null)
+      inputRef.current?.focus()
     } finally {
       setLoading(false)
     }
@@ -137,8 +136,9 @@ const RedefinirSenha = () => {
       await esqueciSenha(email)
       setReenviado(true)
       setContador(TEMPO_REENVIO)
-      setDigitos(Array(TAMANHO_CODIGO).fill(''))
-      focarIndice(0)
+      setCodigo('')
+      setCodigoConfirmado(null)
+      inputRef.current?.focus()
       setTimeout(() => setReenviado(false), 4000)
     } catch (err) {
       setErro(err.response?.data?.message || 'Não foi possível reenviar o código.')
@@ -191,25 +191,53 @@ const RedefinirSenha = () => {
 
             <div className="asp-group">
               <label>Código de confirmação</label>
-              <div className="asp-codigo-wrapper" onPaste={handlePaste}>
-                {digitos.map((d, i) => (
-                  <input
-                    key={i}
-                    ref={(el) => (inputsRef.current[i] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={d}
-                    onChange={(e) => handleChange(i, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(i, e)}
-                    className={`asp-codigo-digito ${erro ? 'error' : ''}`}
-                    disabled={loading || sucesso}
-                  />
-                ))}
+
+              {/* Input real: fica por cima das caixinhas, mas invisível.
+                  As caixinhas abaixo só exibem o valor - garante que o dígito
+                  sempre aparece, sem depender de 6 inputs controlados separados. */}
+              <div className="asp-codigo-shell">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={TAMANHO_CODIGO}
+                  value={codigo}
+                  onChange={handleCodigoChange}
+                  disabled={loading || sucesso}
+                  className="asp-codigo-input-real"
+                />
+                <div className="asp-codigo-wrapper" aria-hidden="true">
+                  {digitos.map((d, i) => (
+                    <div
+                      key={i}
+                      className={`asp-codigo-digito ${erro && codigoConfirmado === false ? 'error' : ''} ${i === codigo.length ? 'asp-codigo-digito--ativo' : ''}`}
+                    >
+                      {d.trim()}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="asp-codigo-acoes">
+                <button
+                  type="button"
+                  className="asp-link asp-link-button"
+                  onClick={handleVerificarCodigo}
+                  disabled={verificando || loading || sucesso || codigo.length < TAMANHO_CODIGO}
+                >
+                  {verificando ? 'Verificando...' : 'Verificar código'}
+                </button>
+                {codigoConfirmado === true && (
+                  <span className="asp-codigo-status asp-codigo-status--valido">✓ Código confirmado</span>
+                )}
               </div>
             </div>
 
-            <div className="asp-campos-senha asp-campos-senha--revelado">
+            <div
+              className={`asp-campos-senha ${codigoConfirmado === true ? 'asp-campos-senha--revelado' : ''}`}
+              aria-hidden={codigoConfirmado !== true}
+            >
               <div className="asp-group">
                 <label>Nova senha</label>
                 <div className="asp-input-wrapper">
@@ -219,7 +247,8 @@ const RedefinirSenha = () => {
                     value={novaSenha}
                     onChange={(e) => setNovaSenha(e.target.value)}
                     placeholder="Ex: Traco123@"
-                    disabled={loading || sucesso}
+                    disabled={loading || sucesso || codigoConfirmado !== true}
+                    tabIndex={codigoConfirmado === true ? 0 : -1}
                   />
                 </div>
                 <p className="asp-senha-requisito">
@@ -246,13 +275,14 @@ const RedefinirSenha = () => {
                     value={confirmarSenha}
                     onChange={(e) => setConfirmarSenha(e.target.value)}
                     placeholder="Repita a nova senha"
-                    disabled={loading || sucesso}
+                    disabled={loading || sucesso || codigoConfirmado !== true}
+                    tabIndex={codigoConfirmado === true ? 0 : -1}
                   />
                 </div>
               </div>
             </div>
 
-            <button type="submit" className="asp-btn-submit" disabled={loading || sucesso}>
+            <button type="submit" className="asp-btn-submit" disabled={loading || sucesso || codigoConfirmado !== true}>
               {loading ? 'Redefinindo...' : 'Redefinir senha'}
             </button>
           </form>
@@ -280,6 +310,5 @@ const RedefinirSenha = () => {
     </div>
   )
 }
-
 
 export default RedefinirSenha

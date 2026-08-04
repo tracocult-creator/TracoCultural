@@ -292,18 +292,44 @@
 .asp-back-link:hover { color: var(--color-accent-dark); }
 
 /* ---------- Código de confirmação (6 dígitos) ---------- */
+.asp-codigo-shell {
+  position: relative;
+}
+
+/* Input real: ocupa todo o espaço das caixinhas, mas fica transparente.
+   Ele que recebe o foco/clique/teclado de verdade; as caixinhas abaixo
+   só exibem o valor do estado do React, então sempre mostram o dígito
+   digitado, sem depender do navegador renderizar 6 inputs separados. */
+.asp-codigo-input-real {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: none;
+  background: transparent;
+  font-size: 1.3rem;
+  letter-spacing: 2rem;
+  cursor: text;
+  z-index: 2;
+}
+.asp-codigo-input-real:disabled { cursor: not-allowed; }
+
 .asp-codigo-wrapper {
   display: flex;
   justify-content: space-between;
   gap: .5rem;
+  pointer-events: none;
 }
 .asp-codigo-digito {
   width: 100%;
   aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: 1.3rem;
   font-weight: 700;
-  padding: 0;
   border: none;
   border-bottom: 3px solid #ece3dc;
   border-radius: 6px 6px 0 0;
@@ -311,27 +337,23 @@
   color: var(--color-accent-dark) !important;
   font-family: 'Poppins', sans-serif;
   transition: var(--t);
-  caret-color: var(--color-accent-dark);
 }
-.asp-codigo-digito:focus {
-  outline: none;
+.asp-codigo-digito--ativo {
   border-bottom-color: var(--color-accent-dark);
   background: #fff;
 }
 .asp-codigo-digito.error { border-bottom-color: #e74c3c; }
-.asp-codigo-digito:disabled { opacity: .55; cursor: not-allowed; }
-
-.asp-codigo-digito:-webkit-autofill,
-.asp-codigo-digito:-webkit-autofill:hover,
-.asp-codigo-digito:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--color-text) !important;
-  -webkit-box-shadow: 0 0 0px 1000px #fbf7f2 inset !important;
-  transition: background-color 5000s ease-in-out 0s;
-}
 
 @media (max-width: 480px) {
   .asp-codigo-wrapper { gap: .35rem; }
   .asp-codigo-digito { font-size: 1.1rem; }
+}
+
+.asp-codigo-acoes {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin-top: .6rem;
 }
 
 .asp-codigo-status {
@@ -342,6 +364,7 @@
 .asp-codigo-status--checando { color: var(--color-text-muted); }
 .asp-codigo-status--invalido { color: #e74c3c; }
 .asp-codigo-status--valido { color: #2ecc71; }
+
 
 /* ---------- Revelação progressiva dos campos de nova senha ---------- */
 .asp-campos-senha {
