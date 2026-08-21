@@ -41,9 +41,6 @@ export const redefinirSenha = (email, codigo, novaSenha) =>
 export const VerificarCodigo = (email, codigo) =>
   api.post('/auth/verificar-codigo', { email, codigo })
 
-export const validarCodigo = (email, codigo) =>
-  api.post('/auth/validar-codigo', { email, codigo })
-
 
 
 // USUARIOS
@@ -56,6 +53,25 @@ export const getEventos = (params) => api.get('/eventos', { params })
 export const getEventoPorId = (id) => api.get(`/eventos/${id}`)
 export const criarEvento = (payload) => api.post('/eventos', payload)
 export const getEventosDoUsuario = (idUsuario) => api.get('/eventos', { params: { idUsuario } })
+export const getMeusEventos = () => api.get('/eventos/meus')
+export const atualizarEvento = (id, payload) => api.put(`/eventos/${id}`, payload)
+export const excluirEvento = (id) => api.delete(`/eventos/${id}`)
+
+// Busca paginada por texto livre (usada pela busca da Home)
+export const buscarEventosPaginado = ({ q, categoriaId, cidade, page = 0, size = 12 }) =>
+  api.get('/eventos', { params: { q, categoriaId, cidade, page, size } })
+
+// COMPARTILHAMENTOS
+export const registrarCompartilhamento = (eventoId) =>
+  api.post(`/eventos/${eventoId}/compartilhamentos`)
+export const contarCompartilhamentos = (eventoId) =>
+  api.get(`/eventos/${eventoId}/compartilhamentos/contagem`)
+
+// NOTIFICAÇÕES
+export const getNotificacoes = () => api.get('/notificacoes')
+export const getNotificacoesNaoLidas = () => api.get('/notificacoes/nao-lidas/contagem')
+export const marcarNotificacaoComoLida = (id) => api.patch(`/notificacoes/${id}/lida`)
+export const marcarTodasNotificacoesComoLidas = () => api.patch('/notificacoes/lidas')
 
 // COMENTÁRIOS
 export const getComentarios = (eventoId) =>

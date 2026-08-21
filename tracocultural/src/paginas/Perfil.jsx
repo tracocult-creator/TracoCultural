@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../servicos/api'
+import api, { excluirEvento } from '../servicos/api'
 import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../componentes/Navbar'
+import ConfirmModal from '../componentes/ConfirmModal'
+import EditarEventoModal from '../componentes/EditarEventoModal'
+import ShareButton from '../componentes/ShareButton'
+import { isEventoEncerrado } from '../utils/text'
 import '../estilos/ProfilePage.css'
+import '../estilos/HomePage.css' // reaproveita .event-actions-row / .event-fav-btn / .event-encerrado-badge
+import '../estilos/Modal.css'
 
 const estados = ['SP', 'RJ', 'MG', 'RS', 'BA', 'PR', 'SC', 'PE', 'DF']
 const NOMES_ESTADOS = {
@@ -30,6 +36,10 @@ const Perfil = () => {
   const [senhaForm, setSenhaForm] = useState({ senhaAtual: '', novaSenha: '', confirmar: '' })
   const [erroSenha, setErroSenha] = useState('')
 
+  const [editingEvento, setEditingEvento] = useState(null)
+  const [deletingEvento, setDeletingEvento] = useState(null)
+  const [excluindo, setExcluindo] = useState(false)
+
   useEffect(() => {
     if (!user) return
     const base = {
@@ -41,14 +51,18 @@ const Perfil = () => {
     setProfile(base)
     setEditProfile(base)
 
-    api.get(`/eventos/meus`)
-      .then(({ data }) => setUserEvents(data))
-      .catch(() => setUserEvents([]))
+    carregarMeusEventos()
 
     api.get('/favoritos')
       .then(({ data }) => setUserFavoritos(Array.isArray(data) ? data : []))
       .catch(() => setUserFavoritos([]))
   }, [user])
+
+  const carregarMeusEventos = () => {
+    api.get('/eventos/meus')
+      .then(({ data }) => setUserEvents(data))
+      .catch(() => setUserEvents([]))
+  }
 
   const mostrarSucesso = (fechar = true) => {
     setSucesso(true)
@@ -105,6 +119,25 @@ const Perfil = () => {
     setEditProfile({ ...profile })
     setSenhaForm({ senhaAtual: '', novaSenha: '', confirmar: '' })
     setIsEditing(true)
+  }
+
+  const handleEventoSalvo = (eventoAtualizado) => {
+    setUserEvents((prev) => prev.map((e) => (e.id === eventoAtualizado.id ? { ...e, ...eventoAtualizado } : e)))
+    setEditingEvento(null)
+  }
+
+  const handleConfirmarExclusao = async () => {
+    if (!deletingEvento) return
+    setExcluindo(true)
+    try {
+      await excluirEvento(deletingEvento.id)
+      setUserEvents((prev) => prev.filter((e) => e.id !== deletingEvento.id))
+      setDeletingEvento(null)
+    } catch {
+      alert('Erro ao excluir evento. Tente novamente.')
+    } finally {
+      setExcluindo(false)
+    }
   }
 
   if (!profile) return <div>Carregando...</div>
@@ -165,22 +198,51 @@ const Perfil = () => {
           <h3 className="user-events-title">Meus Eventos</h3>
           {userEvents.length > 0 ? (
             <div className="user-events-grid">
-              {userEvents.map((evento) => (
-                <div className="event-card" key={evento.id}>
-                  {evento.cardImage ? (
-                    <img src={`data:image/jpeg;base64,${evento.cardImage}`} alt={evento.nome} className="event-image" />
-                  ) : (
-                    <div className="event-image event-image--empty">
-                      <i className="bi bi-image"></i>
+              {userEvents.map((evento) => {
+                const encerrado = isEventoEncerrado(evento)
+                return (
+                  <div
+                    className={`event-card${encerrado ? ' event-card--encerrado' : ''}`}
+                    key={evento.id}
+                    onClick={() => navigate(`/eventos/${evento.id}`)}
+                  >
+                    <div className="event-image-wrapper">
+                      {evento.cardImage ? (
+                        <img src={`data:image/jpeg;base64,${evento.cardImage}`} alt={evento.nome} className="event-image" />
+                      ) : (
+                        <div className="event-image event-image--empty">
+                          <i className="bi bi-image"></i>
+                        </div>
+                      )}
+
+                      {encerrado && <span className="event-encerrado-badge">Encerrado</span>}
+
+                      <div className="event-actions-row">
+                        <ShareButton evento={evento} stopPropagation />
+                        <button
+                          className="event-fav-btn"
+                          title="Editar evento"
+                          onClick={(e) => { e.stopPropagation(); setEditingEvento(evento) }}
+                        >
+                          <i className="bi bi-pencil-fill"></i>
+                        </button>
+                        <button
+                          className="event-fav-btn event-fav-btn--danger"
+                          title="Excluir evento"
+                          onClick={(e) => { e.stopPropagation(); setDeletingEvento(evento) }}
+                        >
+                          <i className="bi bi-trash3-fill"></i>
+                        </button>
+                      </div>
                     </div>
-                  )}
-                  <div className="event-content">
-                    <h3 className="event-title">{evento.nome}</h3>
-                    <p className="event-date">📅 {new Date(evento.dataInicio).toLocaleDateString('pt-BR')}</p>
-                    <p className="event-location">📍 {evento.cidade}</p>
+                    <div className="event-content">
+                      <h3 className="event-title">{evento.nome}</h3>
+                      <p className="event-date">📅 {new Date(evento.dataInicio).toLocaleDateString('pt-BR')}</p>
+                      <p className="event-location">📍 {evento.cidade}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="no-events">
@@ -242,6 +304,25 @@ const Perfil = () => {
               )}
             </div>
           </div>
+        )}
+
+        {editingEvento && (
+          <EditarEventoModal
+            evento={editingEvento}
+            onClose={() => setEditingEvento(null)}
+            onSalvo={handleEventoSalvo}
+          />
+        )}
+
+        {deletingEvento && (
+          <ConfirmModal
+            title="Excluir este evento?"
+            message={`"${deletingEvento.nome}" será removido permanentemente, junto com favoritos e comentários associados.`}
+            confirmLabel="Excluir evento"
+            loading={excluindo}
+            onConfirm={handleConfirmarExclusao}
+            onCancel={() => setDeletingEvento(null)}
+          />
         )}
       </main>
     </div>

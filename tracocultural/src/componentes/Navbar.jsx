@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import NotificacaoBell from './NotificacaoBell'
 import logo from '../assets/TRAÇO.png'
 import '../estilos/Modal.css'
 import '../estilos/temaClaro.css'
@@ -53,6 +54,8 @@ const Navbar = () => {
         <button className="nav-button nav-button--criar" onClick={() => navigate('/criar-evento')}>
           <i className="bi bi-plus-circle"></i> Criar Evento
         </button>
+
+        {user && <NotificacaoBell />}
 
         <div className="navbar-user" ref={menuRef}>
           <button

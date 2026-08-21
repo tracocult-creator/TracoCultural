@@ -84,6 +84,163 @@
   border: 1px solid rgba(212, 163, 115, 0.28);
 }
 
+/* ── Sininho de notificações ── */
+.notif-bell-wrapper {
+  position: relative;
+  margin-left: 0.2rem;
+}
+
+.notif-bell-trigger {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--glass-border);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--t);
+}
+.notif-bell-trigger:hover { background: var(--glass-bg); }
+
+.notif-bell-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 3px;
+  border-radius: 50%;
+  background: var(--color-danger-dark, #9c382a);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(35, 16, 14, 1);
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 340px;
+  max-width: 88vw;
+  background: rgba(35, 16, 14, 0.97);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  z-index: 200;
+  overflow: hidden;
+  animation: navMenuIn 0.16s ease;
+}
+
+.notif-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.notif-marcar-todas {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.notif-marcar-todas:hover { text-decoration: underline; }
+
+.notif-dropdown-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.notif-dropdown-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2.2rem 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.82rem;
+  text-align: center;
+}
+.notif-dropdown-empty i { font-size: 1.4rem; opacity: 0.6; }
+
+.notif-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--t);
+}
+.notif-item:hover { background: rgba(255, 255, 255, 0.06); }
+.notif-item--nao-lida { background: rgba(212, 163, 115, 0.08); }
+.notif-item--nao-lida:hover { background: rgba(212, 163, 115, 0.14); }
+
+.notif-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212, 163, 115, 0.16);
+  color: var(--color-accent);
+  font-size: 0.85rem;
+}
+
+.notif-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.notif-item-mensagem {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.notif-item-data {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.notif-item-dot {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
 /* ── User menu (Perfil / Configurações / Admin / Sair) ── */
 .navbar-user {
   position: relative;
@@ -476,9 +633,15 @@
   box-shadow: var(--shadow-xs);
 }
 
-.event-fav-btn {
+.event-actions-row {
   position: absolute;
   top: 10px; right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.event-fav-btn {
   width: 34px; height: 34px;
   border-radius: 50%;
   background: rgba(30,10,8,.55);
@@ -491,6 +654,7 @@
   justify-content: center;
   transition: var(--t);
   cursor: pointer;
+  flex-shrink: 0;
 }
 .event-fav-btn:hover {
   background: rgba(212,163,115,.35);
@@ -499,6 +663,84 @@
   transform: scale(1.12);
 }
 .event-fav-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.event-fav-btn--danger:hover {
+  background: rgba(var(--color-danger-dark-rgb), .45);
+  border-color: var(--color-danger-dark);
+  color: #fff;
+}
+
+.event-encerrado-badge {
+  position: absolute;
+  top: 10px; left: 10px;
+  background: rgba(20,8,7,.72);
+  color: rgba(255,255,255,.85);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--r-pill);
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,.2);
+}
+/* quando há badge de categoria e de encerrado juntos, empurra a categoria pra baixo */
+.event-category-badge ~ .event-encerrado-badge,
+.event-encerrado-badge ~ .event-category-badge {
+  top: 42px;
+}
+
+.event-card--encerrado .event-image { filter: grayscale(0.35) brightness(0.75); }
+.event-card--encerrado .event-title { color: rgba(255,255,255,.55); }
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: rgba(0,0,0,.3);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+.search-clear-btn:hover { color: var(--color-primary); }
+
+.btn-limpar-filtros {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.4rem;
+  background: rgba(212,163,115,.15);
+  border: 1px solid rgba(212,163,115,.35);
+  color: var(--color-accent);
+  border-radius: var(--r-pill);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--t);
+}
+.btn-limpar-filtros:hover { background: rgba(212,163,115,.28); }
+
+.carregar-mais-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 0 0 3rem;
+}
+.btn-carregar-mais {
+  padding: 0.75rem 1.8rem;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #fff;
+  border-radius: var(--r-pill);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: var(--t);
+}
+.btn-carregar-mais:hover:not(:disabled) { background: rgba(255,255,255,.16); }
+.btn-carregar-mais:disabled { opacity: .5; cursor: not-allowed; }
 
 .event-content {
   padding: 1.1rem 1.2rem 1.3rem;

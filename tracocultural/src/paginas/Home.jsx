@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../componentes/Navbar'
 import MapaEventos from '../componentes/MapaEventos'
 import ErrorBoundary from '../componentes/ErrorBoundary'
+import ConfirmModal from '../componentes/ConfirmModal'
+import EditarEventoModal from '../componentes/EditarEventoModal'
+import ShareButton from '../componentes/ShareButton'
 import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
 import { useAuth } from '../contexts/AuthContext'
-import api from '../servicos/api'
+import api, { buscarEventosPaginado, excluirEvento } from '../servicos/api'
+import { normalizeText, isEventoEncerrado } from '../utils/text'
 
 const CATEGORIAS = [
   'Todas', 'Social', 'Música', 'Cultura & Arte', 'Profissional',
@@ -32,6 +36,8 @@ const SkeletonCard = () => (
   </div>
 )
 
+const PAGE_SIZE = 12
+
 const Home = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -39,23 +45,28 @@ const Home = () => {
   const [eventos, setEventos] = useState([])
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState('')
+  const [buscaDebounced, setBuscaDebounced] = useState('')
   const [category, setCategory] = useState('Todas')
 
+  // Modo de busca server-side (com paginação), separado da navegação
+  // por categoria (que continua carregando a lista inteira — a base do
+  // TCC é pequena o bastante pra isso não pesar).
+  const [buscaResultados, setBuscaResultados] = useState([])
+  const [buscaPage, setBuscaPage] = useState(0)
+  const [buscaTotalPages, setBuscaTotalPages] = useState(0)
+  const [buscando, setBuscando] = useState(false)
+
   const [showMapaModal, setShowMapaModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editForm, setEditForm] = useState(null)
-  const [editLoading, setEditLoading] = useState(false)
+  const [editingEvento, setEditingEvento] = useState(null)
+  const [deletingEvento, setDeletingEvento] = useState(null)
+  const [excluindo, setExcluindo] = useState(false)
   const [favoritando, setFavoritando] = useState(null)
   const categoryRef = useRef(null)
 
-const scrollCategorias = (direction) => {
-  if (!categoryRef.current) return
-
-  categoryRef.current.scrollBy({
-    left: direction === 'left' ? -300 : 300,
-    behavior: 'smooth'
-  })
-}
+  const scrollCategorias = (direction) => {
+    if (!categoryRef.current) return
+    categoryRef.current.scrollBy({ left: direction === 'left' ? -300 : 300, behavior: 'smooth' })
+  }
 
   const buscarEventos = useCallback(() => {
     setLoading(true)
@@ -69,6 +80,46 @@ const scrollCategorias = (direction) => {
     buscarEventos()
   }, [buscarEventos])
 
+  // Debounce da busca (300ms) — evita bater no backend a cada tecla
+  useEffect(() => {
+    const t = setTimeout(() => setBuscaDebounced(busca.trim()), 300)
+    return () => clearTimeout(t)
+  }, [busca])
+
+  // Busca server-side com paginação, disparada quando o termo debounced muda
+  useEffect(() => {
+    if (!buscaDebounced) {
+      setBuscaResultados([])
+      setBuscaPage(0)
+      setBuscaTotalPages(0)
+      return
+    }
+    let ativo = true
+    setBuscando(true)
+    buscarEventosPaginado({ q: buscaDebounced, page: 0, size: PAGE_SIZE })
+      .then(({ data }) => {
+        if (!ativo) return
+        setBuscaResultados(data.content || [])
+        setBuscaPage(0)
+        setBuscaTotalPages(data.totalPages || 0)
+      })
+      .catch(() => { if (ativo) setBuscaResultados([]) })
+      .finally(() => { if (ativo) setBuscando(false) })
+    return () => { ativo = false }
+  }, [buscaDebounced])
+
+  const carregarMaisBusca = () => {
+    const proximaPagina = buscaPage + 1
+    setBuscando(true)
+    buscarEventosPaginado({ q: buscaDebounced, page: proximaPagina, size: PAGE_SIZE })
+      .then(({ data }) => {
+        setBuscaResultados((prev) => [...prev, ...(data.content || [])])
+        setBuscaPage(proximaPagina)
+        setBuscaTotalPages(data.totalPages || 0)
+      })
+      .finally(() => setBuscando(false))
+  }
+
   const handleFavoritar = async (e, eventoId) => {
     e.stopPropagation()
     if (!user) return
@@ -79,45 +130,45 @@ const scrollCategorias = (direction) => {
     finally { setFavoritando(null) }
   }
 
-  const handleAbrirEditar = (evento) => {
-    setEditForm({
-      id: evento.id,
-      nome: evento.nome || '',
-      descricao: evento.descricao || '',
-      dataInicio: evento.dataInicio ? evento.dataInicio.slice(0, 16) : '',
-      dataFim: evento.dataFim ? evento.dataFim.slice(0, 16) : '',
-      cidade: evento.cidade || '',
-      linkExterno: evento.linkExterno || '',
-    })
-    setShowEditModal(true)
+  const handleEventoSalvo = (eventoAtualizado) => {
+    setEventos((prev) => prev.map((e) => (e.id === eventoAtualizado.id ? { ...e, ...eventoAtualizado } : e)))
+    setBuscaResultados((prev) => prev.map((e) => (e.id === eventoAtualizado.id ? { ...e, ...eventoAtualizado } : e)))
+    setEditingEvento(null)
   }
 
-  const handleSalvarEdicao = async () => {
-    setEditLoading(true)
+  const handleConfirmarExclusao = async () => {
+    if (!deletingEvento) return
+    setExcluindo(true)
     try {
-      const payload = {
-        ...editForm,
-        dataInicio: new Date(editForm.dataInicio).toISOString(),
-        dataFim: editForm.dataFim ? new Date(editForm.dataFim).toISOString() : null,
-      }
-      const { data } = await api.put(`/eventos/${editForm.id}`, payload)
-      setEventos((prev) => prev.map((e) => (e.id === editForm.id ? { ...e, ...data } : e)))
-      setShowEditModal(false)
+      await excluirEvento(deletingEvento.id)
+      setEventos((prev) => prev.filter((e) => e.id !== deletingEvento.id))
+      setBuscaResultados((prev) => prev.filter((e) => e.id !== deletingEvento.id))
+      setDeletingEvento(null)
     } catch {
-      alert('Erro ao editar evento.')
+      alert('Erro ao excluir evento. Tente novamente.')
     } finally {
-      setEditLoading(false)
+      setExcluindo(false)
     }
   }
 
-  const eventosFiltrados = eventos.filter((e) => {
-    const matchBusca = !busca ||
-      e.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-      e.descricao?.toLowerCase().includes(busca.toLowerCase()) ||
-      e.cidade?.toLowerCase().includes(busca.toLowerCase())
-    const matchCategoria = category === 'Todas' || e.categoria?.nome === category
+  const emModoBusca = buscaDebounced.length > 0
+  const listaBase = emModoBusca ? buscaResultados : eventos
+
+  const eventosFiltrados = listaBase.filter((e) => {
+    const matchCategoria = category === 'Todas' || normalizeText(e.categoria?.nome) === normalizeText(category)
+    // a busca textual já foi feita no servidor quando em modo busca;
+    // aqui só reforça no modo lista completa (categoria + busca juntas)
+    const matchBusca = emModoBusca || !busca ||
+      normalizeText(e.nome).includes(normalizeText(busca)) ||
+      normalizeText(e.descricao).includes(normalizeText(busca)) ||
+      normalizeText(e.cidade).includes(normalizeText(busca))
     return matchBusca && matchCategoria
   })
+
+  const temFiltrosAtivos = !!busca || category !== 'Todas'
+  const limparFiltros = () => { setBusca(''); setCategory('Todas') }
+
+  const carregandoAtual = emModoBusca ? (buscando && buscaPage === 0) : loading
 
   return (
     <div className="home-page">
@@ -150,6 +201,11 @@ const scrollCategorias = (direction) => {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
+            {!!busca && (
+              <button className="search-clear-btn" onClick={() => setBusca('')} title="Limpar busca">
+                <i className="bi bi-x-circle-fill"></i>
+              </button>
+            )}
           </div>
           <button className="filter-button" onClick={() => setShowMapaModal(true)}>
             <i className="bi bi-geo-alt"></i> Ver no mapa
@@ -157,45 +213,34 @@ const scrollCategorias = (direction) => {
         </div>
       </section>
 
-     <div className="category-strip-wrapper">
+      <div className="category-strip-wrapper">
+        <button className="category-arrow" onClick={() => scrollCategorias('left')}>
+          <i className="bi bi-chevron-left"></i>
+        </button>
 
-  <button
-    className="category-arrow"
-    onClick={() => scrollCategorias('left')}
-  >
-    <i className="bi bi-chevron-left"></i>
-  </button>
+        <div className="category-strip" ref={categoryRef}>
+          {CATEGORIAS.map((cat) => (
+            <button
+              key={cat}
+              className={`category-chip${category === cat ? ' category-chip--active' : ''}`}
+              onClick={() => setCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-  <div
-    className="category-strip"
-    ref={categoryRef}
-  >
-    {CATEGORIAS.map((cat) => (
-      <button
-        key={cat}
-        className={`category-chip${category === cat ? ' category-chip--active' : ''}`}
-        onClick={() => setCategory(cat)}
-      >
-        {cat}
-      </button>
-    ))}
-  </div>
-
-  <button
-    className="category-arrow"
-    onClick={() => scrollCategorias('right')}
-  >
-    <i className="bi bi-chevron-right"></i>
-  </button>
-
-</div>
+        <button className="category-arrow" onClick={() => scrollCategorias('right')}>
+          <i className="bi bi-chevron-right"></i>
+        </button>
+      </div>
 
       {/* ── Results header ── */}
       <div className="results-header">
         <h2 className="results-title">
           {category === 'Todas' ? 'Todos os eventos' : category}
         </h2>
-        {!loading && (
+        {!carregandoAtual && (
           <span className="results-count">
             <i className="bi bi-calendar3"></i>
             {eventosFiltrados.length} {eventosFiltrados.length === 1 ? 'evento' : 'eventos'}
@@ -205,65 +250,111 @@ const scrollCategorias = (direction) => {
 
       {/* ── Grid ── */}
       <main className="events-grid">
-        {loading ? (
+        {carregandoAtual ? (
           Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
         ) : eventosFiltrados.length === 0 ? (
           <div className="home-state-wrapper">
             <i className="bi bi-calendar-x home-state-icon"></i>
-            <strong style={{ color: 'rgba(255,255,255,.7)' }}>Nenhum evento encontrado</strong>
-            <span>Tente ajustar os filtros ou pesquisar por outra cidade.</span>
+            <strong style={{ color: 'rgba(255,255,255,.7)' }}>
+              {temFiltrosAtivos ? 'Nenhum evento encontrado' : 'Ainda não há eventos por aqui'}
+            </strong>
+            <span>
+              {temFiltrosAtivos
+                ? 'Tente ajustar os filtros ou pesquisar por outro termo.'
+                : 'Assim que alguém publicar um evento, ele aparece aqui.'}
+            </span>
+            {temFiltrosAtivos && (
+              <button className="btn-limpar-filtros" onClick={limparFiltros}>
+                <i className="bi bi-x-lg"></i> Limpar filtros
+              </button>
+            )}
           </div>
         ) : (
-          eventosFiltrados.map((evento) => (
-            <div
-              key={evento.id}
-              className="event-card"
-              onClick={() => navigate(`/eventos/${evento.id}`)}
-            >
-              <div className="event-image-wrapper">
-                {evento.cardImage ? (
-                  <img
-                    src={`data:image/jpeg;base64,${evento.cardImage}`}
-                    alt={evento.nome}
-                    className="event-image"
-                  />
-                ) : (
-                  <div className="event-image event-image--empty">
-                    <i className="bi bi-calendar-event"></i>
+          eventosFiltrados.map((evento) => {
+            const isOwner = !!user && evento.idUsuarioFk === user.id
+            const encerrado = isEventoEncerrado(evento)
+            return (
+              <div
+                key={evento.id}
+                className={`event-card${encerrado ? ' event-card--encerrado' : ''}`}
+                onClick={() => navigate(`/eventos/${evento.id}`)}
+              >
+                <div className="event-image-wrapper">
+                  {evento.cardImage ? (
+                    <img
+                      src={`data:image/jpeg;base64,${evento.cardImage}`}
+                      alt={evento.nome}
+                      className="event-image"
+                    />
+                  ) : (
+                    <div className="event-image event-image--empty">
+                      <i className="bi bi-calendar-event"></i>
+                    </div>
+                  )}
+
+                  {evento.categoria && (
+                    <span className="event-category-badge">{evento.categoria.nome}</span>
+                  )}
+
+                  {encerrado && <span className="event-encerrado-badge">Encerrado</span>}
+
+                  <div className="event-actions-row">
+                    <ShareButton evento={evento} stopPropagation />
+                    {isOwner && (
+                      <>
+                        <button
+                          className="event-fav-btn"
+                          title="Editar evento"
+                          onClick={(e) => { e.stopPropagation(); setEditingEvento(evento) }}
+                        >
+                          <i className="bi bi-pencil-fill"></i>
+                        </button>
+                        <button
+                          className="event-fav-btn event-fav-btn--danger"
+                          title="Excluir evento"
+                          onClick={(e) => { e.stopPropagation(); setDeletingEvento(evento) }}
+                        >
+                          <i className="bi bi-trash3-fill"></i>
+                        </button>
+                      </>
+                    )}
+                    {user && !isOwner && (
+                      <button
+                        className="event-fav-btn"
+                        onClick={(e) => handleFavoritar(e, evento.id)}
+                        disabled={favoritando === evento.id}
+                        title="Favoritar"
+                      >
+                        <i className="bi bi-heart"></i>
+                      </button>
+                    )}
                   </div>
-                )}
+                </div>
 
-                {evento.categoria && (
-                  <span className="event-category-badge">{evento.categoria.nome}</span>
-                )}
-
-                {user && (
-                  <button
-                    className="event-fav-btn"
-                    onClick={(e) => handleFavoritar(e, evento.id)}
-                    disabled={favoritando === evento.id}
-                    title="Favoritar"
-                  >
-                    <i className="bi bi-heart"></i>
-                  </button>
-                )}
+                <div className="event-content">
+                  <h3 className="event-title">{evento.nome}</h3>
+                  <p className="event-date">
+                    <i className="bi bi-calendar3"></i>
+                    {formatarData(evento.dataInicio, evento.dataFim)}
+                  </p>
+                  <p className="event-location">
+                    <i className="bi bi-geo-alt"></i>
+                    {evento.cidade}
+                  </p>
+                </div>
               </div>
-
-              <div className="event-content">
-                <h3 className="event-title">{evento.nome}</h3>
-                <p className="event-date">
-                  <i className="bi bi-calendar3"></i>
-                  {formatarData(evento.dataInicio, evento.dataFim)}
-                </p>
-                <p className="event-location">
-                  <i className="bi bi-geo-alt"></i>
-                  {evento.cidade}
-                </p>
-              </div>
-            </div>
-          ))
+            )
+          })
         )}
       </main>
+
+      {emModoBusca && buscaPage + 1 < buscaTotalPages && !carregandoAtual && (
+        <div className="carregar-mais-wrapper">
+          <button className="btn-carregar-mais" onClick={carregarMaisBusca} disabled={buscando}>
+            {buscando ? 'Carregando…' : 'Carregar mais eventos'}
+          </button>
+        </div>
+      )}
 
       {/* ── Modal do Mapa ── */}
       {showMapaModal && (
@@ -281,41 +372,24 @@ const scrollCategorias = (direction) => {
       )}
 
       {/* ── Modal de Edição ── */}
-      {showEditModal && editForm && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="edit-evento-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
-            <h3>Editar Evento</h3>
+      {editingEvento && (
+        <EditarEventoModal
+          evento={editingEvento}
+          onClose={() => setEditingEvento(null)}
+          onSalvo={handleEventoSalvo}
+        />
+      )}
 
-            <label>Nome *</label>
-            <input className="form-input" value={editForm.nome} onChange={(e) => setEditForm({ ...editForm, nome: e.target.value })} maxLength={100} />
-
-            <label>Descrição</label>
-            <textarea className="form-textarea" rows={4} value={editForm.descricao} onChange={(e) => setEditForm({ ...editForm, descricao: e.target.value })} maxLength={255} />
-
-            <div className="edit-row">
-              <div>
-                <label>Data de Início *</label>
-                <input className="form-input" type="datetime-local" value={editForm.dataInicio} onChange={(e) => setEditForm({ ...editForm, dataInicio: e.target.value })} />
-              </div>
-              <div>
-                <label>Data de Término</label>
-                <input className="form-input" type="datetime-local" value={editForm.dataFim} onChange={(e) => setEditForm({ ...editForm, dataFim: e.target.value })} />
-              </div>
-            </div>
-
-            <label>Cidade *</label>
-            <input className="form-input" value={editForm.cidade} onChange={(e) => setEditForm({ ...editForm, cidade: e.target.value })} maxLength={45} />
-
-            <label>Link Externo</label>
-            <input className="form-input" type="url" value={editForm.linkExterno} onChange={(e) => setEditForm({ ...editForm, linkExterno: e.target.value })} placeholder="https://…" />
-
-            <div className="modal-actions">
-              <button onClick={handleSalvarEdicao} disabled={editLoading}>{editLoading ? 'Salvando…' : 'Salvar'}</button>
-              <button onClick={() => setShowEditModal(false)} disabled={editLoading}>Cancelar</button>
-            </div>
-          </div>
-        </div>
+      {/* ── Confirmação de Exclusão ── */}
+      {deletingEvento && (
+        <ConfirmModal
+          title="Excluir este evento?"
+          message={`"${deletingEvento.nome}" será removido permanentemente, junto com favoritos e comentários associados.`}
+          confirmLabel="Excluir evento"
+          loading={excluindo}
+          onConfirm={handleConfirmarExclusao}
+          onCancel={() => setDeletingEvento(null)}
+        />
       )}
     </div>
   )
