@@ -144,7 +144,7 @@ const CriarEvento = () => {
               )}
               {form.descricao && (
                 <p className="preview-descricao">
-                  {form.descricao.slice(0, 120)}{form.descricao.length > 120 ? '...' : ''}
+                  {form.descricao.slice(0, 5000)}{form.descricao.length > 5000 ? '...' : ''}
                 </p>
               )}
             </div>
@@ -221,9 +221,9 @@ const CriarEvento = () => {
                 onChange={handleChange}
                 placeholder="Descreva o evento: programacao, atracoes, informacoes de acesso, etc."
                 rows={5}
-                maxLength={255}
+                maxLength={5000}
               />
-              <small className="form-hint">{form.descricao.length}/255 caracteres</small>
+              <small className="form-hint">{form.descricao.length}/5000 caracteres</small>
             </div>
 
             <div className="form-section">
@@ -278,7 +278,7 @@ const CriarEvento = () => {
                 value={form.cidade}
                 onChange={handleChange}
                 placeholder="Ex: Sao Paulo, SP"
-                maxLength={45}
+                maxLength={100}
                 required
               />
             </div>

@@ -41,6 +41,9 @@ export const redefinirSenha = (email, codigo, novaSenha) =>
 export const VerificarCodigo = (email, codigo) =>
   api.post('/auth/verificar-codigo', { email, codigo })
 
+export const validarCodigo = (email, codigo) =>
+  api.post('/auth/validar-codigo', { email, codigo })
+
 
 
 // USUARIOS

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import '../estilos/AuthSplit.css'
-import { redefinirSenha, esqueciSenha, VerificarCodigo } from '../servicos/api'
+import { redefinirSenha, esqueciSenha, validarCodigo } from '../servicos/api'
 import logo from '../assets/TRAÇO.png'
 
 
@@ -62,7 +62,7 @@ const RedefinirSenha = () => {
     setErro('')
     setVerificando(true)
     try {
-      const { data } = await VerificarCodigo(email, codigo)
+      const { data } = await validarCodigo(email, codigo)
       if (data?.valido) {
         setCodigoConfirmado(true)
       } else {
