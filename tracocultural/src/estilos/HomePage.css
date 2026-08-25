@@ -219,6 +219,12 @@
   min-width: 0;
 }
 
+.notif-item-titulo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+}
+
 .notif-item-mensagem {
   font-size: 0.82rem;
   line-height: 1.4;
@@ -533,6 +539,57 @@
   font-weight: 700;
   box-shadow: 0 4px 14px rgba(212,163,115,.4);
 }
+
+/* ═══════════════════════════════════════════
+   EVENTOS PERTO DE VOCÊ (só scroll horizontal)
+═══════════════════════════════════════════ */
+.nearby-section {
+  padding: 1.6rem 0 0.4rem;
+}
+
+.nearby-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 clamp(1.2rem, 4vw, 3rem);
+  margin-bottom: 0.9rem;
+}
+.nearby-header i { color: var(--color-accent); font-size: 0.9rem; }
+.nearby-header h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+.nearby-cidade {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.5);
+}
+
+/* O ponto chave: overflow-x auto + nowrap, SEM wrap e SEM grid — não
+   importa quantos eventos existam, nunca quebra em mais de uma linha. */
+.nearby-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 0 clamp(1.2rem, 4vw, 3rem) 0.6rem;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.nearby-scroll::-webkit-scrollbar { height: 6px; }
+.nearby-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.15);
+  border-radius: 3px;
+}
+
+.nearby-card {
+  flex: 0 0 auto;
+  width: 240px;
+  scroll-snap-align: start;
+}
+.nearby-card .event-image-wrapper { height: 130px; }
 
 /* ═══════════════════════════════════════════
    RESULTS HEADER

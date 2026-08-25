@@ -37,6 +37,9 @@ const SkeletonCard = () => (
 )
 
 const PAGE_SIZE = 12
+// Zona Oeste de SP — por enquanto só Barueri representa "perto de você"
+// (fixo, não usa geolocalização — mesma decisão tomada no mobile).
+const CIDADE_PERTO_DE_VOCE = 'Barueri'
 
 const Home = () => {
   const { user } = useAuth()
@@ -168,6 +171,13 @@ const Home = () => {
   const temFiltrosAtivos = !!busca || category !== 'Todas'
   const limparFiltros = () => { setBusca(''); setCategory('Todas') }
 
+  // Independente de busca/categoria — sempre calculado a partir da lista
+  // completa carregada, igual no mobile. Usa "includes" (não igualdade
+  // exata) pra tolerar cidade cadastrada como "Barueri, SP" ou variações.
+  const eventosPertoDeVoce = eventos.filter((e) =>
+    normalizeText(e.cidade).includes(normalizeText(CIDADE_PERTO_DE_VOCE))
+  )
+
   const carregandoAtual = emModoBusca ? (buscando && buscaPage === 0) : loading
 
   return (
@@ -234,6 +244,55 @@ const Home = () => {
           <i className="bi bi-chevron-right"></i>
         </button>
       </div>
+
+      {/* ── Eventos perto de você (Barueri, só scroll horizontal) ── */}
+      {!loading && eventosPertoDeVoce.length > 0 && (
+        <section className="nearby-section">
+          <div className="nearby-header">
+            <i className="bi bi-geo-alt-fill"></i>
+            <h2>Eventos perto de você</h2>
+            <span className="nearby-cidade">· {CIDADE_PERTO_DE_VOCE}</span>
+          </div>
+
+          <div className="nearby-scroll">
+            {eventosPertoDeVoce.map((evento) => {
+              const encerrado = isEventoEncerrado(evento)
+              return (
+                <div
+                  key={`nearby-${evento.id}`}
+                  className={`event-card nearby-card${encerrado ? ' event-card--encerrado' : ''}`}
+                  onClick={() => navigate(`/eventos/${evento.id}`)}
+                >
+                  <div className="event-image-wrapper">
+                    {evento.cardImage ? (
+                      <img
+                        src={`data:image/jpeg;base64,${evento.cardImage}`}
+                        alt={evento.nome}
+                        className="event-image"
+                      />
+                    ) : (
+                      <div className="event-image event-image--empty">
+                        <i className="bi bi-calendar-event"></i>
+                      </div>
+                    )}
+                    {evento.categoria && (
+                      <span className="event-category-badge">{evento.categoria.nome}</span>
+                    )}
+                    {encerrado && <span className="event-encerrado-badge">Encerrado</span>}
+                  </div>
+                  <div className="event-content">
+                    <h3 className="event-title">{evento.nome}</h3>
+                    <p className="event-date">
+                      <i className="bi bi-calendar3"></i>
+                      {formatarData(evento.dataInicio, evento.dataFim)}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ── Results header ── */}
       <div className="results-header">
