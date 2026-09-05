@@ -36,7 +36,7 @@
 .tc-app {
   width: 100%;
   min-height: 100vh;
-  background: linear-gradient(160deg, #9c7a74 0%, #9b7875 100%);
+  background: var(--tc-bg);
   color: var(--tc-text);
   font-family: 'Poppins', sans-serif;
 }
@@ -225,6 +225,22 @@
 }
 .tc-btn-primary:hover { background: var(--tc-primary); }
 .tc-btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+.tc-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--tc-radius-pill);
+  background: transparent;
+  border: 1.5px solid var(--tc-border-strong);
+  color: var(--tc-text);
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.tc-btn-secondary:hover { border-color: var(--tc-primary); color: var(--tc-primary); }
+.tc-btn-secondary:disabled { opacity: .6; cursor: not-allowed; }
 
 .tc-hero-media {
   position: relative;
@@ -433,12 +449,16 @@
    PÁGINA — cabeçalho genérico (título + subtítulo)
 ═══════════════════════════════════════════ */
 .tc-page-head {
+  background: linear-gradient(120deg, var(--tc-primary-dark), var(--tc-primary));
+  padding: clamp(2rem, 5vw, 3rem) clamp(1.2rem, 4vw, 3rem) clamp(2.4rem, 5vw, 3.4rem);
+  margin-bottom: -1.4rem;
+}
+.tc-page-head-inner {
   max-width: 1400px;
   margin: 0 auto;
-  padding: clamp(1.6rem, 4vw, 2.4rem) clamp(1.2rem, 4vw, 3rem) 0.5rem;
 }
-.tc-page-title { font-size: clamp(1.5rem, 3vw, 1.9rem); font-weight: 700; }
-.tc-page-sub { margin-top: .4rem; color: var(--tc-text-muted); font-size: .92rem; max-width: 560px; }
+.tc-page-title { font-size: clamp(1.5rem, 3vw, 1.9rem); font-weight: 700; color: #fff; }
+.tc-page-sub { margin-top: .4rem; color: rgba(255,255,255,0.75); font-size: .92rem; max-width: 560px; }
 
 /* ═══════════════════════════════════════════
    EVENTOS — página de listagem
@@ -683,6 +703,11 @@
 .tc-settings-nav-item small { display: block; font-size: .72rem; opacity: .75; font-weight: 400; }
 .tc-settings-nav-item:hover { background: var(--tc-surface-alt); }
 .tc-settings-nav-item--active { background: var(--tc-surface); box-shadow: var(--tc-shadow-sm); color: var(--tc-text); font-weight: 700; }
+.tc-settings-nav-item[data-logout] {
+  margin-top: .5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--tc-border);
+}
 
 .tc-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.2rem; margin-top: 1rem; }
 .tc-form-field { display: flex; flex-direction: column; gap: .35rem; }
@@ -696,10 +721,12 @@
 .tc-form-field input:focus { border-color: var(--tc-primary); }
 
 .tc-danger-box {
-  margin-top: 1.6rem; padding: 1rem 1.2rem;
+  padding: 1rem 1.2rem;
   border: 1px solid rgba(179,65,58,.28); border-radius: var(--tc-radius-md);
   background: rgba(179,65,58,.05);
 }
+.tc-card--danger { border-color: rgba(179,65,58,.2); }
+.tc-card--danger h3 { color: var(--color-danger-dark); }
 .tc-danger-box strong { display: block; margin-bottom: .3rem; }
 .tc-danger-box p { font-size: .84rem; color: var(--tc-text-muted); margin-bottom: .8rem; }
 .tc-btn-danger { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; padding: .6rem 1.2rem; border-radius: var(--tc-radius-pill); background: #fff; border: 1px solid var(--color-danger-dark); color: var(--color-danger-dark); font-weight: 600; font-size: .85rem; line-height: 1; }
@@ -735,4 +762,4 @@
 @media (max-width: 560px) {
   .tc-hero-search { flex-direction: column; }
   .tc-btn-primary { width: 100%; }
-}         
+}

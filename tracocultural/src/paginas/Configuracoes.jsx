@@ -93,8 +93,10 @@ const Configuracoes = () => {
       <Navbar />
 
       <div className="tc-page-head">
-        <h1 className="tc-page-title">Configurações</h1>
-        <p className="tc-page-sub">Gerencie suas preferências e informações da conta.</p>
+        <div className="tc-page-head-inner">
+          <h1 className="tc-page-title">Configurações</h1>
+          <p className="tc-page-sub">Gerencie suas preferências e informações da conta.</p>
+        </div>
       </div>
 
       <div className="tc-settings-layout">
@@ -109,7 +111,7 @@ const Configuracoes = () => {
               <span>{item.label}<small>{item.desc}</small></span>
             </button>
           ))}
-          <button className="tc-settings-nav-item" onClick={logout} style={{ color: '#b3413a' }}>
+          <button className="tc-settings-nav-item" onClick={logout} style={{ color: '#b3413a' }} data-logout>
             <i className="bi bi-box-arrow-right"></i>
             <span>Sair da conta</span>
           </button>
@@ -117,47 +119,52 @@ const Configuracoes = () => {
 
         <div>
           {aba === 'conta' && (
-            <div className="tc-card">
-              <h3>Informações pessoais</h3>
-              {sucesso && <div className="tc-success-bar">Alterações salvas com sucesso!</div>}
-              {erro && <p style={{ color: '#b3413a', fontSize: '.85rem', marginBottom: '.6rem' }}>{erro}</p>}
+            <>
+              <div className="tc-card">
+                <h3>Informações pessoais</h3>
+                {sucesso && <div className="tc-success-bar">Alterações salvas com sucesso!</div>}
+                {erro && <p style={{ color: '#b3413a', fontSize: '.85rem', marginBottom: '.6rem' }}>{erro}</p>}
 
-              <div className="tc-form-grid">
-                <div className="tc-form-field tc-form-field--full">
-                  <label>Nome completo</label>
-                  <input type="text" value={dados.nome} onChange={(e) => setDados({ ...dados, nome: e.target.value })} />
-                </div>
-                <div className="tc-form-field tc-form-field--full">
-                  <label>E-mail</label>
-                  <input type="email" value={dados.email} onChange={(e) => setDados({ ...dados, email: e.target.value })} />
+                <div className="tc-form-grid">
+                  <div className="tc-form-field">
+                    <label>Nome completo</label>
+                    <input type="text" value={dados.nome} onChange={(e) => setDados({ ...dados, nome: e.target.value })} />
+                  </div>
+                  <div className="tc-form-field">
+                    <label>E-mail</label>
+                    <input type="email" value={dados.email} onChange={(e) => setDados({ ...dados, email: e.target.value })} />
+                  </div>
                 </div>
 
-                <div className="tc-form-field tc-form-field--full" style={{ marginTop: '.6rem' }}>
-                  <label style={{ fontSize: '.85rem', fontWeight: 700, color: 'var(--tc-text)' }}>Senha</label>
-                  <button
-                    type="button"
-                    className="tc-btn-primary"
-                    style={{ marginTop: '.4rem' }}
-                    onClick={handleRedefinirSenha}
-                    disabled={enviandoCodigo}
-                  >
-                    {enviandoCodigo ? 'Enviando código…' : 'Redefinir senha'}
+                <button className="tc-btn-primary" style={{ marginTop: '1.2rem' }} onClick={handleSalvar} disabled={loading}>
+                  {loading ? 'Salvando…' : 'Salvar alterações'}
+                </button>
+              </div>
+
+              <div className="tc-card">
+                <h3>Senha</h3>
+                <p style={{ marginBottom: '1rem' }}>Enviaremos um código de confirmação para o seu e-mail antes de definir uma nova senha.</p>
+                <button
+                  type="button"
+                  className="tc-btn-secondary"
+                  onClick={handleRedefinirSenha}
+                  disabled={enviandoCodigo}
+                >
+                  {enviandoCodigo ? 'Enviando código…' : 'Redefinir senha'}
+                </button>
+              </div>
+
+              <div className="tc-card tc-card--danger">
+                <h3>Zona de risco</h3>
+                <div className="tc-danger-box">
+                  <strong>Excluir conta</strong>
+                  <p>Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente removidos.</p>
+                  <button className="tc-btn-danger" onClick={() => { setConfirmText(''); setErroDelete(''); setShowDeleteModal(true) }}>
+                    Excluir conta
                   </button>
                 </div>
               </div>
-
-              <button className="tc-btn-primary" style={{ marginTop: '1.2rem' }} onClick={handleSalvar} disabled={loading}>
-                {loading ? 'Salvando…' : 'Salvar alterações'}
-              </button>
-
-              <div className="tc-danger-box">
-                <strong>Excluir conta</strong>
-                <p>Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente removidos.</p>
-                <button className="tc-btn-danger" onClick={() => { setConfirmText(''); setErroDelete(''); setShowDeleteModal(true) }}>
-                  Excluir conta
-                </button>
-              </div>
-            </div>
+            </>
           )}
 
           {aba === 'preferencias' && (
