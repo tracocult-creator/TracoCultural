@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import logo from '../../assets/TRAÇO.png'
 
 const itens = [
-  { key: 'dashboard',   label: 'Dashboard',   icon: 'bi-speedometer2' },
-  { key: 'eventos',     label: 'Eventos',      icon: 'bi-calendar-event' },
-  { key: 'comentarios', label: 'Comentários',  icon: 'bi-chat-dots' },
-  { key: 'usuarios',    label: 'Usuários',     icon: 'bi-people' },
+  { key: 'dashboard',     label: 'Dashboard',     icon: 'bi-speedometer2' },
+  { key: 'eventos',       label: 'Eventos',       icon: 'bi-calendar-event' },
+  { key: 'comentarios',   label: 'Comentários',   icon: 'bi-chat-dots' },
+  { key: 'usuarios',      label: 'Usuários',      icon: 'bi-people' },
+  { key: 'notificacoes',  label: 'Notificações',  icon: 'bi-megaphone' },
 ]
 
 const SidebarAdmin = ({ aba, setAba, isOpen, onClose }) => {

@@ -67,11 +67,6 @@ export const registrarCompartilhamento = (eventoId) =>
 export const contarCompartilhamentos = (eventoId) =>
   api.get(`/eventos/${eventoId}/compartilhamentos/contagem`)
 
-// NOTIFICAÇÕES
-export const getNotificacoes = () => api.get('/notificacoes')
-export const getNotificacoesNaoLidas = () => api.get('/notificacoes/nao-lidas/contagem')
-export const marcarNotificacaoComoLida = (id) => api.patch(`/notificacoes/${id}/lida`)
-export const marcarTodasNotificacoesComoLidas = () => api.patch('/notificacoes/lidas')
 
 // COMENTÁRIOS
 export const getComentarios = (eventoId) =>
@@ -85,5 +80,14 @@ export const deletarComentario = (eventoId, comentarioId) =>
 export const getFavoritos = () => api.get('/favoritos')
 export const adicionarFavorito = (eventoId) => api.post('/favoritos', { idEventoFk: eventoId })
 export const removerFavorito = (eventoId) => api.delete(`/favoritos/${eventoId}`)
+
+// NOTIFICAÇÕES
+export const getNotificacoes = () => api.get('/notificacoes')
+export const getNotificacoesNaoLidas = () => api.get('/notificacoes/nao-lidas/contagem')
+export const marcarNotificacaoComoLida = (id) => api.patch(`/notificacoes/${id}/lida`)
+export const marcarTodasNotificacoesComoLidas = () => api.patch('/notificacoes/lidas')
+
+// Admin -> notificação geral para todos os usuários da plataforma
+export const enviarNotificacaoGeral = (mensagem) => api.post('/admin/notificacoes', { mensagem })
 
 export default api

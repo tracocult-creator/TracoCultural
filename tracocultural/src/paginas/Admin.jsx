@@ -5,13 +5,15 @@ import Dashboard from '../componentes/admin/Dashboard'
 import EventosAdmin from '../componentes/admin/EventosAdmin'
 import ComentariosAdmin from '../componentes/admin/ComentariosAdmin'
 import UsuariosAdmin from '../componentes/admin/UsuariosAdmin'
+import NotificacoesAdmin from '../componentes/admin/NotificacoesAdmin'
 import '../estilos/admin.css'
 
 const titulos = {
-  dashboard:   'Dashboard',
-  eventos:     'Eventos',
-  comentarios: 'Comentários',
-  usuarios:    'Usuários',
+  dashboard:     'Dashboard',
+  eventos:       'Eventos',
+  comentarios:   'Comentários',
+  usuarios:      'Usuários',
+  notificacoes:  'Notificações',
 }
 
 const Admin = () => {
@@ -27,11 +29,12 @@ const Admin = () => {
 
   const renderConteudo = () => {
     switch (aba) {
-      case 'dashboard':   return <Dashboard showToast={showToast} />
-      case 'eventos':     return <EventosAdmin showToast={showToast} />
-      case 'comentarios': return <ComentariosAdmin showToast={showToast} />
-      case 'usuarios':    return <UsuariosAdmin showToast={showToast} />
-      default:            return null
+      case 'dashboard':     return <Dashboard showToast={showToast} onNavigate={setAba} />
+      case 'eventos':       return <EventosAdmin showToast={showToast} />
+      case 'comentarios':   return <ComentariosAdmin showToast={showToast} />
+      case 'usuarios':      return <UsuariosAdmin showToast={showToast} />
+      case 'notificacoes':  return <NotificacoesAdmin showToast={showToast} />
+      default:              return null
     }
   }
 

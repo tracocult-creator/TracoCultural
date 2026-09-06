@@ -9,7 +9,14 @@ const cards = [
   { key: 'eventosDestacados', label: 'Destaques',          icon: 'bi-star' },
 ]
 
-const Dashboard = ({ showToast }) => {
+const acoesRapidas = [
+  { aba: 'notificacoes', label: 'Enviar notificação', icon: 'bi-megaphone', desc: 'Avise todos os usuários' },
+  { aba: 'eventos',      label: 'Gerenciar eventos',  icon: 'bi-calendar-event', desc: 'Editar, destacar ou excluir' },
+  { aba: 'usuarios',     label: 'Gerenciar usuários',  icon: 'bi-people', desc: 'Promover admins, excluir contas' },
+  { aba: 'comentarios',  label: 'Moderar comentários',  icon: 'bi-chat-dots', desc: 'Revisar e remover conteúdo' },
+]
+
+const Dashboard = ({ showToast, onNavigate }) => {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -34,6 +41,26 @@ const Dashboard = ({ showToast }) => {
             <span className="admin-stat-value">{stats?.[key] ?? '—'}</span>
             <span className="admin-stat-label">{label}</span>
           </div>
+        ))}
+      </div>
+
+      <div className="admin-section-header" style={{ marginTop: '.5rem' }}>
+        <h2 className="admin-section-title">Ações rápidas</h2>
+      </div>
+      <div className="admin-quick-actions">
+        {acoesRapidas.map((a) => (
+          <button
+            key={a.aba}
+            className="admin-quick-action"
+            onClick={() => onNavigate?.(a.aba)}
+          >
+            <span className="admin-quick-action-icon"><i className={`bi ${a.icon}`}></i></span>
+            <span className="admin-quick-action-text">
+              <strong>{a.label}</strong>
+              <small>{a.desc}</small>
+            </span>
+            <i className="bi bi-chevron-right admin-quick-action-arrow"></i>
+          </button>
         ))}
       </div>
     </>

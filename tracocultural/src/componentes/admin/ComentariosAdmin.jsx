@@ -1,10 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import api from '../../servicos/api'
+import AdminToolbar from './AdminToolbar'
+
+const normalizar = (str) =>
+  (str || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
 const ComentariosAdmin = ({ showToast }) => {
   const [comentarios, setComentarios] = useState([])
   const [loading, setLoading] = useState(true)
   const [confirmDelete, setConfirmDelete] = useState(null)
+
+  const [busca, setBusca] = useState('')
+  const [filtroEvento, setFiltroEvento] = useState('todos')
+  const [ordenacao, setOrdenacao] = useState('recentes')
 
   const carregar = () => {
     setLoading(true)
@@ -27,11 +35,68 @@ const ComentariosAdmin = ({ showToast }) => {
 
   const formatarData = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '—'
 
+  const comentariosFiltrados = useMemo(() => {
+    const termo = normalizar(busca.trim())
+    let lista = comentarios.filter((c) => {
+      const nomeEvento = c.nomeEvento || c.evento?.nome
+      if (termo) {
+        const alvo = normalizar(`${c.nomeUsuario || c.usuario?.nome || ''} ${nomeEvento || ''} ${c.texto || ''}`)
+        if (!alvo.includes(termo)) return false
+      }
+      if (filtroEvento === 'com' && !nomeEvento) return false
+      if (filtroEvento === 'sem' && nomeEvento) return false
+      return true
+    })
+
+    const dataDe = (c) => new Date(c.dataCriacao || c.criadoEm || 0).getTime()
+    lista = [...lista].sort((a, b) => (ordenacao === 'recentes' ? dataDe(b) - dataDe(a) : dataDe(a) - dataDe(b)))
+
+    return lista
+  }, [comentarios, busca, filtroEvento, ordenacao])
+
+  const limparFiltros = () => {
+    setBusca('')
+    setFiltroEvento('todos')
+    setOrdenacao('recentes')
+  }
+
   return (
     <>
       <div className="admin-section-header">
         <h2 className="admin-section-title">Gestão de Comentários</h2>
       </div>
+
+      <AdminToolbar
+        searchValue={busca}
+        onSearchChange={setBusca}
+        searchPlaceholder="Pesquisar por usuário, evento ou texto..."
+        filters={[
+          {
+            key: 'evento',
+            label: 'Vínculo',
+            value: filtroEvento,
+            onChange: setFiltroEvento,
+            options: [
+              { value: 'todos', label: 'Todos' },
+              { value: 'com', label: 'Vinculados a evento' },
+              { value: 'sem', label: 'Sem evento vinculado' },
+            ],
+          },
+          {
+            key: 'ordenacao',
+            label: 'Ordenar',
+            value: ordenacao,
+            onChange: setOrdenacao,
+            options: [
+              { value: 'recentes', label: 'Mais recentes' },
+              { value: 'antigos', label: 'Mais antigos' },
+            ],
+          },
+        ]}
+        total={comentarios.length}
+        filteredTotal={comentariosFiltrados.length}
+        onClearFilters={limparFiltros}
+      />
 
       {loading ? (
         <div className="admin-loading"><i className="bi bi-arrow-repeat"></i> Carregando...</div>
@@ -50,7 +115,14 @@ const ComentariosAdmin = ({ showToast }) => {
             <tbody>
               {comentarios.length === 0 ? (
                 <tr><td colSpan={5} className="admin-table-empty">Nenhum comentário encontrado.</td></tr>
-              ) : comentarios.map((c) => (
+              ) : comentariosFiltrados.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="admin-table-empty">
+                    <i className="bi bi-search" style={{ display: 'block', fontSize: '1.4rem', marginBottom: '.4rem' }}></i>
+                    Nenhum comentário corresponde à pesquisa/filtros.
+                  </td>
+                </tr>
+              ) : comentariosFiltrados.map((c) => (
                 <tr key={c.id}>
                   <td>{c.nomeUsuario || c.usuario?.nome || '—'}</td>
                   <td style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

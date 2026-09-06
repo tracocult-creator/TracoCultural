@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import api from '../../servicos/api'
-
-const CATEGORIAS = [
-  'Social','Musica','Cultura & Arte','Profissional','Educacao',
-  'Tecnologia','Bem-Estar','Esporte','Gastronomia','Comercio',
-  'Kids','Religioso','Comunidade','Geek','Viagem',
-]
+import AdminToolbar from './AdminToolbar'
 
 const empty = { nome: '', descricao: '', cidade: '', dataInicio: '', dataFim: '', linkExterno: '' }
+
+const normalizar = (str) =>
+  (str || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
 const EventosAdmin = ({ showToast }) => {
   const [eventos, setEventos] = useState([])
@@ -16,6 +14,11 @@ const EventosAdmin = ({ showToast }) => {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(null)
+
+  const [busca, setBusca] = useState('')
+  const [filtroCategoria, setFiltroCategoria] = useState('todas')
+  const [filtroDestaque, setFiltroDestaque] = useState('todos')
+  const [filtroPatrocinado, setFiltroPatrocinado] = useState('todos')
 
   const carregar = () => {
     setLoading(true)
@@ -80,11 +83,82 @@ const EventosAdmin = ({ showToast }) => {
     } catch { showToast('Erro ao patrocinar evento.', 'error') }
   }
 
+  const categoriasDisponiveis = useMemo(() => {
+    const nomes = new Set(eventos.map((ev) => ev.categoria?.nome).filter(Boolean))
+    return Array.from(nomes).sort((a, b) => a.localeCompare(b, 'pt-BR'))
+  }, [eventos])
+
+  const eventosFiltrados = useMemo(() => {
+    const termo = normalizar(busca.trim())
+    return eventos.filter((ev) => {
+      if (termo) {
+        const alvo = normalizar(`${ev.nome} ${ev.cidade} ${ev.usuario?.nome || ev.nomeUsuario || ''}`)
+        if (!alvo.includes(termo)) return false
+      }
+      if (filtroCategoria !== 'todas' && ev.categoria?.nome !== filtroCategoria) return false
+      if (filtroDestaque === 'sim' && !ev.destacado) return false
+      if (filtroDestaque === 'nao' && ev.destacado) return false
+      if (filtroPatrocinado === 'sim' && !ev.patrocinado) return false
+      if (filtroPatrocinado === 'nao' && ev.patrocinado) return false
+      return true
+    })
+  }, [eventos, busca, filtroCategoria, filtroDestaque, filtroPatrocinado])
+
+  const limparFiltros = () => {
+    setBusca('')
+    setFiltroCategoria('todas')
+    setFiltroDestaque('todos')
+    setFiltroPatrocinado('todos')
+  }
+
   return (
     <>
       <div className="admin-section-header">
         <h2 className="admin-section-title">Gestão de Eventos</h2>
       </div>
+
+      <AdminToolbar
+        searchValue={busca}
+        onSearchChange={setBusca}
+        searchPlaceholder="Pesquisar por nome, cidade ou criador..."
+        filters={[
+          {
+            key: 'categoria',
+            label: 'Categoria',
+            value: filtroCategoria,
+            onChange: setFiltroCategoria,
+            options: [
+              { value: 'todas', label: 'Todas categorias' },
+              ...categoriasDisponiveis.map((c) => ({ value: c, label: c })),
+            ],
+          },
+          {
+            key: 'destaque',
+            label: 'Destaque',
+            value: filtroDestaque,
+            onChange: setFiltroDestaque,
+            options: [
+              { value: 'todos', label: 'Todos' },
+              { value: 'sim', label: 'Destacados' },
+              { value: 'nao', label: 'Não destacados' },
+            ],
+          },
+          {
+            key: 'patrocinado',
+            label: 'Patrocínio',
+            value: filtroPatrocinado,
+            onChange: setFiltroPatrocinado,
+            options: [
+              { value: 'todos', label: 'Todos' },
+              { value: 'sim', label: 'Patrocinados' },
+              { value: 'nao', label: 'Não patrocinados' },
+            ],
+          },
+        ]}
+        total={eventos.length}
+        filteredTotal={eventosFiltrados.length}
+        onClearFilters={limparFiltros}
+      />
 
       {loading ? (
         <div className="admin-loading"><i className="bi bi-arrow-repeat"></i> Carregando...</div>
@@ -105,7 +179,14 @@ const EventosAdmin = ({ showToast }) => {
             <tbody>
               {eventos.length === 0 ? (
                 <tr><td colSpan={7} className="admin-table-empty">Nenhum evento encontrado.</td></tr>
-              ) : eventos.map((ev) => (
+              ) : eventosFiltrados.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="admin-table-empty">
+                    <i className="bi bi-search" style={{ display: 'block', fontSize: '1.4rem', marginBottom: '.4rem' }}></i>
+                    Nenhum evento corresponde à pesquisa/filtros.
+                  </td>
+                </tr>
+              ) : eventosFiltrados.map((ev) => (
                 <tr key={ev.id}>
                   <td style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.nome}</td>
                   <td>{ev.categoria?.nome || '—'}</td>
@@ -123,16 +204,16 @@ const EventosAdmin = ({ showToast }) => {
                   </td>
                   <td>
                     <div className="admin-actions">
-                      <button className="admin-btn admin-btn--primary" onClick={() => abrirEditar(ev)}>
+                      <button className="admin-btn admin-btn--primary" onClick={() => abrirEditar(ev)} title="Editar">
                         <i className="bi bi-pencil"></i>
                       </button>
-                      <button className="admin-btn admin-btn--amber" style={{ background: 'rgba(212,163,115,.15)', color: '#d4a373', border: '1px solid rgba(212,163,115,.3)' }} onClick={() => destacar(ev.id)}>
+                      <button className="admin-btn admin-btn--amber" style={{ background: 'rgba(212,163,115,.15)', color: '#d4a373', border: '1px solid rgba(212,163,115,.3)' }} onClick={() => destacar(ev.id)} title="Destacar">
                         <i className="bi bi-star"></i>
                       </button>
-                      <button className="admin-btn admin-btn--success" onClick={() => patrocinar(ev.id)}>
+                      <button className="admin-btn admin-btn--success" onClick={() => patrocinar(ev.id)} title="Patrocinar">
                         <i className="bi bi-award"></i>
                       </button>
-                      <button className="admin-btn admin-btn--danger" onClick={() => setConfirmDelete(ev)}>
+                      <button className="admin-btn admin-btn--danger" onClick={() => setConfirmDelete(ev)} title="Excluir">
                         <i className="bi bi-trash"></i>
                       </button>
                     </div>
@@ -144,7 +225,7 @@ const EventosAdmin = ({ showToast }) => {
         </div>
       )}
 
-      {/* mmodal editar */}
+      {/* modal editar */}
       {editTarget && (
         <div className="admin-modal-overlay" onClick={() => setEditTarget(null)}>
           <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
