@@ -12,7 +12,7 @@ import {
   deletarComentario,
   excluirEvento,
 } from '../servicos/api'
-import { isEventoEncerrado } from '../utils/text'
+import { isEventoEncerrado, diasAteRemocao } from '../utils/text'
 import '../estilos/EventoDetalhe.css'
 import '../estilos/Modal.css'
 
@@ -212,6 +212,7 @@ const EventoDetalhe = () => {
             {encerrado && (
               <span className="evento-categoria-badge evento-categoria-badge--encerrado">
                 <i className="bi bi-clock-history"></i> Encerrado
+                {typeof diasAteRemocao(evento) === 'number' && ` · será removido em ${diasAteRemocao(evento)}d`}
               </span>
             )}
           </div>

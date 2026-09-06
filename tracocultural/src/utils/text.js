@@ -17,3 +17,20 @@ export function isEventoEncerrado(evento) {
   if (!fim) return false
   return new Date(fim).getTime() < Date.now()
 }
+
+const DIAS_ATE_REMOCAO = 3
+const UM_DIA_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Dias restantes até o backend remover automaticamente um evento encerrado
+ * (mesma regra de EventoService.removerEventosEncerrados: dataFim, ou
+ * dataInicio se não houver dataFim, +3 dias). Retorna null se o evento
+ * ainda não encerrou.
+ */
+export function diasAteRemocao(evento) {
+  if (!isEventoEncerrado(evento)) return null
+  const fim = new Date(evento.dataFim || evento.dataInicio).getTime()
+  const dataRemocao = fim + DIAS_ATE_REMOCAO * UM_DIA_MS
+  const diasRestantes = Math.ceil((dataRemocao - Date.now()) / UM_DIA_MS)
+  return Math.max(0, diasRestantes)
+}

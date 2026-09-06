@@ -6,7 +6,7 @@ import Navbar from '../componentes/Navbar'
 import ConfirmModal from '../componentes/ConfirmModal'
 import EditarEventoModal from '../componentes/EditarEventoModal'
 import ShareButton from '../componentes/ShareButton'
-import { isEventoEncerrado } from '../utils/text'
+import { isEventoEncerrado, diasAteRemocao } from '../utils/text'
 import '../estilos/ProfilePage.css'
 import '../estilos/HomePage.css' // reaproveita .event-actions-row / .event-fav-btn / .event-encerrado-badge
 import '../estilos/Modal.css'
@@ -215,7 +215,11 @@ const Perfil = () => {
                         </div>
                       )}
 
-                      {encerrado && <span className="event-encerrado-badge">Encerrado</span>}
+                      {encerrado && (
+                        <span className="event-encerrado-badge">
+                          Encerrado{typeof diasAteRemocao(evento) === 'number' && ` · some em ${diasAteRemocao(evento)}d`}
+                        </span>
+                      )}
 
                       <div className="event-actions-row">
                         <ShareButton evento={evento} stopPropagation />

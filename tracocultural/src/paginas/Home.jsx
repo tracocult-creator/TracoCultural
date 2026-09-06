@@ -10,7 +10,7 @@ import '../estilos/HomePage.css'
 import '../estilos/Modal.css'
 import { useAuth } from '../contexts/AuthContext'
 import api, { buscarEventosPaginado, excluirEvento } from '../servicos/api'
-import { normalizeText, isEventoEncerrado } from '../utils/text'
+import { normalizeText, isEventoEncerrado, diasAteRemocao } from '../utils/text'
 
 const CATEGORIAS = [
   'Todas', 'Social', 'Música', 'Cultura & Arte', 'Profissional',
@@ -278,7 +278,11 @@ const Home = () => {
                     {evento.categoria && (
                       <span className="event-category-badge">{evento.categoria.nome}</span>
                     )}
-                    {encerrado && <span className="event-encerrado-badge">Encerrado</span>}
+                    {encerrado && (
+                      <span className="event-encerrado-badge">
+                        Encerrado{typeof diasAteRemocao(evento) === 'number' && ` · some em ${diasAteRemocao(evento)}d`}
+                      </span>
+                    )}
                   </div>
                   <div className="event-content">
                     <h3 className="event-title">{evento.nome}</h3>
@@ -355,7 +359,11 @@ const Home = () => {
                     <span className="event-category-badge">{evento.categoria.nome}</span>
                   )}
 
-                  {encerrado && <span className="event-encerrado-badge">Encerrado</span>}
+                  {encerrado && (
+                    <span className="event-encerrado-badge">
+                      Encerrado{typeof diasAteRemocao(evento) === 'number' && ` · some em ${diasAteRemocao(evento)}d`}
+                    </span>
+                  )}
 
                   <div className="event-actions-row">
                     <ShareButton evento={evento} stopPropagation />

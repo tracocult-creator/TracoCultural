@@ -5,6 +5,7 @@ import NotificacaoBell from './NotificacaoBell'
 import logo from '../assets/TRAÇO.png'
 import '../estilos/Modal.css'
 import '../estilos/temaClaro.css'
+import '../estilos/HomePage.css' // estilos do sininho/painel de notificações (.notif-*) -- o Navbar aparece em toda página, então precisa garantir isso aqui, não depender de cada página importar por conta própria
 
 const Navbar = () => {
   const navigate = useNavigate()
