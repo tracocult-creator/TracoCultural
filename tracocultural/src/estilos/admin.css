@@ -790,6 +790,7 @@
   .admin-notif-layout { grid-template-columns: 1fr; }
 }
 
+
 @media (max-width: 768px) {
   .admin-sidebar {
     position: fixed;
