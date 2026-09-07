@@ -1,31 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../componentes/Navbar'
 import api from '../servicos/api'
 import '../estilos/CriarEvento.css'
 
-const CATEGORIAS = [
-  { id: 1,  nome: 'Social' },
-  { id: 2,  nome: 'Musica' },
-  { id: 3,  nome: 'Cultura & Arte' },
-  { id: 4,  nome: 'Profissional' },
-  { id: 5,  nome: 'Educacao' },
-  { id: 6,  nome: 'Tecnologia' },
-  { id: 7,  nome: 'Bem-Estar' },
-  { id: 8,  nome: 'Esporte' },
-  { id: 9,  nome: 'Gastronomia' },
-  { id: 10, nome: 'Comercio' },
-  { id: 11, nome: 'Kids' },
-  { id: 12, nome: 'Religioso' },
-  { id: 13, nome: 'Comunidade' },
-  { id: 14, nome: 'Geek' },
-  { id: 15, nome: 'Viagem' },
-]
-
 const CriarEvento = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
+
+  const [categorias, setCategorias] = useState([])
+  const [categoriasErro, setCategoriasErro] = useState(false)
 
   const [form, setForm] = useState({
     nome: '',
@@ -40,6 +25,15 @@ const CriarEvento = () => {
   const [imagemPreview, setImagemPreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+
+  // Categorias vêm do backend (mesma fonte de verdade que o app mobile usa)
+  // -- uma lista fixa no front corria o risco de mandar um id que não bate
+  // com o real da tabela Categoria.
+  useEffect(() => {
+    api.get('/categorias')
+      .then(({ data }) => setCategorias(Array.isArray(data) ? data : []))
+      .catch(() => setCategoriasErro(true))
+  }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -97,7 +91,16 @@ const CriarEvento = () => {
       await api.post('/eventos', payload)
       navigate('/home')
     } catch (err) {
-      setErro(err.response?.data?.message || 'Erro ao criar evento. Tente novamente.')
+      const status = err.response?.status
+      const mensagemServidor = err.response?.data?.message
+
+      if (status === 403 && !mensagemServidor) {
+        // 403 sem corpo = o token não passou na validação do Spring Security
+        // (sessão expirada/inválida), não é falta de permissão de verdade.
+
+      } else {
+        setErro(mensagemServidor || 'Erro ao criar evento. Tente novamente.')
+      }
     } finally {
       setLoading(false)
     }
@@ -124,7 +127,7 @@ const CriarEvento = () => {
               )}
               {form.categoriaId && (
                 <span className="preview-categoria-badge">
-                  {CATEGORIAS.find(c => c.id === Number(form.categoriaId))?.nome}
+                  {categorias.find(c => c.id === Number(form.categoriaId))?.nome}
                 </span>
               )}
             </div>
@@ -228,18 +231,24 @@ const CriarEvento = () => {
 
             <div className="form-section">
               <label className="form-label">Categoria <span className="obrigatorio">*</span></label>
-              <div className="categoria-grid">
-                {CATEGORIAS.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    className={`categoria-chip ${Number(form.categoriaId) === cat.id ? 'categoria-chip--ativo' : ''}`}
-                    onClick={() => setForm({ ...form, categoriaId: cat.id })}
-                  >
-                    {cat.nome}
-                  </button>
-                ))}
-              </div>
+              {categoriasErro ? (
+                <p className="criar-evento-erro" style={{ marginBottom: 0 }}>
+                  Não foi possível carregar as categorias. Atualize a página.
+                </p>
+              ) : (
+                <div className="categoria-grid">
+                  {categorias.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className={`categoria-chip ${Number(form.categoriaId) === cat.id ? 'categoria-chip--ativo' : ''}`}
+                      onClick={() => setForm({ ...form, categoriaId: cat.id })}
+                    >
+                      {cat.nome}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="form-section">
