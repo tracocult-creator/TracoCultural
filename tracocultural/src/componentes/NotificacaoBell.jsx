@@ -1,19 +1,28 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import {
-  getNotificacoes,
-  getNotificacoesNaoLidas,
-  marcarNotificacaoComoLida,
-  marcarTodasNotificacoesComoLidas,
-} from '../servicos/api'
+import api from '../servicos/api'
 
-const POLL_MS = 60000 // reconsulta a contagem a cada 60s
+const ICONES_TIPO = {
+  COMENTARIO: 'bi-chat-left-text-fill',
+  EVENTO_PROXIMO: 'bi-alarm-fill',
+  EVENTO_ATUALIZACAO: 'bi-arrow-repeat',
+  GERAL: 'bi-megaphone-fill',
+}
 
-const formatarDataRelativa = (dataStr) => {
-  const agora = new Date()
-  const data = new Date(dataStr)
-  const diffMin = Math.floor((agora - data) / 60000)
-  if (diffMin < 1) return 'agora'
+const CORES_TIPO = {
+  COMENTARIO: { bg: 'rgba(212,163,115,0.16)', fg: '#B8864E', bar: '#D4A373' },
+  EVENTO_PROXIMO: { bg: 'rgba(179,65,58,0.14)', fg: '#b3413a', bar: '#b3413a' },
+  EVENTO_ATUALIZACAO: { bg: 'rgba(142,94,86,0.16)', fg: '#8E5E56', bar: '#8E5E56' },
+  GERAL: { bg: 'rgba(60,35,33,0.12)', fg: '#3C2321', bar: '#3C2321' },
+}
+const CORES_PADRAO = { bg: 'rgba(142,94,86,0.16)', fg: '#8E5E56', bar: '#8E5E56' }
+
+function formatarDataRelativa(dataISO) {
+  const data = new Date(dataISO)
+  const diffMs = Date.now() - data.getTime()
+  const diffMin = Math.floor(diffMs / 60000)
+  if (diffMin < 1) return 'agora mesmo'
   if (diffMin < 60) return `há ${diffMin} min`
   const diffH = Math.floor(diffMin / 60)
   if (diffH < 24) return `há ${diffH}h`
@@ -22,203 +31,180 @@ const formatarDataRelativa = (dataStr) => {
   return data.toLocaleDateString('pt-BR')
 }
 
-const formatarDataCompleta = (dataStr) => {
-  const data = new Date(dataStr)
-  return data.toLocaleString('pt-BR', {
+function formatarDataCompleta(dataISO) {
+  return new Date(dataISO).toLocaleString('pt-BR', {
     day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
 
-const ICONES_TIPO = {
-  COMENTARIO: 'bi-chat-left-text-fill',
-  EVENTO_PROXIMO: 'bi-alarm-fill',
-  EVENTO_ATUALIZACAO: 'bi-pencil-fill',
-  GERAL: 'bi-megaphone-fill',
-}
-
-const TITULOS_TIPO = {
-  COMENTARIO: 'Novo comentário',
-  EVENTO_PROXIMO: 'Evento se aproximando',
-  EVENTO_ATUALIZACAO: 'Atualização de evento',
-  GERAL: 'Aviso geral',
-}
-
-/**
- * Sininho de notificações in-app. Sem push de verdade (isso exigiria
- * service worker + VAPID keys) — faz polling leve da contagem de não
- * lidas e busca a lista completa só quando o dropdown é aberto.
- *
- * Clicar numa notificação não navega mais direto pro evento: abre um
- * painel lateral com o conteúdo completo (mensagem, tipo, data cheia) e
- * só navega se a pessoa clicar explicitamente em "Ver evento" dentro dele.
- */
 const NotificacaoBell = () => {
   const navigate = useNavigate()
-  const [aberto, setAberto] = useState(false)
   const [notificacoes, setNotificacoes] = useState([])
   const [naoLidas, setNaoLidas] = useState(0)
-  const [carregando, setCarregando] = useState(false)
-  const [painelNotificacao, setPainelNotificacao] = useState(null)
-  const ref = useRef(null)
+  const [dropdownAberto, setDropdownAberto] = useState(false)
+  const [notificacaoSelecionada, setNotificacaoSelecionada] = useState(null)
+  const wrapperRef = useRef(null)
 
-  const buscarContagem = useCallback(() => {
-    getNotificacoesNaoLidas()
-      .then(({ data }) => setNaoLidas(data.total || 0))
-      .catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    buscarContagem()
-    const interval = setInterval(buscarContagem, POLL_MS)
-    return () => clearInterval(interval)
-  }, [buscarContagem])
-
-  useEffect(() => {
-    const handleClickFora = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setAberto(false)
-    }
-    document.addEventListener('mousedown', handleClickFora)
-    return () => document.removeEventListener('mousedown', handleClickFora)
-  }, [])
-
-  // Fecha o painel lateral com Esc, por acessibilidade/consistência.
-  useEffect(() => {
-    if (!painelNotificacao) return
-    const handleEsc = (e) => { if (e.key === 'Escape') setPainelNotificacao(null) }
-    document.addEventListener('keydown', handleEsc)
-    return () => document.removeEventListener('keydown', handleEsc)
-  }, [painelNotificacao])
-
-  const abrirDropdown = () => {
-    const vaiAbrir = !aberto
-    setAberto(vaiAbrir)
-    if (vaiAbrir) {
-      setCarregando(true)
-      getNotificacoes()
-        .then(({ data }) => setNotificacoes(data))
-        .catch(() => setNotificacoes([]))
-        .finally(() => setCarregando(false))
-    }
+  const carregar = () => {
+    api.get('/notificacoes').then(({ data }) => setNotificacoes(Array.isArray(data) ? data : [])).catch(() => {})
+    api.get('/notificacoes/nao-lidas/contagem').then(({ data }) => setNaoLidas(data?.total ?? 0)).catch(() => {})
   }
 
-  const handleClicarNotificacao = (n) => {
+  useEffect(() => {
+    carregar()
+    const intervalo = setInterval(carregar, 60000)
+    return () => clearInterval(intervalo)
+  }, [])
+
+  useEffect(() => {
+    function aoClicarFora(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setDropdownAberto(false)
+    }
+    document.addEventListener('mousedown', aoClicarFora)
+    return () => document.removeEventListener('mousedown', aoClicarFora)
+  }, [])
+
+  useEffect(() => {
+    function aoApertarEsc(e) {
+      if (e.key === 'Escape') setNotificacaoSelecionada(null)
+    }
+    document.addEventListener('keydown', aoApertarEsc)
+    return () => document.removeEventListener('keydown', aoApertarEsc)
+  }, [])
+
+  async function abrirNotificacao(n) {
+    setDropdownAberto(false)
+    setNotificacaoSelecionada(n)
     if (!n.lida) {
-      setNotificacoes((prev) => prev.map((x) => (x.id === n.id ? { ...x, lida: true } : x)))
-      setNaoLidas((prev) => Math.max(0, prev - 1))
-      marcarNotificacaoComoLida(n.id).catch(() => {})
+      try {
+        await api.patch(`/notificacoes/${n.id}/lida`)
+        setNotificacoes((prev) => prev.map((x) => x.id === n.id ? { ...x, lida: true } : x))
+        setNaoLidas((prev) => Math.max(0, prev - 1))
+      } catch {}
     }
-    setAberto(false)
-    setPainelNotificacao(n)
   }
 
-  const handleVerEvento = () => {
-    if (!painelNotificacao?.idEventoFk) return
-    const idEvento = painelNotificacao.idEventoFk
-    setPainelNotificacao(null)
-    navigate(`/eventos/${idEvento}`)
+  async function marcarTodasComoLidas() {
+    try {
+      await api.patch('/notificacoes/lidas')
+      setNotificacoes((prev) => prev.map((x) => ({ ...x, lida: true })))
+      setNaoLidas(0)
+    } catch {}
   }
 
-  const handleMarcarTodas = (e) => {
-    e.stopPropagation()
-    setNotificacoes((prev) => prev.map((n) => ({ ...n, lida: true })))
-    setNaoLidas(0)
-    marcarTodasNotificacoesComoLidas().catch(() => {})
+  function irParaEvento() {
+    if (notificacaoSelecionada?.idEventoFk) {
+      navigate(`/evento/${notificacaoSelecionada.idEventoFk}`)
+      setNotificacaoSelecionada(null)
+    }
   }
+
+  const cores = notificacaoSelecionada
+    ? (CORES_TIPO[notificacaoSelecionada.tipo] || CORES_PADRAO)
+    : CORES_PADRAO
+
+  // O painel completo (com overlay) é renderizado via portal direto no
+  // <body>, fora da hierarquia do Navbar. Necessário porque o Navbar tem
+  // backdrop-filter (efeito "vidro fosco") -- por regra do CSS, isso cria
+  // um novo "containing block" para qualquer descendente com position:
+  // fixed, fazendo o painel ficar preso/pequeno dentro do Navbar em vez de
+  // cobrir a tela inteira. O portal escapa desse problema.
+  const painel = notificacaoSelecionada && createPortal(
+    <>
+      <div className="notif-panel-overlay" onClick={() => setNotificacaoSelecionada(null)} />
+      <div className="notif-panel">
+        <span className="notif-panel-topbar" style={{ background: cores.bar }} />
+
+        <div className="notif-panel-header">
+          <span className="notif-panel-icone" style={{ background: cores.bg, color: cores.fg }}>
+            <i className={`bi ${ICONES_TIPO[notificacaoSelecionada.tipo] || 'bi-bell-fill'}`}></i>
+          </span>
+          <button className="notif-panel-fechar" onClick={() => setNotificacaoSelecionada(null)} aria-label="Fechar">
+            <i className="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div className="notif-panel-body">
+          <span className="notif-panel-tipo" style={{ background: cores.bg, color: cores.fg }}>
+            {notificacaoSelecionada.tipo === 'COMENTARIO' && 'Comentário'}
+            {notificacaoSelecionada.tipo === 'EVENTO_PROXIMO' && 'Evento próximo'}
+            {notificacaoSelecionada.tipo === 'EVENTO_ATUALIZACAO' && 'Atualização de evento'}
+            {notificacaoSelecionada.tipo === 'GERAL' && 'Aviso geral'}
+            {!['COMENTARIO', 'EVENTO_PROXIMO', 'EVENTO_ATUALIZACAO', 'GERAL'].includes(notificacaoSelecionada.tipo) && 'Notificação'}
+          </span>
+
+          <p className="notif-panel-mensagem">{notificacaoSelecionada.mensagem}</p>
+
+          <p className="notif-panel-data">
+            <i className="bi bi-clock"></i> {formatarDataCompleta(notificacaoSelecionada.dataCriacao)}
+          </p>
+        </div>
+
+        {notificacaoSelecionada.idEventoFk && (
+          <div className="notif-panel-footer">
+            <button className="notif-panel-cta" onClick={irParaEvento}>
+              Ver evento <i className="bi bi-arrow-right"></i>
+            </button>
+          </div>
+        )}
+      </div>
+    </>,
+    document.body
+  )
 
   return (
-    <div className="notif-bell-wrapper" ref={ref}>
+    <div className="notif-bell-wrapper" ref={wrapperRef}>
       <button
-        className="notif-bell-trigger"
-        onClick={abrirDropdown}
+        className="notif-bell-btn"
+        onClick={() => setDropdownAberto((v) => !v)}
         aria-label="Notificações"
-        aria-expanded={aberto}
       >
         <i className="bi bi-bell-fill"></i>
-        {naoLidas > 0 && (
-          <span className="notif-bell-badge">{naoLidas > 9 ? '9+' : naoLidas}</span>
-        )}
+        {naoLidas > 0 && <span className="notif-badge">{naoLidas > 9 ? '9+' : naoLidas}</span>}
       </button>
 
-      {aberto && (
+      {dropdownAberto && (
         <div className="notif-dropdown">
           <div className="notif-dropdown-header">
             <span>Notificações</span>
             {naoLidas > 0 && (
-              <button className="notif-marcar-todas" onClick={handleMarcarTodas}>
+              <button className="notif-marcar-lidas" onClick={marcarTodasComoLidas}>
                 Marcar todas como lidas
               </button>
             )}
           </div>
 
           <div className="notif-dropdown-list">
-            {carregando ? (
-              <div className="notif-dropdown-empty">
-                <i className="bi bi-hourglass-split"></i> Carregando…
-              </div>
-            ) : notificacoes.length === 0 ? (
-              <div className="notif-dropdown-empty">
+            {notificacoes.length === 0 && (
+              <div className="notif-vazio">
                 <i className="bi bi-bell-slash"></i>
-                Nenhuma notificação por aqui ainda.
+                <span>Nenhuma notificação por enquanto</span>
               </div>
-            ) : (
-              notificacoes.map((n) => (
+            )}
+            {notificacoes.map((n) => {
+              const c = CORES_TIPO[n.tipo] || CORES_PADRAO
+              return (
                 <button
                   key={n.id}
-                  className={`notif-item${n.lida ? '' : ' notif-item--nao-lida'}`}
-                  onClick={() => handleClicarNotificacao(n)}
+                  className={`notif-item ${!n.lida ? 'notif-item--nao-lida' : ''}`}
+                  onClick={() => abrirNotificacao(n)}
                 >
-                  <span className="notif-item-icon">
-                    <i className={`bi ${ICONES_TIPO[n.tipo] || 'bi-info-circle-fill'}`}></i>
+                  <span className="notif-item-icone" style={{ background: c.bg, color: c.fg }}>
+                    <i className={`bi ${ICONES_TIPO[n.tipo] || 'bi-bell-fill'}`}></i>
                   </span>
-                  <span className="notif-item-body">
-                    <span className="notif-item-mensagem">{n.mensagem}</span>
+                  <span className="notif-item-corpo">
+                    <span className="notif-item-msg">{n.mensagem}</span>
                     <span className="notif-item-data">{formatarDataRelativa(n.dataCriacao)}</span>
                   </span>
                   {!n.lida && <span className="notif-item-dot" />}
                 </button>
-              ))
-            )}
+              )
+            })}
           </div>
         </div>
       )}
 
-      {/* Painel lateral com a notificação por inteiro */}
-      {painelNotificacao && (
-        <div className="notif-panel-overlay" onClick={() => setPainelNotificacao(null)}>
-          <div className="notif-panel" onClick={(e) => e.stopPropagation()}>
-            <div className="notif-panel-header">
-              <span className="notif-panel-icon">
-                <i className={`bi ${ICONES_TIPO[painelNotificacao.tipo] || 'bi-info-circle-fill'}`}></i>
-              </span>
-              <span className="notif-panel-tipo">
-                {TITULOS_TIPO[painelNotificacao.tipo] || 'Notificação'}
-              </span>
-              <button
-                className="notif-panel-close"
-                onClick={() => setPainelNotificacao(null)}
-                aria-label="Fechar"
-              >
-                <i className="bi bi-x-lg"></i>
-              </button>
-            </div>
-
-            <div className="notif-panel-body">
-              <p className="notif-panel-mensagem">{painelNotificacao.mensagem}</p>
-              <p className="notif-panel-data">
-                <i className="bi bi-clock"></i> {formatarDataCompleta(painelNotificacao.dataCriacao)}
-              </p>
-            </div>
-
-            {painelNotificacao.idEventoFk && (
-              <div className="notif-panel-actions">
-                <button className="notif-panel-btn-evento" onClick={handleVerEvento}>
-                  Ver evento <i className="bi bi-arrow-right"></i>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {painel}
     </div>
   )
 }

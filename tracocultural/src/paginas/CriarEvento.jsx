@@ -97,7 +97,7 @@ const CriarEvento = () => {
       if (status === 403 && !mensagemServidor) {
         // 403 sem corpo = o token não passou na validação do Spring Security
         // (sessão expirada/inválida), não é falta de permissão de verdade.
-
+        setErro('Sua sessão expirou. Saia e entre novamente para continuar.')
       } else {
         setErro(mensagemServidor || 'Erro ao criar evento. Tente novamente.')
       }
