@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { enviarNotificacaoGeral } from '../../servicos/api'
 
-const LIMITE_CARACTERES = 500
+const LIMITE_CARACTERES = 5000
 
 const SUGESTOES = [
   'A plataforma passará por manutenção programada às 22h.',
@@ -80,7 +80,7 @@ const NotificacoesAdmin = ({ showToast }) => {
               onChange={(e) => setMensagem(e.target.value)}
               placeholder="Ex: A plataforma passará por manutenção às 22h."
               rows={5}
-              maxLength={LIMITE_CARACTERES + 50}
+              maxLength={LIMITE_CARACTERES + 5000}
             />
             <span className={`admin-char-counter ${restantes < 0 ? 'admin-char-counter--over' : ''}`}>
               {mensagem.length}/{LIMITE_CARACTERES}
