@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../componentes/Navbar'
 import ConfirmModal from '../componentes/ConfirmModal'
 import EditarEventoModal from '../componentes/EditarEventoModal'
+import NotificarFavoritosModal from '../componentes/NotificarFavoritosModal'
 import ShareButton from '../componentes/ShareButton'
 import { isEventoEncerrado, diasAteRemocao } from '../utils/text'
 import '../estilos/ProfilePage.css'
@@ -37,6 +38,7 @@ const Perfil = () => {
   const [erroSenha, setErroSenha] = useState('')
 
   const [editingEvento, setEditingEvento] = useState(null)
+  const [notifyingEvento, setNotifyingEvento] = useState(null)
   const [deletingEvento, setDeletingEvento] = useState(null)
   const [excluindo, setExcluindo] = useState(false)
 
@@ -225,6 +227,13 @@ const Perfil = () => {
                         <ShareButton evento={evento} stopPropagation />
                         <button
                           className="event-fav-btn"
+                          title="Notificar quem favoritou"
+                          onClick={(e) => { e.stopPropagation(); setNotifyingEvento(evento) }}
+                        >
+                          <i className="bi bi-bell-fill"></i>
+                        </button>
+                        <button
+                          className="event-fav-btn"
                           title="Editar evento"
                           onClick={(e) => { e.stopPropagation(); setEditingEvento(evento) }}
                         >
@@ -315,6 +324,13 @@ const Perfil = () => {
             evento={editingEvento}
             onClose={() => setEditingEvento(null)}
             onSalvo={handleEventoSalvo}
+          />
+        )}
+
+        {notifyingEvento && (
+          <NotificarFavoritosModal
+            evento={notifyingEvento}
+            onClose={() => setNotifyingEvento(null)}
           />
         )}
 

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../componentes/Navbar'
 import ConfirmModal from '../componentes/ConfirmModal'
 import EditarEventoModal from '../componentes/EditarEventoModal'
+import NotificarFavoritosModal from '../componentes/NotificarFavoritosModal'
 import ShareButton from '../componentes/ShareButton'
 import {
   getEventoPorId,
@@ -48,6 +49,7 @@ const EventoDetalhe = () => {
   const [erro, setErro] = useState('')
 
   const [editando, setEditando] = useState(false)
+  const [notificando, setNotificando] = useState(false)
   const [excluindoEvento, setExcluindoEvento] = useState(false)
   const [confirmarExclusaoEvento, setConfirmarExclusaoEvento] = useState(false)
   const [comentarioParaExcluir, setComentarioParaExcluir] = useState(null)
@@ -148,6 +150,13 @@ const EventoDetalhe = () => {
             <ShareButton evento={evento} className="evento-hero-action-btn" />
             {isOwner && (
               <>
+                <button
+                  className="evento-hero-action-btn"
+                  title="Notificar quem favoritou"
+                  onClick={() => setNotificando(true)}
+                >
+                  <i className="bi bi-bell-fill"></i>
+                </button>
                 <button className="evento-hero-action-btn" title="Editar evento" onClick={() => setEditando(true)}>
                   <i className="bi bi-pencil-fill"></i>
                 </button>
@@ -181,6 +190,13 @@ const EventoDetalhe = () => {
                 <ShareButton evento={evento} className="evento-hero-action-btn evento-hero-action-btn--light" />
                 {isOwner && (
                   <>
+                    <button
+                      className="evento-hero-action-btn evento-hero-action-btn--light"
+                      title="Notificar quem favoritou"
+                      onClick={() => setNotificando(true)}
+                    >
+                      <i className="bi bi-bell-fill"></i>
+                    </button>
                     <button
                       className="evento-hero-action-btn evento-hero-action-btn--light"
                       title="Editar evento"
@@ -356,6 +372,13 @@ const EventoDetalhe = () => {
           evento={evento}
           onClose={() => setEditando(false)}
           onSalvo={(atualizado) => { setEvento((prev) => ({ ...prev, ...atualizado })); setEditando(false) }}
+        />
+      )}
+
+      {notificando && (
+        <NotificarFavoritosModal
+          evento={evento}
+          onClose={() => setNotificando(false)}
         />
       )}
 

@@ -586,3 +586,207 @@
   padding: 1.5rem;
   margin-top: 0.5rem;
 }
+
+/* ── Modal de Notificar Favoritos ── */
+.notify-fav-modal {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  width: 90%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: var(--color-text);
+  animation: modalIn 0.28s ease;
+  box-shadow: var(--shadow-lg);
+}
+
+.notify-fav-modal::before {
+  content: '';
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg, var(--color-primary-dark), var(--color-amber));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.notify-fav-modal h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  padding: 1.5rem 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notify-fav-subtitle {
+  padding: 0.4rem 1.5rem 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.notify-fav-modal label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  padding: 0 1.5rem;
+  margin-top: 1rem;
+}
+
+.notify-fav-modal .form-textarea {
+  resize: vertical;
+}
+
+.notify-fav-counter {
+  display: block;
+  text-align: right;
+  padding: 0.25rem 1.5rem 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.notify-fav-counter--over {
+  color: var(--color-danger-dark);
+  font-weight: 600;
+}
+
+.notify-fav-erro {
+  margin: 0.5rem 1.5rem 0;
+  font-size: 0.85rem;
+  color: var(--color-danger-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.notify-fav-modal .modal-actions {
+  padding: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.notify-fav-sucesso {
+  margin: 1rem 1.5rem 0;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(46, 160, 67, 0.1);
+  color: #1e7d32;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.notify-fav-sucesso i {
+  font-size: 1.1rem;
+  margin-top: 0.1rem;
+}
+
+/* ── Histórico de avisos dentro do modal de notificar favoritos ── */
+.notify-fav-historico {
+  border-top: 1px solid #f0ebe9;
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.notify-fav-historico h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.notify-fav-historico-vazio {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.notify-fav-historico ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.notify-fav-historico li {
+  background: #faf8f7;
+  border: 1px solid #f0ebe9;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+}
+
+.notify-fav-historico-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.notify-fav-historico li p {
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.notify-fav-historico-edit {
+  width: 100%;
+  margin: 0 0 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border: 2px solid #ede8e7;
+  border-radius: var(--radius-sm);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+.notify-fav-historico-edit:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.notify-fav-historico-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.notify-fav-historico-actions button {
+  border: none;
+  background: rgba(142, 94, 86, 0.1);
+  color: var(--color-primary);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.notify-fav-historico-actions button:hover:not(:disabled) {
+  background: rgba(142, 94, 86, 0.2);
+}
+
+.notify-fav-historico-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notify-fav-historico-danger {
+  background: rgba(var(--color-danger-dark-rgb), 0.1) !important;
+  color: var(--color-danger-dark) !important;
+}
+
+.notify-fav-historico-danger:hover:not(:disabled) {
+  background: rgba(var(--color-danger-dark-rgb), 0.2) !important;
+}

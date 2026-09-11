@@ -1,5 +1,3 @@
-
- 
 .admin-layout {
   display: flex;
   min-height: 100vh;
@@ -777,12 +775,41 @@
 .admin-notif-history-hora { font-size: .72rem; color: rgba(255,255,255,.4); }
 
 .admin-notif-history li p {
-  margin: 0;
+  margin: 0 0 .5rem;
   font-size: .8rem;
   color: rgba(255,255,255,.7);
   line-height: 1.4;
   overflow: hidden;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+
+.admin-notif-history-actions {
+  display: flex;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.admin-notif-history-actions .admin-btn {
+  padding: .35rem .75rem;
+  font-size: .74rem;
+}
+
+.admin-notif-history-edit-textarea {
+  width: 100%;
+  margin: .4rem 0 0;
+  padding: .6rem .7rem;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: .8rem;
+  resize: vertical;
+}
+
+.admin-notif-history-edit-textarea:focus {
+  outline: none;
+  border-color: rgba(212,163,115,.5);
 }
 
 /* ── Responsive ── */

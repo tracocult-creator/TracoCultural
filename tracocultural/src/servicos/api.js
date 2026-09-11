@@ -87,7 +87,17 @@ export const getNotificacoesNaoLidas = () => api.get('/notificacoes/nao-lidas/co
 export const marcarNotificacaoComoLida = (id) => api.patch(`/notificacoes/${id}/lida`)
 export const marcarTodasNotificacoesComoLidas = () => api.patch('/notificacoes/lidas')
 
+// Dono do evento (ou admin) -> notifica só quem favoritou aquele evento
+export const notificarFavoritosDoEvento = (eventoId, mensagem) =>
+  api.post(`/eventos/${eventoId}/notificar-favoritos`, { mensagem })
+
 // Admin -> notificação geral para todos os usuários da plataforma
 export const enviarNotificacaoGeral = (mensagem) => api.post('/admin/notificacoes', { mensagem })
+
+// Envios em lote (histórico persistido) -> usado no painel do admin e
+// na tela de quem cria evento, pra editar/excluir um envio inteiro
+export const listarEnviosNotificacao = () => api.get('/notificacoes/envios')
+export const editarEnvioNotificacao = (id, mensagem) => api.put(`/notificacoes/envios/${id}`, { mensagem })
+export const excluirEnvioNotificacao = (id) => api.delete(`/notificacoes/envios/${id}`)
 
 export default api
