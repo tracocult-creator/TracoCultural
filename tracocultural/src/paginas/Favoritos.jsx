@@ -14,7 +14,7 @@ const Favoritos = () => {
   useEffect(() => {
     if (!user) return
     getFavoritos()
-      .then(({ data }) => setFavoritos(data))
+      .then(({ data }) => setFavoritos(Array.isArray(data) ? data : []))
       .catch(() => setFavoritos([]))
       .finally(() => setLoading(false))
   }, [user])
@@ -22,7 +22,7 @@ const Favoritos = () => {
   const removerFavorito = async (eventoId) => {
     try {
       await removerFavoritoApi(eventoId)
-      setFavoritos((prev) => prev.filter((f) => f.evento.id !== eventoId))
+      setFavoritos((prev) => prev.filter((evento) => evento.id !== eventoId))
     } catch {}
   }
 
@@ -50,18 +50,18 @@ const Favoritos = () => {
           </div>
         ) : (
           <div className="favorites-grid">
-            {favoritos.map((fav) => {
-              const titulo = fav.evento.nome
-              const imagem = fav.evento.cardImage ? `data:image/jpeg;base64,${fav.evento.cardImage}` : null
-              const categoria = fav.evento.categoria?.nome
-              const data = fav.evento.dataInicio ? new Date(fav.evento.dataInicio).toLocaleDateString('pt-BR') : null
-              const local = fav.evento.cidade || 'Local a confirmar'
+            {favoritos.map((evento) => {
+              const titulo = evento.nome
+              const imagem = evento.cardImage ? `data:image/jpeg;base64,${evento.cardImage}` : null
+              const categoria = evento.categoria?.nome
+              const data = evento.dataInicio ? new Date(evento.dataInicio).toLocaleDateString('pt-BR') : null
+              const local = evento.cidade || 'Local a confirmar'
 
               return (
               <div
-                key={fav.id}
+                key={evento.id}
                 className="favorite-card"
-                onClick={() => navigate(`/eventos/${fav.evento.id}`)}
+                onClick={() => navigate(`/eventos/${evento.id}`)}
               >
                 <div className="favorite-image-wrap">
                   {imagem ? (
@@ -75,7 +75,7 @@ const Favoritos = () => {
                   <button
                     className="favorite-remove-btn"
                     title="Remover dos favoritos"
-                    onClick={(e) => { e.stopPropagation(); removerFavorito(fav.evento.id) }}
+                    onClick={(e) => { e.stopPropagation(); removerFavorito(evento.id) }}
                   >
                     <i className="bi bi-trash"></i>
                   </button>
