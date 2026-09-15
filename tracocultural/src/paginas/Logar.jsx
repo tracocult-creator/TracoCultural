@@ -29,6 +29,12 @@ const Logar = () => {
     setLoading(true)
     try {
       const { data } = await loginUsuario(email, senha)
+      if (!data?.token) {
+        
+        console.error('[Logar] resposta de login sem token:', data)
+        setErros({ geral: 'Não foi possível concluir o login (resposta do servidor incompleta). Tente novamente em instantes.' })
+        return
+      }
       login(data)
       navigate('/home')
     } catch (err) {

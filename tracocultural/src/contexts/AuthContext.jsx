@@ -20,6 +20,8 @@ export const AuthProvider = ({ children }) => {
       setUser(userWithoutToken)
       localStorage.setItem('user', JSON.stringify(userWithoutToken))
     } else {
+      
+      console.error('[AuthContext] login() chamado sem token na resposta. Nenhum token foi salvo -- chamadas autenticadas vão falhar. Resposta recebida:', userData)
       setUser(userData)
       localStorage.setItem('user', JSON.stringify(userData))
     }
