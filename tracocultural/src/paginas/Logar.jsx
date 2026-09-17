@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import '../estilos/AuthSplit.css'
 import { useAuth } from '../contexts/AuthContext'
 import { loginUsuario } from '../servicos/api'
@@ -13,6 +13,8 @@ const Logar = () => {
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuth()
+  const [searchParams] = useSearchParams()
+  const sessaoExpirada = searchParams.get('sessaoExpirada') === '1'
 
   const validar = () => {
     const novosErros = {}
@@ -69,6 +71,11 @@ const Logar = () => {
             <p>Acesse sua conta Traço Cultural</p>
           </div>
           <form onSubmit={handleSubmit} className="asp-form">
+            {sessaoExpirada && !erros.geral && (
+              <div className="asp-error-message">
+                Sua sessão expirou. Entre novamente para continuar.
+              </div>
+            )}
             {erros.geral && <div className="asp-error-message">{erros.geral}</div>}
             <div className="asp-group">
               <label>Email</label>

@@ -65,7 +65,7 @@ const EditarEventoModal = ({ evento, onClose, onSalvo }) => {
           rows={4}
           value={form.descricao}
           onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-          maxLength={255}
+          maxLength={5000}
         />
 
         <div className="edit-row">

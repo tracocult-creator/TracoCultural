@@ -207,7 +207,7 @@ const Home = () => {
             <input
               type="text"
               className="search-input"
-              placeholder="Pesquisar eventos, artistas ou lugares…"
+              placeholder="Pesquise e explore o Traço Cultural…"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />

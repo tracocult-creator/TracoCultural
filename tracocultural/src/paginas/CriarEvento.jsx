@@ -91,16 +91,12 @@ const CriarEvento = () => {
       await api.post('/eventos', payload)
       navigate('/home')
     } catch (err) {
-      const status = err.response?.status
+      // Sessão inválida (401, ou 403 sem mensagem) já é tratada globalmente pelo
+      // interceptor em api.js, que desloga e redireciona pra /logar. Aqui só
+      // sobra erro de negócio de verdade (ex: campo inválido), que sempre vem
+      // com mensagem do backend.
       const mensagemServidor = err.response?.data?.message
-
-      if (status === 403 && !mensagemServidor) {
-        // 403 sem corpo = o token não passou na validação do Spring Security
-        // (sessão expirada/inválida), não é falta de permissão de verdade.
-        setErro('Sua sessão expirou. Saia e entre novamente para continuar.')
-      } else {
-        setErro(mensagemServidor || 'Erro ao criar evento. Tente novamente.')
-      }
+      setErro(mensagemServidor || 'Erro ao criar evento. Tente novamente.')
     } finally {
       setLoading(false)
     }

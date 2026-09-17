@@ -13,10 +13,27 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+    const temMensagemDoBackend = !!error.response?.data?.message
+
+    // 401 = sempre sessão inválida.
+    // 403 SEM mensagem = também é sessão inválida: é o Spring Security barrando
+    // um token ausente/expirado/corrompido, antes mesmo de chegar na regra de
+    // negócio do controller. 403 COM mensagem é uma regra de negócio de verdade
+    // (ex: "Acesso negado" ao tentar editar evento de outra pessoa) e não deve
+    // deslogar o usuário -- só a própria tela trata esse erro.
+    const sessaoInvalida = status === 401 || (status === 403 && !temMensagemDoBackend)
+
+    if (sessaoInvalida) {
+      console.error('%c[DEBUG SESSÃO] Requisição rejeitada como sessão inválida', 'color: orange; font-weight: bold; font-size: 14px')
+      console.error('URL:', error.config?.baseURL + error.config?.url)
+      console.error('Status:', status)
+      console.error('Corpo da resposta do backend:', error.response?.data)
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/logar'
+      if (window.location.pathname !== '/logar') {
+        window.location.href = '/logar?sessaoExpirada=1'
+      }
     }
     return Promise.reject(error)
   }

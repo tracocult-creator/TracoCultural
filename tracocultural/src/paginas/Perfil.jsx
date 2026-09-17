@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api, { excluirEvento } from '../servicos/api'
+import api, { excluirEvento, esqueciSenha } from '../servicos/api'
 import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../componentes/Navbar'
 import ConfirmModal from '../componentes/ConfirmModal'
@@ -34,8 +34,8 @@ const Perfil = () => {
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState(false)
 
-  const [senhaForm, setSenhaForm] = useState({ senhaAtual: '', novaSenha: '', confirmar: '' })
   const [erroSenha, setErroSenha] = useState('')
+  const [enviandoCodigo, setEnviandoCodigo] = useState(false)
 
   const [editingEvento, setEditingEvento] = useState(null)
   const [notifyingEvento, setNotifyingEvento] = useState(null)
@@ -94,22 +94,19 @@ const Perfil = () => {
     }
   }
 
-  const handleSaveSenha = async () => {
-    if (senhaForm.novaSenha.length < 8) { setErroSenha('Nova senha deve ter no mínimo 8 caracteres.'); return }
-    if (senhaForm.novaSenha !== senhaForm.confirmar) { setErroSenha('As senhas não coincidem.'); return }
+
+
+  const handleEsqueciSenha = async () => {
+    if (!profile?.email) return
     setErroSenha('')
-    setLoading(true)
+    setEnviandoCodigo(true)
     try {
-      await api.patch(`/usuarios/${profile.id}/senha`, {
-        senhaAtual: senhaForm.senhaAtual,
-        novaSenha: senhaForm.novaSenha,
-      })
-      setSenhaForm({ senhaAtual: '', novaSenha: '', confirmar: '' })
-      mostrarSucesso()
+      await esqueciSenha(profile.email)
+      navigate('/redefinir-senha', { state: { email: profile.email } })
     } catch (err) {
-      setErroSenha(err.response?.data?.message || 'Erro ao alterar senha.')
+      setErroSenha(err.response?.data?.message || 'Erro ao enviar o código de redefinição. Tente novamente.')
     } finally {
-      setLoading(false)
+      setEnviandoCodigo(false)
     }
   }
 
@@ -300,18 +297,15 @@ const Perfil = () => {
                 <>
                   {erroSenha && <p className="profile-alert profile-alert--error" style={{ margin: '0 1.5rem .5rem' }}>{erroSenha}</p>}
 
-                  <label>Senha atual:</label>
-                  <input type="password" value={senhaForm.senhaAtual} onChange={(e) => setSenhaForm({ ...senhaForm, senhaAtual: e.target.value })} placeholder="••••••••" />
-
-                  <label>Nova senha:</label>
-                  <input type="password" value={senhaForm.novaSenha} onChange={(e) => setSenhaForm({ ...senhaForm, novaSenha: e.target.value })} placeholder="Mínimo 8 caracteres" />
-
-                  <label>Confirmar nova senha:</label>
-                  <input type="password" value={senhaForm.confirmar} onChange={(e) => setSenhaForm({ ...senhaForm, confirmar: e.target.value })} placeholder="Repita a nova senha" />
+                  <p style={{ margin: '0 0 1rem' }}>
+                    Enviaremos um código de confirmação para o seu e-mail antes de definir uma nova senha.
+                  </p>
 
                   <div className="modal-actions">
-                    <button onClick={handleSaveSenha} disabled={loading}>{loading ? 'Salvando...' : 'Alterar senha'}</button>
-                    <button onClick={() => setIsEditing(false)} disabled={loading}>Cancelar</button>
+                    <button onClick={handleEsqueciSenha} disabled={enviandoCodigo}>
+                      {enviandoCodigo ? 'Enviando código…' : 'Redefinir senha'}
+                    </button>
+                    <button onClick={() => setIsEditing(false)} disabled={enviandoCodigo}>Cancelar</button>
                   </div>
                 </>
               )}
