@@ -9,6 +9,8 @@ import api, { deletarUsuario, esqueciSenha } from '../servicos/api'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+const iniciais = (nome) => (nome || '?').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()
+
 const Configuracoes = () => {
   const { user, login, logout } = useAuth()
   const navigate = useNavigate()
@@ -93,6 +95,7 @@ const Configuracoes = () => {
       <Navbar />
 
       <div className="tc-page-head">
+        <i className="bi bi-gear-fill tc-page-head-watermark"></i>
         <div className="tc-page-head-inner">
           <h1 className="tc-page-title">Configurações</h1>
           <p className="tc-page-sub">Gerencie suas preferências e informações da conta.</p>
@@ -121,7 +124,21 @@ const Configuracoes = () => {
           {aba === 'conta' && (
             <>
               <div className="tc-card">
-                <h3>Informações pessoais</h3>
+                <div className="tc-card-head">
+                  <span className="tc-card-head-icon"><i className="bi bi-person"></i></span>
+                  <h3>Informações pessoais</h3>
+                </div>
+
+                <div className="tc-settings-identity">
+                  <span className="tc-settings-identity-avatar" style={{ background: user?.corFundo || 'var(--tc-primary-dark)' }}>
+                    {iniciais(user?.nome)}
+                  </span>
+                  <div>
+                    <div className="tc-settings-identity-name">{user?.nome || 'Sua conta'}</div>
+                    <div className="tc-settings-identity-email">{user?.email}</div>
+                  </div>
+                </div>
+
                 {sucesso && <div className="tc-success-bar">Alterações salvas com sucesso!</div>}
                 {erro && <p style={{ color: '#b3413a', fontSize: '.85rem', marginBottom: '.6rem' }}>{erro}</p>}
 
@@ -142,7 +159,10 @@ const Configuracoes = () => {
               </div>
 
               <div className="tc-card">
-                <h3>Senha</h3>
+                <div className="tc-card-head">
+                  <span className="tc-card-head-icon"><i className="bi bi-shield-lock"></i></span>
+                  <h3>Senha</h3>
+                </div>
                 <p style={{ marginBottom: '1rem' }}>Enviaremos um código de confirmação para o seu e-mail antes de definir uma nova senha.</p>
                 <button
                   type="button"
@@ -155,7 +175,10 @@ const Configuracoes = () => {
               </div>
 
               <div className="tc-card tc-card--danger">
-                <h3>Zona de risco</h3>
+                <div className="tc-card-head">
+                  <span className="tc-card-head-icon"><i className="bi bi-exclamation-triangle"></i></span>
+                  <h3>Zona de risco</h3>
+                </div>
                 <div className="tc-danger-box">
                   <strong>Excluir conta</strong>
                   <p>Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente removidos.</p>
@@ -169,7 +192,10 @@ const Configuracoes = () => {
 
           {aba === 'preferencias' && (
             <div className="tc-card">
-              <h3>Preferências</h3>
+              <div className="tc-card-head">
+                <span className="tc-card-head-icon"><i className="bi bi-sliders"></i></span>
+                <h3>Preferências</h3>
+              </div>
               <div className="tc-toggle-row">
                 <div className="tc-toggle-row-label">
                   <strong>Compartilhar localização</strong>
@@ -185,7 +211,10 @@ const Configuracoes = () => {
 
           {aba === 'notificacoes' && (
             <div className="tc-card">
-              <h3>Notificações</h3>
+              <div className="tc-card-head">
+                <span className="tc-card-head-icon"><i className="bi bi-bell"></i></span>
+                <h3>Notificações</h3>
+              </div>
               <div className="tc-toggle-row">
                 <div className="tc-toggle-row-label">
                   <strong>Email marketing</strong>

@@ -19,6 +19,7 @@ const EventosAdmin = ({ showToast }) => {
   const [filtroCategoria, setFiltroCategoria] = useState('todas')
   const [filtroDestaque, setFiltroDestaque] = useState('todos')
   const [filtroPatrocinado, setFiltroPatrocinado] = useState('todos')
+  const [filtroAprovacao, setFiltroAprovacao] = useState('pendentes')
 
   const carregar = () => {
     setLoading(true)
@@ -83,6 +84,26 @@ const EventosAdmin = ({ showToast }) => {
     } catch { showToast('Erro ao patrocinar evento.', 'error') }
   }
 
+  const aprovar = async (id) => {
+    try {
+      await api.patch(`/admin/eventos/${id}/aprovar`)
+      showToast('Status de aprovação atualizado!', 'success')
+      carregar()
+    } catch { showToast('Erro ao atualizar aprovação do evento.', 'error') }
+  }
+
+  const [limpando, setLimpando] = useState(false)
+
+  const limparEncerrados = async () => {
+    setLimpando(true)
+    try {
+      const { data } = await api.post('/admin/eventos/limpar-encerrados')
+      showToast(data.message, 'success')
+      carregar()
+    } catch { showToast('Erro ao limpar eventos encerrados.', 'error') }
+    finally { setLimpando(false) }
+  }
+
   const categoriasDisponiveis = useMemo(() => {
     const nomes = new Set(eventos.map((ev) => ev.categoria?.nome).filter(Boolean))
     return Array.from(nomes).sort((a, b) => a.localeCompare(b, 'pt-BR'))
@@ -100,21 +121,28 @@ const EventosAdmin = ({ showToast }) => {
       if (filtroDestaque === 'nao' && ev.destacado) return false
       if (filtroPatrocinado === 'sim' && !ev.patrocinado) return false
       if (filtroPatrocinado === 'nao' && ev.patrocinado) return false
+      if (filtroAprovacao === 'pendentes' && ev.aprovado) return false
+      if (filtroAprovacao === 'aprovados' && !ev.aprovado) return false
       return true
     })
-  }, [eventos, busca, filtroCategoria, filtroDestaque, filtroPatrocinado])
+  }, [eventos, busca, filtroCategoria, filtroDestaque, filtroPatrocinado, filtroAprovacao])
 
   const limparFiltros = () => {
     setBusca('')
     setFiltroCategoria('todas')
     setFiltroDestaque('todos')
     setFiltroPatrocinado('todos')
+    setFiltroAprovacao('todos')
   }
 
   return (
     <>
       <div className="admin-section-header">
         <h2 className="admin-section-title">Gestão de Eventos</h2>
+        <button className="admin-btn admin-btn--neutral" onClick={limparEncerrados} disabled={limpando} title="Remove eventos encerrados há mais de 3 dias (normalmente automático, às 1h)">
+          <i className={`bi ${limpando ? 'bi-arrow-repeat' : 'bi-trash3'}`}></i>
+          {limpando ? ' Limpando...' : ' Limpar encerrados'}
+        </button>
       </div>
 
       <AdminToolbar
@@ -154,6 +182,17 @@ const EventosAdmin = ({ showToast }) => {
               { value: 'nao', label: 'Não patrocinados' },
             ],
           },
+          {
+            key: 'aprovacao',
+            label: 'Aprovação',
+            value: filtroAprovacao,
+            onChange: setFiltroAprovacao,
+            options: [
+              { value: 'todos', label: 'Todos' },
+              { value: 'pendentes', label: `Pendentes (${eventos.filter((e) => !e.aprovado).length})` },
+              { value: 'aprovados', label: 'Aprovados' },
+            ],
+          },
         ]}
         total={eventos.length}
         filteredTotal={eventosFiltrados.length}
@@ -173,15 +212,16 @@ const EventosAdmin = ({ showToast }) => {
                 <th>Criador</th>
                 <th>Destaque</th>
                 <th>Patrocinado</th>
+                <th>Aprovação</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody>
               {eventos.length === 0 ? (
-                <tr><td colSpan={7} className="admin-table-empty">Nenhum evento encontrado.</td></tr>
+                <tr><td colSpan={8} className="admin-table-empty">Nenhum evento encontrado.</td></tr>
               ) : eventosFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="admin-table-empty">
+                  <td colSpan={8} className="admin-table-empty">
                     <i className="bi bi-search" style={{ display: 'block', fontSize: '1.4rem', marginBottom: '.4rem' }}></i>
                     Nenhum evento corresponde à pesquisa/filtros.
                   </td>
@@ -203,9 +243,24 @@ const EventosAdmin = ({ showToast }) => {
                     </span>
                   </td>
                   <td>
+                    <span className={`admin-badge ${ev.aprovado ? 'admin-badge--green' : 'admin-badge--amber'}`}>
+                      {ev.aprovado ? 'Aprovado' : 'Pendente'}
+                    </span>
+                  </td>
+                  <td>
                     <div className="admin-actions">
                       <button className="admin-btn admin-btn--primary" onClick={() => abrirEditar(ev)} title="Editar">
                         <i className="bi bi-pencil"></i>
+                      </button>
+                      <button
+                        className="admin-btn"
+                        style={ev.aprovado
+                          ? { background: 'rgba(220,53,69,.12)', color: '#dc3545', border: '1px solid rgba(220,53,69,.3)' }
+                          : { background: 'rgba(40,167,69,.12)', color: '#28a745', border: '1px solid rgba(40,167,69,.3)' }}
+                        onClick={() => aprovar(ev.id)}
+                        title={ev.aprovado ? 'Desaprovar (tira do ar)' : 'Aprovar (publica pro público)'}
+                      >
+                        <i className={`bi ${ev.aprovado ? 'bi-x-lg' : 'bi-check-lg'}`}></i>
                       </button>
                       <button className="admin-btn admin-btn--amber" style={{ background: 'rgba(212,163,115,.15)', color: '#d4a373', border: '1px solid rgba(212,163,115,.3)' }} onClick={() => destacar(ev.id)} title="Destacar">
                         <i className="bi bi-star"></i>

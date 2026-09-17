@@ -452,13 +452,93 @@
   background: linear-gradient(120deg, var(--tc-primary-dark), var(--tc-primary));
   padding: clamp(2rem, 5vw, 3rem) clamp(1.2rem, 4vw, 3rem) clamp(2.4rem, 5vw, 3.4rem);
   margin-bottom: -1.4rem;
+  position: relative;
+  overflow: hidden;
 }
 .tc-page-head-inner {
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 .tc-page-title { font-size: clamp(1.5rem, 3vw, 1.9rem); font-weight: 700; color: #fff; }
 .tc-page-sub { margin-top: .4rem; color: rgba(255,255,255,0.75); font-size: .92rem; max-width: 560px; }
+
+.tc-page-head-watermark {
+  position: absolute;
+  top: 50%;
+  right: clamp(-1rem, 4vw, 2rem);
+  transform: translateY(-50%);
+  font-size: clamp(6rem, 14vw, 10rem);
+  color: rgba(255,255,255,.08);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Cabeçalho de card com ícone (Configurações) ── */
+.tc-card-head {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  margin-bottom: .9rem;
+}
+.tc-card-head-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--tc-surface-alt);
+  color: var(--tc-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.tc-card--danger .tc-card-head-icon { background: rgba(179,65,58,.1); color: var(--color-danger-dark); }
+.tc-card-head h3 { margin-bottom: 0; }
+
+.tc-settings-layout .tc-card {
+  background: var(--tc-surface-alt);
+  box-shadow: none;
+}
+.tc-settings-layout .tc-card--danger {
+  background: rgba(179,65,58,.045);
+}
+.tc-settings-layout .tc-form-field input {
+  background: var(--tc-surface);
+}
+.tc-settings-layout .tc-card-head-icon {
+  background: var(--tc-surface);
+}
+.tc-settings-nav-item--active {
+  background: var(--tc-surface-alt);
+}
+
+.tc-settings-identity {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding-bottom: 1.2rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--tc-border);
+}
+.tc-settings-identity-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--tc-primary-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.tc-settings-identity-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.tc-settings-identity-name { font-size: 1rem; font-weight: 700; }
+.tc-settings-identity-email { font-size: .84rem; color: var(--tc-text-muted); }
 
 /* ═══════════════════════════════════════════
    EVENTOS — página de listagem
