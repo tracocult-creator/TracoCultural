@@ -326,6 +326,14 @@
    decorativas (divs, ex.: RedefinirSenha) devem deixar o clique passar. */
 input.asp-codigo-digito {
   pointer-events: auto;
+  /* display:flex em cima de um <input> real é inconsistente entre
+     navegadores pra centralizar o próprio valor digitado -- em vez
+     disso, centraliza só com text-align + line-height. */
+  display: block;
+  line-height: 1;
+  padding: 0;
+  -webkit-text-fill-color: var(--color-accent-dark);
+  opacity: 1;
 }
 .asp-codigo-digito {
   width: 100%;
