@@ -28,6 +28,8 @@ const RedefinirSenha = () => {
   // codigoConfirmado: null = ainda não verificado, true = válido, false = inválido
   const [verificando, setVerificando] = useState(false)
   const [codigoConfirmado, setCodigoConfirmado] = useState(null)
+  const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false)
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false)
 
   const inputRef = useRef(null)
 
@@ -243,13 +245,21 @@ const RedefinirSenha = () => {
                 <div className="asp-input-wrapper">
                   <i className="bi bi-lock asp-input-icon"></i>
                   <input
-                    type="password"
+                    type={mostrarNovaSenha ? 'text' : 'password'}
                     value={novaSenha}
                     onChange={(e) => setNovaSenha(e.target.value)}
                     placeholder="Ex: Traco123@"
                     disabled={loading || sucesso || codigoConfirmado !== true}
                     tabIndex={codigoConfirmado === true ? 0 : -1}
                   />
+                  <button
+                    type="button"
+                    className="asp-toggle-senha"
+                    onClick={() => setMostrarNovaSenha((v) => !v)}
+                    tabIndex={-1}
+                  >
+                    <i className={`bi bi-${mostrarNovaSenha ? 'eye-slash' : 'eye'}`}></i>
+                  </button>
                 </div>
                 <p className="asp-senha-requisito">
                   A senha deve conter:
@@ -271,13 +281,21 @@ const RedefinirSenha = () => {
                 <div className="asp-input-wrapper">
                   <i className="bi bi-lock-fill asp-input-icon"></i>
                   <input
-                    type="password"
+                    type={mostrarConfirmarSenha ? 'text' : 'password'}
                     value={confirmarSenha}
                     onChange={(e) => setConfirmarSenha(e.target.value)}
                     placeholder="Repita a nova senha"
                     disabled={loading || sucesso || codigoConfirmado !== true}
                     tabIndex={codigoConfirmado === true ? 0 : -1}
                   />
+                  <button
+                    type="button"
+                    className="asp-toggle-senha"
+                    onClick={() => setMostrarConfirmarSenha((v) => !v)}
+                    tabIndex={-1}
+                  >
+                    <i className={`bi bi-${mostrarConfirmarSenha ? 'eye-slash' : 'eye'}`}></i>
+                  </button>
                 </div>
               </div>
             </div>
