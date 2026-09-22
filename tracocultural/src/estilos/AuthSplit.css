@@ -321,6 +321,12 @@
   gap: .5rem;
   pointer-events: none;
 }
+/* Em telas que usam <input> real dentro do wrapper (ex.: VerificarCodigo),
+   o input precisa continuar clicável/focável -- só as caixinhas
+   decorativas (divs, ex.: RedefinirSenha) devem deixar o clique passar. */
+input.asp-codigo-digito {
+  pointer-events: auto;
+}
 .asp-codigo-digito {
   width: 100%;
   aspect-ratio: 1 / 1;
