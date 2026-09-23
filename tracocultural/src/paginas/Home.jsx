@@ -11,6 +11,7 @@ import '../estilos/Modal.css'
 import { useAuth } from '../contexts/AuthContext'
 import api, { buscarEventosPaginado, excluirEvento } from '../servicos/api'
 import { normalizeText, isEventoEncerrado, diasAteRemocao } from '../utils/text'
+import { useGeoLocation } from '../hooks/useGeoLocation'
 
 const CATEGORIAS = [
   'Todas', 'Social', 'Música', 'Cultura & Arte', 'Profissional',
@@ -37,13 +38,14 @@ const SkeletonCard = () => (
 )
 
 const PAGE_SIZE = 12
-// Zona Oeste de SP — por enquanto só Barueri representa "perto de você"
-// (fixo, não usa geolocalização — mesma decisão tomada no mobile).
-const CIDADE_PERTO_DE_VOCE = 'Barueri'
 
 const Home = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
+  // Cidade "perto de você" descoberta via geolocalização real do
+  // navegador (com reverse geocoding), igual ao mobile — nada fixo.
+  // Se a permissão for negada, `city` fica null e a seção some em silêncio.
+  const { city: cidadePertoDeVoce } = useGeoLocation()
 
   const [eventos, setEventos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -174,9 +176,11 @@ const Home = () => {
   // Independente de busca/categoria — sempre calculado a partir da lista
   // completa carregada, igual no mobile. Usa "includes" (não igualdade
   // exata) pra tolerar cidade cadastrada como "Barueri, SP" ou variações.
-  const eventosPertoDeVoce = eventos.filter((e) =>
-    normalizeText(e.cidade).includes(normalizeText(CIDADE_PERTO_DE_VOCE))
-  )
+  // Só existe depois que a geolocalização devolve a cidade real do
+  // usuário — se a permissão for negada, a seção simplesmente não aparece.
+  const eventosPertoDeVoce = cidadePertoDeVoce
+    ? eventos.filter((e) => normalizeText(e.cidade).includes(normalizeText(cidadePertoDeVoce)))
+    : []
 
   const carregandoAtual = emModoBusca ? (buscando && buscaPage === 0) : loading
 
@@ -245,13 +249,13 @@ const Home = () => {
         </button>
       </div>
 
-      {/* ── Eventos perto de você (Barueri, só scroll horizontal) ── */}
-      {!loading && eventosPertoDeVoce.length > 0 && (
+      {/* ── Eventos perto de você (cidade real do usuário, via geolocalização, só scroll horizontal) ── */}
+      {!loading && cidadePertoDeVoce && eventosPertoDeVoce.length > 0 && (
         <section className="nearby-section">
           <div className="nearby-header">
             <i className="bi bi-geo-alt-fill"></i>
             <h2>Eventos perto de você</h2>
-            <span className="nearby-cidade">· {CIDADE_PERTO_DE_VOCE}</span>
+            <span className="nearby-cidade">· {cidadePertoDeVoce}</span>
           </div>
 
           <div className="nearby-scroll">

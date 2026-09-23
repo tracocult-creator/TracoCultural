@@ -8,15 +8,12 @@ import EditarEventoModal from '../componentes/EditarEventoModal'
 import NotificarFavoritosModal from '../componentes/NotificarFavoritosModal'
 import ShareButton from '../componentes/ShareButton'
 import { isEventoEncerrado, diasAteRemocao } from '../utils/text'
+import { useGeoLocation } from '../hooks/useGeoLocation'
+import { NOMES_ESTADOS } from '../constants/estados'
 import '../estilos/ProfilePage.css'
 import '../estilos/HomePage.css' // reaproveita .event-actions-row / .event-fav-btn / .event-encerrado-badge
 import '../estilos/Modal.css'
 
-const estados = ['SP', 'RJ', 'MG', 'RS', 'BA', 'PR', 'SC', 'PE', 'DF']
-const NOMES_ESTADOS = {
-  SP: 'São Paulo', RJ: 'Rio de Janeiro', MG: 'Minas Gerais', RS: 'Rio Grande do Sul',
-  BA: 'Bahia', PR: 'Paraná', SC: 'Santa Catarina', PE: 'Pernambuco', DF: 'Distrito Federal',
-}
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const primeiraLetra = (nome) => (nome || '?')[0].toUpperCase()
@@ -42,11 +39,16 @@ const Perfil = () => {
   const [deletingEvento, setDeletingEvento] = useState(null)
   const [excluindo, setExcluindo] = useState(false)
 
+  // Não existe estado predefinido (ex.: SP) — se o usuário ainda não tem
+  // um estado salvo, tentamos descobrir o real via geolocalização do
+  // navegador (mesma lógica usada em "eventos perto de você").
+  const { uf: ufDetectado } = useGeoLocation()
+
   useEffect(() => {
     if (!user) return
     const base = {
       ...user,
-      estado: user.estado || 'SP',
+      estado: user.estado || null,
       icone: user.icone || 'person-standing',
       corFundo: user.corFundo || '#8E5E56',
     }
@@ -59,6 +61,16 @@ const Perfil = () => {
       .then(({ data }) => setUserFavoritos(Array.isArray(data) ? data : []))
       .catch(() => setUserFavoritos([]))
   }, [user])
+
+  // Assim que a geolocalização devolve o UF real, preenche o perfil de
+  // quem ainda não tinha estado salvo (e persiste, sem precisar que o
+  // usuário abra o modal de edição pra isso).
+  useEffect(() => {
+    if (!profile || profile.estado || !ufDetectado) return
+    setProfile((prev) => ({ ...prev, estado: ufDetectado }))
+    setEditProfile((prev) => ({ ...prev, estado: ufDetectado }))
+    api.put(`/usuarios/${profile.id}`, { ...profile, estado: ufDetectado }).catch(() => {})
+  }, [profile, ufDetectado])
 
   const carregarMeusEventos = () => {
     api.get('/eventos/meus')
@@ -171,8 +183,9 @@ const Perfil = () => {
               <h3 className="profile-name">{profile.nome}</h3>
               <p className="profile-email">{profile.email}</p>
               <p className="profile-location">
-                📍 {NOMES_ESTADOS[profile.estado] || profile.estado}
-                {NOMES_ESTADOS[profile.estado] && ` (${profile.estado})`}
+                📍 {profile.estado
+                  ? `${NOMES_ESTADOS[profile.estado] || profile.estado}${NOMES_ESTADOS[profile.estado] ? ` (${profile.estado})` : ''}`
+                  : 'Localização não detectada'}
               </p>
             </div>
             <button className="btn-edit-profile" onClick={abrirModal}>
