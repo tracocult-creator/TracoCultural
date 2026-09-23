@@ -12,6 +12,8 @@ import {
   criarComentario,
   deletarComentario,
   excluirEvento,
+  adicionarFavorito,
+  removerFavorito,
 } from '../servicos/api'
 import { isEventoEncerrado, diasAteRemocao } from '../utils/text'
 import '../estilos/EventoDetalhe.css'
@@ -41,6 +43,9 @@ const EventoDetalhe = () => {
   const navigate = useNavigate()
 
   const [evento, setEvento] = useState(null)
+  const [totalFavoritos, setTotalFavoritos] = useState(0)
+  const [favoritado, setFavoritado] = useState(false)
+  const [favoritando, setFavoritando] = useState(false)
   const [comentarios, setComentarios] = useState([])
   const [novoComentario, setNovoComentario] = useState('')
   const [loadingEvento, setLoadingEvento] = useState(true)
@@ -57,7 +62,12 @@ const EventoDetalhe = () => {
 
   useEffect(() => {
     getEventoPorId(id)
-      .then(({ data }) => setEvento(data))
+      .then(({ data }) => {
+        // GET /eventos/{id} agora retorna { evento, totalFavoritos, favoritadoPeloUsuario }
+        setEvento(data.evento)
+        setTotalFavoritos(data.totalFavoritos ?? 0)
+        setFavoritado(Boolean(data.favoritadoPeloUsuario))
+      })
       .catch(() => navigate('/home'))
       .finally(() => setLoadingEvento(false))
 
@@ -99,6 +109,27 @@ const EventoDetalhe = () => {
       alert('Erro ao remover comentário. Tente novamente.')
     } finally {
       setExcluindoComentario(false)
+    }
+  }
+
+  const handleToggleFavorito = async () => {
+    if (!user || favoritando) return
+    setFavoritando(true)
+    const estavaFavoritado = favoritado
+    // atualização otimista, com rollback se a chamada falhar
+    setFavoritado(!estavaFavoritado)
+    setTotalFavoritos((prev) => prev + (estavaFavoritado ? -1 : 1))
+    try {
+      if (estavaFavoritado) {
+        await removerFavorito(id)
+      } else {
+        await adicionarFavorito(id)
+      }
+    } catch {
+      setFavoritado(estavaFavoritado)
+      setTotalFavoritos((prev) => prev + (estavaFavoritado ? 1 : -1))
+    } finally {
+      setFavoritando(false)
     }
   }
 
@@ -147,6 +178,16 @@ const EventoDetalhe = () => {
           </button>
 
           <div className="evento-hero-actions">
+            {user && (
+              <button
+                className="evento-hero-action-btn"
+                title={favoritado ? 'Remover dos favoritos' : 'Favoritar'}
+                onClick={handleToggleFavorito}
+                disabled={favoritando}
+              >
+                <i className={`bi ${favoritado ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+              </button>
+            )}
             <ShareButton evento={evento} className="evento-hero-action-btn" />
             {isOwner && (
               <>
@@ -187,6 +228,16 @@ const EventoDetalhe = () => {
                 <i className="bi bi-arrow-left"></i> Voltar
               </button>
               <div className="evento-toolbar-actions">
+                {user && (
+                  <button
+                    className="evento-hero-action-btn evento-hero-action-btn--light"
+                    title={favoritado ? 'Remover dos favoritos' : 'Favoritar'}
+                    onClick={handleToggleFavorito}
+                    disabled={favoritando}
+                  >
+                    <i className={`bi ${favoritado ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+                  </button>
+                )}
                 <ShareButton evento={evento} className="evento-hero-action-btn evento-hero-action-btn--light" />
                 {isOwner && (
                   <>
@@ -251,6 +302,10 @@ const EventoDetalhe = () => {
             <span className="evento-meta-pill">
               <i className="bi bi-geo-alt"></i>
               {evento.cidade}
+            </span>
+            <span className="evento-meta-pill">
+              <i className={`bi ${favoritado ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+              {totalFavoritos} {totalFavoritos === 1 ? 'favorito' : 'favoritos'}
             </span>
           </div>
 
