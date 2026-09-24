@@ -128,7 +128,6 @@ const Perfil = () => {
     setSucesso(false)
     setAba('dados')
     setEditProfile({ ...profile })
-    setSenhaForm({ senhaAtual: '', novaSenha: '', confirmar: '' })
     setIsEditing(true)
   }
 
